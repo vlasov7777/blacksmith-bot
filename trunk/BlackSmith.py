@@ -160,8 +160,8 @@ UNAVALABLE = []
 
 BOT_PID = os.getpid()
 BOT_VER = 1
-CORE_MODE = 24
-BOT_REV = 38
+CORE_MODE = 25
+BOT_REV = 39
 BOT_OS = os.name
 
 JCON = None
@@ -714,9 +714,11 @@ def has_access(source, level, conf):
 ################ join/leave & message send handlers ############################################
 
 def send_join_presece(conf, nick, code = None):
-	Presence = xmpp.protocol.Presence(conf+'/'+nick)
+	Caps, CapsVer = 'http://witcher-team.ucoz.ru/', '%d.%d' % (BOT_VER, CORE_MODE)
+	Presence = xmpp.protocol.Presence('%s/%s' % (conf, nick))
 	Presence.setStatus(STATUS[conf]['message'])
 	Presence.setShow(STATUS[conf]['status'])
+	Presence.setTag('c', namespace = xmpp.NS_CAPS, attrs = {'node': Caps, 'ver': CapsVer})
 	Pres = Presence.setTag('x', namespace = xmpp.NS_MUC)
 	Pres.addChild('history', {'maxchars': '0'})
 	if code:
