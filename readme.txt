@@ -7,6 +7,7 @@
 #  WitcherGeralt [email: WitcherGeralt@rocketmail.com]
 #  Gigabyte [email: gigabyte@ngs.ru]
 #  ferym [JID: ferym@jabbim.org.ru]
+#  MAG [JID: admin@jabbon.ru]
 #  40tman [email: 40tman@qip.ru]
 #  Avinar [JID: avinar@xmpp.ru]
 #  Evgen [email: meb81@mail.ru]
@@ -21,8 +22,10 @@
 
 !)  Необходимо иметь интерпритатор python не ниже версии 2.5.2 (Python isn`t suppoted!)
 
-1)  Редактируй sourse.py (BlackSmith/static) (предварительно переименуйте s.ru or s.en)
-2)  Запусти BlackSmith.py
+1)  Редактируй sourse.py (BlackSmith/static)
+        (предварительно переименуйте s.ru or s.en)
+2)  Запусти BlackSmith.py или starter.py
+        (под стартером выключение невозможно)
 3)  Через ростер с жида администратора командуй "джойн chat[at]conference.tld"
 
 -> И вауаля! Бот обслуживает твою конференцию!
@@ -30,11 +33,16 @@
 Обратиться по поводу бота можно к WitcherGeralt в Witcher@conference.jabber.ru
 
 By WitcherGeralt (WitcherGeralt@jabber.ru)
-for http://witcher-team.ucoz.ru/ & http://blacksmith-bot.googlecode.com/svn/trunk/
+for http://witcher-team.ucoz.ru/
 
 P.S. --->
 
 В разработке и тестировании непосредственно учавствовали:
-]{vich [Supervirusne@mail.ru] & Eden [EdenPowers@qip.ru] & mrDoctorWhо [mrdoctorwho@gmail.com]
+
+]{vich [Supervirusne@mail.ru]
+Eden [EdenPowers@qip.ru]
+MAG [mag_22@bk.ru]
+Evgen [meb81@mail.ru]
+mrDoctorWhо [mrdoctorwho@gmail.com]
 
 \-\ Распространение без указания ресурса и данного документа (readme.txt) запрещается!
