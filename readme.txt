@@ -30,7 +30,7 @@
 Обратиться по поводу бота можно к WitcherGeralt в Witcher@conference.jabber.ru
 
 By WitcherGeralt (WitcherGeralt@jabber.ru)
-for http://witcher-team.ucoz.ru/
+for http://witcher-team.ucoz.ru/ & http://blacksmith-bot.googlecode.com/svn/trunk/
 
 P.S. --->
 
