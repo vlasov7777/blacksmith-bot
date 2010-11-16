@@ -21,7 +21,7 @@
 
 !)  Необходимо иметь интерпритатор python не ниже версии 2.5.4
 
-1)  Редактируй sourse.py (BlackSmith/static) ()
+1)  Редактируй sourse.py (BlackSmith/static) (предварительно переименуйте s.ru or s.en)
 2)  Запусти BlackSmith.py
 3)  Через ростер с жида администратора командуй "джойн chat[at]conference.tld"
 
