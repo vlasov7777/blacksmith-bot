@@ -4,8 +4,14 @@
 #  BlackSmith plugin
 #  quotes_plugin.py
 
-# (c) Gigabyte & ferym --> http://jabbrik.ru/
-# (c) WitcherGeralt [WitcherGeralt@rocketmail.com]
+# Some of ideas and part of code:
+#  Gigabyte (gigabyte@ngs.ru)
+#  ferym (ferym@jabbim.org.ru)
+# --> http://jabbrik.ru/
+# Coded By:
+#  WitcherGeralt (WitcherGeralt@jabber.ru)
+#  *MAG* (admin@jabbon.ru)
+# --> http://witcher-team.ucoz.ru/
 
 strip_tags = re.compile(r'<[^<>]+>')
 
@@ -36,7 +42,6 @@ def handler_nyash(type, source, body):
 		b1 = re_search(target, '</a></div><div class="content">', '</div>')
 		reply(type, source, u'Цитата #%d:\n%s' % (post, unicode(url_dec(b1), 'windows-1251')))
 	except:
-		Print_Error()
 		reply(type, source, u'повторите запрос')
 
 def handler_ithappens(type, source, body):
@@ -48,7 +53,6 @@ def handler_ithappens(type, source, body):
 		b1 = re_search(target, '<p class="text">', '</p>')
 		reply(type, source, u'Цитата #%d:\n%s' % (post, unicode(url_dec(b1), 'windows-1251')))
 	except:
-		Print_Error()
 		reply(type, source, u'повторите запрос')
 
 def handler_sonnik(type, source, body):
@@ -65,11 +69,12 @@ def handler_sonnik(type, source, body):
 	else:
 		reply(type, source, u'введи слово')
 
-def handler_anekdot(type, source, body):
+def handler_anek(type, source, body):
 	try:
-		data = re_search(read_url('http://anekdot.odessa.ua/rand-anekdot.php', 'Mozilla/5.0'), '>', '<a href=')
-		anek = replace_all(data, {'<br />': '', '<br>': '', '&nbsp;': ' ', '&lt;': '<', '&gt;': '>', '&quot;': '"', '\t': '', '||||:]': '', '>[:\n': ''})
-		reply(type, source, u'Анекдот: \n%s' % (unicode(anek, 'windows-1251')))
+		list = re_search(read_link('http://www.hyrax.ru/cgi-bin/an_java.cgi'), 'td aling=left><br>', '</td></tr></table>').split('<br><br><hr>')
+		list.pop(3)
+		anek = u'Анекдот:\n%s' % unicode(random.choice(list), 'windows-1251')
+		reply(type, source, replace_all(anek, {'<br>': '', '&nbsp;&nbsp;&nbsp;&nbsp;': '\n', '&nbsp;': '', '\n\n': '\n'}).strip())
 	except:
 		reply(type, source, u'что-то сломалось...')
 
@@ -92,10 +97,59 @@ def handler_pyorg(type, source, body):
 	except:
 		reply(type, source, u'что-то сломалось...')
 
+HORO_SIGNS = {u'день': 0, u'овен': 1, u'телец': 2, u'близнецы': 3, u'рак': 4, u'лев': 5, u'дева': 6, u'весы': 7, u'скорпион': 8, u'стрелец': 9, u'козерог': 10, u'водолей': 11, u'рыбы': 12}
+
+def handler_horo(type, source, body):
+	if body:
+		body, number = body.lower(), None
+		if body in [u'хелп', 'help']:
+			reply(type, source, '\n'+'\n'.join(sorted(['%s - %d' % (x, y) for x, y in HORO_SIGNS.iteritems()])))
+		else:
+			if HORO_SIGNS.has_key(body):
+				number = HORO_SIGNS[body]
+			elif check_number(body):
+				chislo = int(body)
+				if -1 < chislo < 13:
+					number = chislo
+			if number != None:
+				try:
+					data = re_search(read_link('http://www.hyrax.ru/cgi-bin/bn_html.cgi'), '<!-- %d --><b>' % (number), '<br><br>')
+					horo = replace_all(data, [' </b><br>', '</b><br>'], ':')
+					repl = unicode(horo, 'windows-1251')
+				except:
+					repl = u'что-то сломалось...'
+				reply(type, source, repl)
+			else:
+				reply(type, source, u'не понимаю')
+	else:
+		reply(type, source, u'введи знак')
+
+def handler_jabber_quotes(type, source, body):
+	if body:
+		body = body.lower()
+	if body in [u'ранд', 'rand']:
+		link = 'http://jabber-quotes.ru/random'
+	elif body in [u'топ20', 'top20']:
+		link = 'http://jabber-quotes.ru/up'
+	else:
+		link = 'http://jabber-quotes.ru/'
+	try:
+		list = read_link(link).split('<blockquote>')
+		list.pop(0)
+		quote = random.choice(list).split('</blockquote>')[0]
+		quote = replace_all(quote, {'<br>': '\n', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&amp;': '&', '&middot;': ';'})
+		while quote.count('\n\n\n'):
+			quote = quote.replace('\n\n\n', '\n\n')
+		reply(type, source, 'Quote:\n%s' % unicode(quote, 'windows-1251'))
+	except:
+		reply(type, source, u'что-то сломалось...')
+
 register_command_handler(handler_pyorg, 'питон', ['фан','все'], 10,'показывает последнии новости с http://python.org/', 'питон', ['питон'])
 register_command_handler(handler_afor, 'афоризм', ['фан','все'], 10,'показывает случайный афоризм с ресурса skio.ru', 'афор', ['афор'])
-register_command_handler(handler_anekdot, 'анекдот', ['все', 'фан'], 10, 'Показывает случайный анекдот с ресурса http://anekdot.odessa.ua/', 'анекдот', ['анекдот'])
+register_command_handler(handler_anek, 'анек', ['все', 'фан'], 10, 'Отображает анекдоты с ресурса http://www.hyrax.ru/\nBy *MAG*', 'анек', ['анек'])
 register_command_handler(handler_bashorgru, 'баш', ['фан','все'], 10, 'Показывает случайную цитату (или по номеру) с баш.орг', 'баш', ['баш','баш 3557'])
 register_command_handler(handler_nyash, 'няш', ['фан','все'], 10, 'Показывает случайную цитату из НЯШа .', 'няш', ['няш'])
 register_command_handler(handler_ithappens, 'ит', ['фан','все'], 10, 'Показывает случайную цитату с http://ithappens.ru/', 'ит', ['ит'])
 register_command_handler(handler_sonnik, 'сон', ['фан','все'], 10, 'Сонник.', 'сон', ['сон вода'])
+register_command_handler(handler_horo, 'хоро', ['фан','все'], 10, 'Гороскоп "на сегодня" с сайта http://www.hyrax.ru/\nЧтобы посмотреть общую характеристику дня используем параметр - "день"\nВместо знака можно вводить число (пишем: "хоро хелп")\nBy *MAG* & WitcherGeralt for http://witcher-team.ucoz.ru/', 'хоро [знак]', ['хоро 11','хоро день', 'хоро овен'])
+register_command_handler(handler_jabber_quotes, 'цитата', ['фан','все'], 10, 'Достаёт цитату с http://jabber-quotes.ru/\nПараметры:\nТоп20 - выбирает 1 из самых популярных\nРанд - абсолютно случайная цитата\nБез параметров - выбирает из 20ти новейших', 'цитата [топ20/ранд]', ['цитата','цитата топ20'])
