@@ -18,6 +18,8 @@
 
 from __future__ import with_statement
 
+from xml.parsers.expat import ExpatError as BadlyFormedStanza
+
 from traceback import format_exc as error_, print_exc as Print_Error
 
 import sys, os, time, gc, codecs, types, threading, base64
@@ -110,6 +112,12 @@ try:
 except:
 	Exit('\n\nError: unable to read general config file!', 1, 30)
 
+try:
+	reload(sys)
+	sys.setdefaultencoding('utf-8')
+except:
+	Print('\n\nError: can`t set default encoding!', color2)
+
 DEFAULT_NICK = DEFAULT_NICK_(DEFAULT_NICK)
 MEMORY_LIMIT = MEMORY_LIMIT_(MEMORY_LIMIT)
 
@@ -152,8 +160,8 @@ UNAVALABLE = []
 
 BOT_PID = os.getpid()
 BOT_VER = 1
-CORE_MODE = 23
-BOT_REV = 36
+CORE_MODE = 24
+BOT_REV = 38
 BOT_OS = os.name
 
 JCON = None
@@ -165,34 +173,6 @@ wsmph = threading.BoundedSemaphore(value = 1)
 
 ################ file work handlers ############################################################
 
-def initialize_file(filename, data = ""):
-	list = filename.split('/')
-	if len(list) == 1:
-		folder, rfile = "", list[0]
-	elif len(list) == 2:
-		folder, rfile = list[0], '%s/%s' % (list[0], list[1])
-	elif len(list) == 3:
-		folder, rfile = '%s/%s' % (list[0], list[1]), '%s/%s/%s' % (list[0], list[1], list[2])
-	else:
-		return False
-	if os.path.exists(rfile):
-		return True
-	try:
-		if folder and not os.path.exists(folder):
-			os.mkdir(folder, 0755)
-		if os.access(rfile, os.F_OK):
-			fl = file(rfile, 'w')
-		else:
-			fl = open(rfile, 'w')
-		INFA['fcr'] += 1
-		if not data:
-			data = '{}'
-		fl.write(data)
-		fl.close()
-	except:
-		return False
-	return True
-
 def check_file(conf = None, file = "", data = ""):
 	if conf:
 		filename = 'dynamic/%s/%s' % (conf, file)
@@ -201,6 +181,28 @@ def check_file(conf = None, file = "", data = ""):
 	else:
 		filename = 'dynamic/%s' % (file)
 	return initialize_file(filename, data)
+
+def initialize_file(filename, data = ""):
+	if len(filename.split('/')) >= 4:
+		return False
+	if os.path.exists(filename):
+		return True
+	try:
+		folder = os.path.dirname(filename)
+		if folder and not os.path.exists(folder):
+			os.mkdir(folder, 0755)
+		if os.access(filename, os.F_OK):
+			fl = file(filename, 'w')
+		else:
+			fl = open(filename, 'w')
+		INFA['fcr'] += 1
+		if not data:
+			data = '{}'
+		fl.write(data)
+		fl.close()
+	except:
+		return False
+	return True
 
 def read_file(filename):
 	if filename.count('/') > 1:
@@ -316,8 +318,8 @@ def ThreadError():
 		return True
 	return False
 
-def Try_Thr(Thread, number = 1):
-	if number >= 5:
+def Try_Thr(Thread, number = 0):
+	if number >= 4:
 		raise RuntimeError, 'Thread try limit!'
 	try:
 		Thread.start()
@@ -506,13 +508,13 @@ def load_plugins():
 				Npl.append(Plug[0])
 	if ltc:
 		lts = ', '.join(sorted(ltc))
-		Print(('\n\nLoaded %s BlackSmith plugins:\n' % str(len(ltc)))+lts, color3)
+		Print(('\n\nLoaded %d BlackSmith plugins:\n' % len(ltc))+lts, color3)
 	if tal:
 		ts = ', '.join(sorted(tal))
-		Print(('\n\nLoaded %s Talisman plugins:\n' % str(len(tal)))+ts, color1)
+		Print(('\n\nLoaded %d Talisman plugins:\n' % len(tal))+ts, color1)
 	if Npl:
 		Ns = ', '.join(sorted(Npl))
-		Print(('\n\nThere are %s unloadable plugins:\n' % str(len(Npl)))+Ns, color2)
+		Print(('\n\nThere are %d unloadable plugins:\n' % len(Npl))+Ns, color2)
 	else:
 		Print('\n\nThere are not unloadable plugins!', color3)
 
@@ -632,7 +634,7 @@ def that_day():
 	return int(time.strftime('%Y%m%d', time.gmtime()))
 
 Elist = [' %s' % (x) for x in [u'0 мес', u'0 дн', u'0 час', u'0 мин', u'0 сек']]
-	
+
 def timeElapsed(or_seconds):
 	minutes, seconds = divmod(or_seconds, 60)
 	hours, minutes = divmod(minutes, 60)
@@ -726,7 +728,7 @@ def join_groupchat(conf, nick, code = None):
 	if conf not in GROUPCHATS:
 		GROUPCHATS[conf] = {}
 	if conf not in STATUS:
-		STATUS[conf] = {'message': u'BlackSmith by WitcherGeralt', 'status': 'chat'}
+		STATUS[conf] = {'message': 'BlackSmith by WitcherGeralt', 'status': 'chat'}
 	save_conflist(conf, nick, code)
 	send_join_presece(conf, nick, code)
 
@@ -756,7 +758,7 @@ def delivery(body):
 	try:
 		JCON.send(xmpp.Message(BOSS, body, 'chat'))
 	except:
-		file_add('__body__.crash', body)
+		file_add('delivery.txt', body)
 
 def msg(target, body):
 	if not isinstance(body, unicode):
@@ -1216,6 +1218,8 @@ def lytic_restart():
 def Dispatch_handler():
 	try:
 		JCON.Process(8)
+	except BadlyFormedStanza:
+		LAST['null'] += 1
 	except KeyboardInterrupt:
 		sys_exit('INTERUPT (Ctrl+C)')
 
@@ -1293,7 +1297,7 @@ def lytic():
 	Print('\n\nYahoo! I am online!', color3)
 	if initialize_file(GROUPCHATS_FILE):
 		CONFS = eval(read_file(GROUPCHATS_FILE))
-		Print('\n\nThere are %s rooms in list:' % str(len(CONFS)), color4)
+		Print('\n\nThere are %d rooms in list:' % len(CONFS), color4)
 		for conf in CONFS:
 			list = ['Joined %s' % (conf), 'Joined conference!', 'Can`t join %s' % (conf), 'Unable conference!']
 			if check_nosimbols(conf):
