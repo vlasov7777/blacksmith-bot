@@ -31,7 +31,9 @@ def handler_jc(type, source, body):
 			while col <= number:
 				text = text[re.search('<font color="blue">', text).end():]
 				body = text[:re.search('<br><br>', text).start()]
-				body = replace_all(body, {'\r': '', '</font>': '', '&nbsp;': ' ', '<br>': '\n', '</a>': '', '<b>': '', '</b>': '', '<font color="gray">': '', '\n\n': '\n'}).strip()
+				body = replace_all(body, {'\r': '', '</font>': '', '&nbsp;': ' ', '<br>': '\n', '</a>': '', '<b>': '', '</b>': '', '<font color="gray">': ''}).strip()
+				while body.count('\n\n'):
+					body = body.replace('\n\n', '\n')
 				repl += '%d) %s\n\n' % (col, body)
 				col += 1
 			reply(type, source, repl)

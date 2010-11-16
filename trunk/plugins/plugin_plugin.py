@@ -10,11 +10,8 @@
 OUT_COMMANDS = {}
 
 def handler_out_list(type, source):
-	list = []
-	for command in OUT_COMMANDS:
-		list.append(command)
-	if len(list) != 0:
-		repl = u'Список отключённых команд: '+', '.join(sorted(list))
+	if OUT_COMMANDS:
+		repl = u'Список отключённых команд: '+', '.join(sorted(OUT_COMMANDS.keys()))
 	else:
 		repl = u'Оключённых команд нет!'
 	reply(type, source, repl)
@@ -64,13 +61,13 @@ def handler_plug_list(type, source, body):
 	else:
 		repl = ''
 		if ltc:
-			repl += u'\nДоступно %s плагинов BlackSmith бота:\n' % str(len(ltc))
+			repl += u'\nДоступно %d плагинов BlackSmith бота:\n' % len(ltc)
 			repl += ', '.join(sorted(ltc))
 		if tal:
-			repl += u'\nДоступно %s плагинов Talisman бота:\n' % str(len(tal))
+			repl += u'\nДоступно %d плагинов Talisman бота:\n' % len(tal)
 			repl += ', '.join(sorted(tal))
 		if Npl:
-			repl += u'\nВнимание! Вналичии %s недоступных плагинов:\n' % str(len(Npl))
+			repl += u'\nВнимание! Вналичии %d недоступных плагинов:\n' % len(Npl)
 			repl += ', '.join(sorted(Npl))
 		reply(type, source, repl)
 
@@ -82,7 +79,8 @@ def handler_load_plugin(type, source, body):
 				execfile('%s/%s' % (PLUGIN_DIR, Plugin))
 				repl = u'Плагин %s был успешно подгружен!' % (Plugin)
 			except:
-				repl = u'Плагин %s не был подгружен!\nОшибка: %s:\n%s' % (Plugin, str(sys.exc_info()[0].__name__), str(sys.exc_info()[1]))
+				exc = sys.exc_info()
+				repl = u'Плагин %s не был подгружен!\nОшибка: %s:\n%s' % (Plugin, exc[0].__name__, exc[1])
 		else:
 			repl = u'Этот плагин не был найден в списке'
 	else:

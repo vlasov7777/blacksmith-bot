@@ -15,7 +15,8 @@ def handler_python_eval(type, source, body):
 	try:
 		repl = unicode(eval(unicode(body)))
 	except:
-		repl = '%s - %s' % (str(sys.exc_info()[0]), str(sys.exc_info()[1]))
+		exc = sys.exc_info()
+		repl = '%s - %s' % (exc[0].__name__, exc[1])
 	reply(type, source, repl)
 
 def handler_python_exec(type, source, body):
@@ -25,7 +26,8 @@ def handler_python_exec(type, source, body):
 	try:
 		exec unicode(body) in globals()
 	except:
-		repl = '%s - %s' % (str(sys.exc_info()[0]), str(sys.exc_info()[1]))
+		exc = sys.exc_info()
+		repl = '%s - %s' % (exc[0].__name__, exc[1])
 	reply(type, source, repl)
 
 def handler_python_sh(type, source, body):
