@@ -1,0 +1,5 @@
+boltun_plugin.py & static/boltun
+
+logger_plugin.py & static/logstate.txt (you need to edit this)
+
+other files are single

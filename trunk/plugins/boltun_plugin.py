@@ -17,7 +17,7 @@ FRAZA_USER = {}
 FRAZA_ALL = {}
 
 def boltun_check_nick(item, conf):
-	for nick in GROUPCHATS[conf]:
+	for nick in GROUPCHATS[conf].keys():
 		if item.count(nick):
 			return True
 	return False

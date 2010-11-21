@@ -20,15 +20,15 @@
 
 Как установить:
 
-!)  Необходимо иметь интерпритатор python не ниже версии 2.5.2 (Python isn`t suppoted!)
+!)  Необходимо иметь интерпритатор python не ниже версии 2.5.2 (Python 3 isn`t suppoted!)
 
-1)  Редактируй sourse.py (BlackSmith/static)
+1)  Редактируйте sourse.py (BlackSmith/static)
         (предварительно переименуйте s.ru or s.en)
 2)  Запусти BlackSmith.py или starter.py
         (под стартером выключение невозможно)
-3)  Через ростер с жида администратора командуй "джойн chat[at]conference.tld"
+3)  Из ростера с жида администратора командуйте "джойн chat[at]conference.tld"
 
--> И вауаля! Бот обслуживает твою конференцию!
+-> И вауаля! Бот обслуживает вашу конференцию!
 
 Обратиться по поводу бота можно к WitcherGeralt в Witcher@conference.jabber.ru
 
