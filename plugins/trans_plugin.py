@@ -13,7 +13,7 @@ RULANG = {'ky': u'Русский', 'bg': u'Русский', 'ru': u'Русски
 def handler_google_trans(type, source, Params):
 	if Params:
 		body = Params.split(None, 2)
-		if LANGS.has_key(body[0]) and len(body) >= 3 and LANGS.has_key(body[1]):
+		if LANGS.has_key(body[0]) and LANGS.has_key(body[1]) and len(body) >= 3:
 			(fl, tl, text) = body
 			if fl == 'auto':
 				if tl == 'auto':
@@ -21,7 +21,7 @@ def handler_google_trans(type, source, Params):
 					return
 			else:
 				answer = google_detect_lang(text)
-				if not RULANG.has_key(answer):
+				if not LANGS.has_key(answer):
 					reply(type, source, answer)
 					return
 				else:
@@ -38,9 +38,7 @@ def handler_google_trans(type, source, Params):
 def handler_google_trans_auto(type, source, text):
 	if text:
 		aw = google_detect_lang(text)
-		if aw == u'Аблом!':
-			repl = u'Аблом!'
-		else:
+		if aw != u'Аблом!':
 			if RULANG.has_key(aw):
 				answer = google_translate(text, '', 'en')
 			else:
@@ -53,6 +51,8 @@ def handler_google_trans_auto(type, source, text):
 				repl = u'Источник: %s\n%s' % (LANGS[aw], answer)
 			else:
 				repl = u'Источник: %s\n%s' % (aw, answer)
+		else:
+			repl = u'Аблом!'
 		reply(type, source, repl)
 	else:
 		reply(type, source, u'а дальше?')
@@ -66,11 +66,10 @@ def google_translate(text, from_lang, to_lang):
 		return u'Аблом!'
 	answer = simplejson.load(req)
 	if answer['responseStatus'] != 200:
-		return str(answer['responseStatus'])+': '+answer['responseDetails']
+		return '%s: %s' % (unicode(answer['responseStatus']), answer['responseDetails'])
 	elif answer['responseData']:
 		return answer['responseData']['translatedText']
-	else:
-		return u'неизвестная ошибка'
+	return u'неизвестная ошибка'
 
 def google_detect_lang(text):
 	try:
@@ -81,11 +80,10 @@ def google_detect_lang(text):
 		return u'Аблом!'
 	answer = simplejson.load(req)
 	if answer['responseStatus'] != 200:
-		return str(answer['responseStatus'])+': '+answer['responseDetails']
+		return '%s: %s' % (unicode(answer['responseStatus']), answer['responseDetails'])
 	elif answer['responseData']:
 		return answer['responseData']['language']
-	else:
-		return u'неизвестная ошибка'
+	return u'неизвестная ошибка'
 
 register_command_handler(handler_google_trans, 'перевод', ['инфо','все'], 10, 'Переводчик с последней ревизии талисмана, респект als!\nПеревод с одного языка в другой. Используется Google Translate. Доступные для перевода языки:\n'+', '.join(sorted([x.encode('utf-8')+': '+y.encode('utf-8') for x,y in LANGS.iteritems()])), 'перевод <исходный_язык> <нужный_язык> <фраза>', ['перевод en ru hello', 'перевод ru en привет'])
 register_command_handler(handler_google_trans_auto, '!', ['инфо','все'], 10, 'Модификация переводчика,\nАвтор модификации: Gigabyte\nПеревод с одного языка в другой с автовыбором, традиционная моя модификация. Используется Google Translate. Доступные для перевода языки:\n'+', '.join(sorted([x.encode('utf-8')+': '+y.encode('utf-8') for x,y in LANGS.iteritems()])), '! <фраза>', ['! hello', '! привет'])

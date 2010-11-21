@@ -118,6 +118,11 @@ try:
 except:
 	Print('\n\nError: can`t set default encoding!', color2)
 
+try:
+	execfile('static/versions.py')
+except:
+	Exit('\n\nError: verfile (versions.py) isn`t exists!', 1, 30)
+
 DEFAULT_NICK = DEFAULT_NICK_(DEFAULT_NICK)
 MEMORY_LIMIT = MEMORY_LIMIT_(MEMORY_LIMIT)
 
@@ -158,18 +163,11 @@ GLOBACCESS = {}
 GROUPCHATS = {}
 UNAVALABLE = []
 
-BOT_PID = os.getpid()
-BOT_VER = 1
-CORE_MODE = 25
-BOT_REV = 39
-BOT_OS = os.name
+BOT_OS, BOT_PID = os.name, os.getpid()
 
-JCON = None
-ROSTER = None
+(JCON, ROSTER) = (None, False)
 
-smph = threading.BoundedSemaphore(value = 100)
-mtx = threading.Lock()
-wsmph = threading.BoundedSemaphore(value = 1)
+smph, mtx, wsmph = threading.BoundedSemaphore(value = 100), threading.Lock(), threading.BoundedSemaphore(value = 1)
 
 ################ file work handlers ############################################################
 
@@ -714,7 +712,6 @@ def has_access(source, level, conf):
 ################ join/leave & message send handlers ############################################
 
 def send_join_presece(conf, nick, code = None):
-	Caps, CapsVer = 'http://witcher-team.ucoz.ru/', '%d.%d' % (BOT_VER, CORE_MODE)
 	Presence = xmpp.protocol.Presence('%s/%s' % (conf, nick))
 	Presence.setStatus(STATUS[conf]['message'])
 	Presence.setShow(STATUS[conf]['status'])
@@ -779,17 +776,24 @@ def msg(target, body):
 	call_outgoing_message_handlers(target, body, obody)
 
 def reply(ltype, source, body):
+	if not isinstance(body, unicode):
+		body = body.decode('utf-8', 'replace')
 	if ltype == 'public':
-		if not isinstance(body, unicode):
-			body = body.decode('utf-8', 'replace')
-		msg(source[1], source[2]+': '+body)
+		body = '%s: %s' % (source[2], body)
+		msg(source[1], body)
 	elif ltype == 'private':
 		msg(source[0], body)
 
+def send_unavailable(status):
+	Presence = xmpp.Presence(typ = 'unavailable')
+	Presence.setStatus(status)
+	JCON.send(Presence)
+
 def change_bot_status(conf, text, status):
-	Presence = xmpp.protocol.Presence(conf+'/'+handler_botnick(conf))
+	Presence = xmpp.protocol.Presence('%s/%s' % (conf, handler_botnick(conf)))
 	Presence.setStatus(text)
 	Presence.setShow(status)
+	Presence.setTag('c', namespace = xmpp.NS_CAPS, attrs = {'node': Caps, 'ver': CapsVer})
 	JCON.send(Presence)
 
 ################ role/afl iq handlers ##########################################################
@@ -1112,6 +1116,7 @@ def PRESENCE_PROCESSING(client, Prs):
 					send_join_presece(conf, handler_botnick(conf))
 				elif ecode == '404':
 					del GROUPCHATS[conf]
+					delivery(u'Ошибка %s (сервер не найден) - конфа: "%s"' % (ecode, conf))
 				elif ecode in ['301','307','401','403','405']:
 					leave_groupchat(conf, u'Got %s error code!' % str(ecode))
 					delivery(u'Ошибка %s, пришлось выйти из -> "%s"' % (ecode, conf))
@@ -1228,9 +1233,7 @@ def Dispatch_handler():
 def sys_exit(exit_reason = 'SUICIDE'):
 	Print('\n\n%s' % (exit_reason), color2)
 	if ONLINE:
-		Presence = xmpp.Presence(typ = 'unavailable')
-		Presence.setStatus(exit_reason)
-		JCON.send(Presence)
+		send_unavailable(exit_reason)
 	if time.time() - INFO['start'] >= 30:
 		call_stage3_init()
 	Exit('\n\nRESTARTING...\n\nPress Ctrl+C to exit', 0, 30)
@@ -1243,21 +1246,22 @@ def lytic():
 		CACHE = eval(read_file(PID_FILE))
 		PID = CACHE['PID']
 		if PID != BOT_PID:
-			try:
-				if BOT_OS == 'nt':
-					kill = 'TASKKILL /PID %s /T /f' % str(PID)
-					os.system(kill)
-				else:
+			if BOT_OS == 'nt':
+				kill = 'TASKKILL /PID %d /T /f' % (PID)
+				os.system(kill)
+			else:
+				killed = 'PID: %d - has been killed!' % (PID)
+				try:
 					os.kill(PID, 9)
-				Print('PID: %s - has been killed!' % str(PID), color3)
-			except:
-				LAST['null'] += 1
+				except:
+					killed = 'Last PID wasn`t detected!'
+				Print(killed, color3)
 			CACHE = {'PID': BOT_PID, 'START': time.time(), 'REST': []}
 		else:
 			CACHE['REST'].append(time.strftime('%d.%m.%Y (%H:%M:%S)', time.localtime()))
 	else:
 		CACHE = {'PID': BOT_PID, 'START': time.time(), 'REST': []}
-	Print('\nBot`s PID: %s' % str(BOT_PID), color4)
+	Print('\nBot`s PID: %d' % (BOT_PID), color4)
 	write_file(PID_FILE, str(CACHE))
 	globals()['RUNTIMES'] = {'START': CACHE['START'], 'REST': CACHE['REST']}
 	Print('\n\nGENERAL CONFIG:\n\nBOT JID: %s@%s\nJID PASS: %s\nBOSS JID: %s\nBOSS PASS: %s' % (USERNAME, HOST, PASSWORD, BOSS, BOSS_PASS), color4)

@@ -15,13 +15,13 @@ def handler_set_prefix(type, source, prefix):
 			if prefix.lower() in [u'удалить', 'del', u'дел']:
 				if source[1] in PREFIX:
 					del PREFIX[source[1]]
-					write_file('dynamic/'+source[1]+'/prefix.txt', "'none'")
+					write_file('dynamic/%s/prefix.txt' % (source[1]), "'none'")
 					reply(type, source, u'Теперь нет префикса!')
 				else:
 					reply(type, source, u'Итак нет префикса!')
 			elif prefix in PRFX_LIST:
 				PREFIX[source[1]] = prefix
-				write_file('dynamic/'+source[1]+'/prefix.txt', '"%s"' % (prefix))
+				write_file('dynamic/%s/prefix.txt' % (source[1]), '"%s"' % (prefix))
 				reply(type, source, u'Знак "%s" отныне является здесь префиксом' % (prefix))
 			else:
 				reply(type, source, u'Недоступный префикс! Доступные: '+', '.join(PRFX_LIST))
@@ -51,20 +51,23 @@ def handler_admin_join(type, source, body):
 					reason = None
 				jid = handler_jid(source[0])
 				if jid not in [BOSS, BOSS.lower()]:
-					if not reason:
-						admin_info = u'Внимание! %s (%s) загнал меня в -> "%s"' % (source[2], jid, conf)
-					else:
-						admin_info = u'Внимание! %s (%s) загнал меня в -> "%s"\nПричина: %s' % (source[2], jid, conf, reason)
+					admin_info = u'Внимание! %s (%s) загнал меня в -> "%s"' % (source[2], jid, conf)
+					if reason:
+						admin_info += u'\nПричина: %s' % (reason)
 					delivery(admin_info)
 				if codename:
 					join_groupchat(conf, handler_botnick(conf), codename)
 				else:
 					join_groupchat(conf, handler_botnick(conf))
-				reply(type, source, u'Я зашёл в -> "%s"' % (conf))
-				if reason:
-					msg(conf, u'Я от %s\nReason: %s' % (source[2], reason))
+				time.sleep(12)
+				if GROUPCHATS.has_key(conf):
+					reply(type, source, u'Я зашёл в -> "%s"' % (conf))
+					info = u'Я от %s' % (source[2])
+					if reason:
+						info += '\nReason: %s' % (reason)
+					msg(conf, info)
 				else:
-					msg(conf, u'Я от %s' % (source[2]))
+					reply(type, source, u'Не дополз до -> "%s"...' % (conf))
 			else:
 				reply(type, source, u'Я итак там! Кончай бухать!')
 		else:
@@ -74,19 +77,24 @@ def handler_admin_join(type, source, body):
 
 def handler_admin_rejoin(type, source, body):
 	if body:
-		conf = body.lower()
+		conf = (body.split()[0]).lower()
 	else:
 		conf = source[1]
-	if conf in GROUPCHATS:
-		CONFS = eval(read_file(GROUPCHATS_FILE))
+	reason = 'Command "rejoin" from %s' % (source[2])
+	if body.count(' '):
+		reason += '\nReason: %s' % body[(body.find(' ') + 1):].strip()
+	chats = eval(read_file(GROUPCHATS_FILE))
+	if chats.has_key(conf):
+		leave_groupchat(conf, reason)
 		time.sleep(2)
-		leave_groupchat(conf, 'Command "rejoin" from %s' % (source[2]))
-		time.sleep(2)
-		join_groupchat(conf, handler_botnick(conf), CONFS[conf]['code'])
-		time.sleep(2)
-		reply(type, source, u'Перезашёл!')
+		join_groupchat(conf, handler_botnick(conf), chats[conf]['code'])
+		time.sleep(12)
+		if GROUPCHATS.has_key(conf):
+			reply(type, source, u'Перезашёл!')
+		else:
+			reply(type, source, u'Не смог перезайти в -> "%s"' % (conf))
 	else:
-		reply(type, source, u'Меня нет в -> "%s"' % (conf))
+		reply(type, source, u'Меня в "%s" нет и не было!' % (conf))
 
 def handler_admin_leave(type, source, body):
 	if body:
@@ -97,25 +105,21 @@ def handler_admin_leave(type, source, body):
 		else:
 			reason = body[(body.find(' ') + 1):].strip()
 	else:
-		conf = source[1]
-		reason = None
+		reason, conf = None, source[1]
 	jid = handler_jid(source[0])
 	if not body or jid in ADLIST or conf == source[1]:
 		if conf in GROUPCHATS:
 			if jid not in [BOSS, BOSS.lower()]:
-				if not reason:
-					admin_info = u'АХТУНГ! %s (%s) выгнал меня из -> "%s"' % (source[2], jid, conf)
-				else:
-					admin_info = u'АХТУНГ! %s (%s) выгнал меня из -> "%s"\nПричина: %s' % (source[2], jid, conf, reason)
+				admin_info = u'АХТУНГ! %s (%s) выгнал меня из -> "%s"' % (source[2], jid, conf)
+				if reason:
+					admin_info += u'\nПричина: %s' % (reason)
 				delivery(admin_info)
+			status = u'Меня уводит %s' % (source[2])
 			if reason:
-				msg(conf, u'Меня уводит %s\nReason: %s' % (source[2], reason))
-				time.sleep(2)
-				leave_groupchat(conf, 'Command "leave" from %s\nReason: %s' % (source[2], reason))
-			else:
-				msg(conf, u'Меня уводит %s' % (source[2]))
-				time.sleep(2)
-				leave_groupchat(conf, 'Command "leave" from %s' % (source[2]))
+				status += u'\nПричина: %s' % (reason)
+			msg(conf, status)
+			time.sleep(2)
+			leave_groupchat(conf, status)
 			if conf != source[1]:
 				reply(type, source, u'Я ушёл из -> "%s"' % (conf))
 		else:
@@ -124,36 +128,24 @@ def handler_admin_leave(type, source, body):
 		reply(type, source, u'Чё!? Выкуси!')
 
 def handler_admin_restart(type, source, reason):
+	status = u'Перезагрузка... Command from %s' % (source[2])
 	if reason:
-		for conf in GROUPCHATS.keys():
-			msg(conf, u'Перезагрузка... Command from %s\nReason: %s' % (source[2], reason))
-	else:
-		for conf in GROUPCHATS.keys():
-			msg(conf, u'Перезагрузка... Command from %s' % (source[2]))
+		status += '\nReason: %s' % (reason)
+	for conf in GROUPCHATS.keys():
+		msg(conf, status)
 	time.sleep(6)
-	Presense = xmpp.Presence(typ = 'unavailable')
-	if reason:
-		Presense.setStatus('Command "restart" from %s -> %s' % (source[2], reason))
-	else:
-		Presense.setStatus('Command "restart" from %s' % (source[2]))
-	JCON.send(Presense)
+	send_unavailable(status)
 	call_stage3_init()
 	Exit('\n\nRESTARTING...', 0, 30)
 
 def handler_admin_exit(type, source, reason):
+	status = u'Выключение... Command from %s' % (source[2])
 	if reason:
-		for conf in GROUPCHATS.keys():
-			msg(conf, u'Выключение... Command from %s\nReason: %s' % (source[2], reason))
-	else:
-		for conf in GROUPCHATS.keys():
-			msg(conf, u'Выключение... Command from %s' % (source[2]))
+		status += '\nReason: %s' % (reason)
+	for conf in GROUPCHATS.keys():
+		msg(conf, status)
 	time.sleep(6)
-	Presense = xmpp.Presence(typ = 'unavailable')
-	if reason:
-		Presense.setStatus('Command "sys.exit(0)" from %s -> %s' % (source[2], reason))
-	else:
-		Presense.setStatus('Command "sys.exit(0)" from %s' % (source[2]))
-	JCON.send(Presense)
+	send_unavailable(status)
 	call_stage3_init()
 	Exit('\n\n--> BOT STOPPED', 1, 30)
 
@@ -181,8 +173,8 @@ def handler_timeup_info(type, source, body):
 	Now_time = time.time()
 	start = u'\nВремя работы: %s' % (timeElapsed(Now_time - RUNTIMES['START']))
 	restarts = len(RUNTIMES['REST'])
-	if restarts != 0:
-		rest = (u'\nПоследняя сессия: %s\nВсего %s перезагрузок: ' % (timeElapsed(Now_time - INFO['start']), str(restarts)))+', '.join(sorted(RUNTIMES['REST']))
+	if restarts:
+		rest = (u'\nПоследняя сессия: %s\nВсего %d перезагрузок: ' % (timeElapsed(Now_time - INFO['start']), restarts))+', '.join(sorted(RUNTIMES['REST']))
 	else:
 		rest = u' - Работаю без перезагрузок!'
 	reply(type, source, start+rest)
@@ -219,21 +211,21 @@ def handler_command_stat(type, source, body):
 	else:
 		list = []
 		for command in COMMSTAT:
-			if COMMSTAT[command]['col'] != 0:
+			if COMMSTAT[command]['col']:
 				list.append([COMMSTAT[command]['col'], len(COMMSTAT[command]['users']), command])
 		list.sort()
 		list.reverse()
 		repl, col = u'\n[№][Команда][Использований][Юзеров использовало]', 0
 		for item in list:
 			col = col + 1
-			repl += '\n'+str(col)+'. '+item[2]+' - '+str(item[0])+' ('+str(item[1])+')'
+			repl += '\n%s. %s - %s (%s)' % (str(col), item[2], str(item[0]), str(item[1]))
 			if col >= 20:
 				break
 	reply(type, source, repl)
 
 def load_conf_prefix(conf):
 	if check_file(conf, 'prefix.txt', "'none'"):
-		prefix = eval(read_file('dynamic/'+conf+'/prefix.txt'))
+		prefix = eval(read_file('dynamic/%s/prefix.txt' % (conf)))
 		if prefix != 'none':
 			PREFIX[conf] = prefix
 	else:
