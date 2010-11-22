@@ -7,11 +7,11 @@
 # Coded by: WitcherGeralt [WitcherGeralt@rocketmail.com]
 # http://witcher-team.ucoz.ru/
 
-BLACK_TAGS = {'<br>': '\n', '&nbsp;&nbsp;&nbsp;&nbsp;': '\t', '&lt;': '<', '&gt;': '>', '<b>': u'«', '</b>': u'»', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ', '&amp;': '&'}
+BLACK_TAGS = {'<br>': '', '&nbsp;&nbsp;&nbsp;&nbsp;': '\t', '&lt;': '<', '&gt;': '>', '<b>': u'«', '</b>': u'»', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ', '&amp;': '&'}
 
-def blacksmith_svn(type, sorce, body):
+def blacksmith_svn(type, source, body):
 	if body:
-		body, call = body.split(), 0
+		body, call, rlist = body.split(), 0, {}
 		req = body[0].strip().lower()
 		if req in [u'ласт', 'last']:
 			try:
@@ -25,27 +25,35 @@ def blacksmith_svn(type, sorce, body):
 				if check_number(call):
 					call = int(call)
 			try:
-				lines = re_search(read_link('http://blacksmith-bot.googlecode.com/svn/wiki/'), '<ul>', '</ul>').split('<li>')
-				list = []
+				lines = re_search(read_link('http://blacksmith-bot.googlecode.com/svn/tags/'), '<ul>', '</ul>').split('<li>')
 				for line in lines:
-					list.append(int(re_search(line, '">', '</a>').split('-')[1].replace('.html', '')))
+					if line.strip():
+						rev_html = re_search(line, '">', '</a>')
+						if rev_html.count('-'):
+							number = rev_html.split('-')[1].replace('.html', '')
+							if check_number(number):
+								rlist[int(number)] = rev_html
 				if call:
 					if call in [u'лист', 'list']:
 						revision = -100
-					elif call in list:
+					elif rlist.has_key(call):
 						revision = call
 					else:
-						revision = max(list)
+						revision = -200
+				else:
+					revision = max(rlist.keys())
 				if revision == -100:
 					revs = ''
-					for x in list:
+					for x in rlist.keys():
 						if revs:
 							revs += ', %d' % (x)
 						else:
 							revs = str(x)
 					repl = u'Есть инфа о ревизиях: %s' % (revs)
+				elif revision == -200:
+					repl = u'Нет инфы о такой ревизии...'
 				else:
-					repl = replace_all(unicode(re_search(read_link('http://blacksmith-bot.googlecode.com/svn/wiki/%d.html' % (revision)), '<div>', '</div>'), 'windows-1251'), BLACK_TAGS)
+					repl = replace_all(unicode(re_search(read_link('http://blacksmith-bot.googlecode.com/svn/tags/%s' % (rlist[revision])), '<div>', '</div>'), 'windows-1251'), BLACK_TAGS)
 			except:
 				repl = u'Аблом, не достучался до репозитория.'
 			reply(type, source, repl)
