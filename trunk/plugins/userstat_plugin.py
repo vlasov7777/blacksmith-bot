@@ -1,7 +1,7 @@
 # |-|-| lytic bot |-|-|
 # -*- coding: utf-8 -*-
 
-#  Лютик Bot plugin
+#  BlackSmith plugin
 #  userstat_plugin.py
 
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
@@ -18,7 +18,7 @@ def handler_userstat(Prs):
 		fromjid = Prs.getFrom()
 		conf = fromjid.getStripped()
 		nick = fromjid.getResource()
-		jid = handler_jid(conf+'/'+nick)
+		jid = handler_jid('%s/%s' % (conf, nick))
 		if jid not in USERSTAT[conf]['jids']:
 			USERSTAT[conf]['jids'][jid] = {'joined': '', 'seen': '', 'joins': 0, 'ishere': True, 'afl': u'никто', 'role': u'участник', 'leave': u'нет', 'nicks': []}
 		if Ptype == 'unavailable':
@@ -57,7 +57,10 @@ def handler_userstat(Prs):
 		USERSTAT[conf]['col'] += 1
 		if USERSTAT[conf]['col'] >= 16:
 			USERSTAT[conf]['col'] = 0
-			write_file('dynamic/'+conf+'/userstat.txt', str(USERSTAT[conf]['jids']))
+			try:
+				write_file('dynamic/%s/userstat.txt' % (conf), str(USERSTAT[conf]['jids']))
+			except MemoryError:
+				LAST['null'] += 1
 
 def handler_check_userstat(type, source, body):
 	if source[1] in GROUPCHATS:
@@ -66,7 +69,7 @@ def handler_check_userstat(type, source, body):
 		elif body.count('@') and body.count('.') and not body.count(' '):
 			jid = body
 		elif body in GROUPCHATS[source[1]]:
-			jid = handler_jid(source[1]+'/'+body)
+			jid = handler_jid('%s/%s' % (source[1], body))
 		else:
 			jid = False
 		if jid and jid in USERSTAT[source[1]]['jids']:
@@ -85,11 +88,9 @@ def handler_check_userstat(type, source, body):
 	else:
 		reply(type, source, u'Ээй! Ты не в чате!')
 
-def handler_userstat_here(type, source, body):
+def handler_userstat_here(type, source, nick):
 	if source[1] in GROUPCHATS:
-		if body:
-			nick = body
-		else:
+		if not nick:
 			nick = source[2]
 		if nick in GROUPCHATS[source[1]] and GROUPCHATS[source[1]][nick]['ishere']:
 			if body:
@@ -105,13 +106,16 @@ def handler_userstat_here(type, source, body):
 def userstat_save():
 	for conf in USERSTAT.keys():
 		if USERSTAT[conf]['col']:
-			write_file('dynamic/'+conf+'/userstat.txt', str(USERSTAT[conf]['jids']))
+			try:
+				write_file('dynamic/%s/userstat.txt' % (conf), str(USERSTAT[conf]['jids']))
+			except:
+				LAST['null'] += 1
 
 def userstat_init(conf):
 	USERSTAT[conf] = {'col': 0, 'jids': {}}
 	if check_file(conf, 'userstat.txt'):
 		try:
-			USERSTAT[conf]['jids'] = eval(read_file('dynamic/'+conf+'/userstat.txt'))
+			USERSTAT[conf]['jids'] = eval(read_file('dynamic/%s/userstat.txt' % (conf)))
 			for jid in USERSTAT[conf]['jids']:
 				USERSTAT[conf]['jids'][jid]['ishere'] = False
 		except:

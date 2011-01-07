@@ -1,7 +1,7 @@
 # |-|-| lytic bot |-|-|
 # -*- coding: utf-8 -*-
 
-#  Лютик Bot plugin
+#  Jaskier Bot plugin
 #  mucacc_plugin.py
 
 # CallForResponse (c) Gigabyte
@@ -59,7 +59,7 @@ def command_kick(type, source, body):
 		if body:
 			args = body.split()
 			nick = args[0].strip()
-			jid = handler_jid(source[1]+'/'+nick)
+			jid = handler_jid('%s/%s' % (source[1], nick))
 			if jid not in ADLIST:
 				if len(args) >= 2:
 					reason = body[(body.find(' ') + 1):].strip()
@@ -78,7 +78,7 @@ def command_visitor(type, source, body):
 		if body:
 			args = body.split()
 			nick = args[0].strip()
-			jid = handler_jid(source[1]+'/'+nick)
+			jid = handler_jid('%s/%s' % (source[1], nick))
 			if jid not in ADLIST:
 				if len(args) >= 2:
 					reason = body[(body.find(' ') + 1):].strip()
@@ -127,7 +127,7 @@ def command_member(type, source, body):
 			nick = args[0].strip()
 			if nick.count('.') or nick in GROUPCHATS[source[1]]:
 				if nick in GROUPCHATS[source[1]]:
-					jid = handler_jid(source[1]+'/'+nick)
+					jid = handler_jid('%s/%s' % (source[1], nick))
 				else:
 					jid = nick
 				if len(args) >= 2:
@@ -149,7 +149,7 @@ def command_admin(type, source, body):
 			nick = args[0].strip()
 			if nick.count('.') or nick in GROUPCHATS[source[1]]:
 				if nick in GROUPCHATS[source[1]]:
-					jid = handler_jid(source[1]+'/'+nick)
+					jid = handler_jid('%s/%s' % (source[1], nick))
 				else:
 					jid = nick
 				if len(args) >= 2:
@@ -171,7 +171,7 @@ def command_owner(type, source, body):
 			nick = args[0].strip()
 			if nick.count('.') or nick in GROUPCHATS[source[1]]:
 				if nick in GROUPCHATS[source[1]]:
-					jid = handler_jid(source[1]+'/'+nick)
+					jid = handler_jid('%s/%s' % (source[1], nick))
 				else:
 					jid = nick
 				if len(args) >= 2:
@@ -193,7 +193,7 @@ def command_ban(type, source, body):
 			nick = args[0].strip()
 			if nick.count('.') or nick in GROUPCHATS[source[1]]:
 				if nick in GROUPCHATS[source[1]]:
-					jid = handler_jid(source[1]+'/'+nick)
+					jid = handler_jid('%s/%s' % (source[1], nick))
 				else:
 					jid = nick
 				if jid not in ADLIST:
@@ -218,7 +218,7 @@ def command_none(type, source, body):
 			nick = args[0].strip()
 			if nick.count('.') or nick in GROUPCHATS[source[1]]:
 				if nick in GROUPCHATS[source[1]]:
-					jid = handler_jid(source[1]+'/'+nick)
+					jid = handler_jid('%s/%s' % (source[1], nick))
 				else:
 					jid = nick
 				if len(args) >= 2:
@@ -240,7 +240,7 @@ def command_fullban(type, source, body):
 			nick = args[0].strip()
 			if nick.count('.') or nick in GROUPCHATS[source[1]]:
 				if nick in GROUPCHATS[source[1]]:
-					jid = handler_jid(source[1]+'/'+nick)
+					jid = handler_jid('%s/%s' % (source[1], nick))
 				else:
 					jid = nick
 				if len(args) >= 2:
@@ -278,4 +278,4 @@ register_command_handler(command_participant, 'участник', ['админ',
 register_command_handler(command_none, 'никто', ['админ','все'], 20, 'Делает юзера никем, т.е. снимает аффиляцию, в том числе и разбанивает', 'никто [nick]', ['никто чел','никто чел'])
 register_command_handler(command_ban, 'бан', ['админ','все'], 20, 'Банит юзера/жид/сервер', 'бан [nick/jid] [причина]', ['бан чел','бан чел критин','бан qip.ru быдлосервак','бан user@qip.ru'])
 register_command_handler(command_fullban, 'фулбан', ['суперадмин','все'], 80, 'Банит юзера во всех конфах бота', 'фулбан [jid/nick] [причина]', ['фулбан bancheg@qip.ru','фулбан чувак'])
-register_command_handler(command_fullunban, 'фулyнбан', ['суперадмин','все'], 80, 'вытаскивает жид из бани во всех конфах бота', 'фулуннбан [jid]', ['фулyнбан bancheg@qip.ru'])
+register_command_handler(command_fullunban, 'фулунбан', ['суперадмин','все'], 80, 'вытаскивает жид из бани во всех конфах бота', 'фулунбан [jid]', ['фулунбан bancheg@qip.ru'])

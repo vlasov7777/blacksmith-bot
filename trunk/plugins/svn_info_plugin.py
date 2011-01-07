@@ -53,7 +53,7 @@ def blacksmith_svn(type, source, body):
 				elif revision == -200:
 					repl = u'Нет инфы о такой ревизии...'
 				else:
-					repl = replace_all(unicode(re_search(read_link('http://blacksmith-bot.googlecode.com/svn/tags/%s' % (rlist[revision])), '<div>', '</div>'), 'windows-1251'), BLACK_TAGS)
+					repl = '\n'+replace_all(unicode(re_search(read_link('http://blacksmith-bot.googlecode.com/svn/tags/%s' % (rlist[revision])), '<div>', '</div>'), 'windows-1251'), BLACK_TAGS)
 			except:
 				repl = u'Аблом, не достучался до репозитория.'
 			reply(type, source, repl)
@@ -62,4 +62,4 @@ def blacksmith_svn(type, source, body):
 	else:
 		reply(type, source, u'мм?')
 
-register_command_handler(blacksmith_svn, 'свн', ['инфо','все'], 10, 'Выдаёт инфу об обновлениях BlackSmith в SVN', 'свн [ласт/last/инфо/info] [№ ревизии/лист]', ['сон ласт', 'свн инфо 40'])
+register_command_handler(blacksmith_svn, 'свн', ['инфо','все'], 10, 'Выдаёт инфу об обновлениях BlackSmith в SVN', 'свн [ласт/last/инфо/info] [№ ревизии/лист]', ['свн ласт', 'свн инфо 40'])

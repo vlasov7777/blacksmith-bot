@@ -30,12 +30,20 @@ def handler_clean(type, source, body):
 		if body not in [u'тихо', u'беспалева']:
 			clearfr = [u'Ну смотря сколько платишь...', u'Сами упарывали, сами и убирайтесь!', u'Ладно пошел за пылесосом...', u'Вызывай мусоровоз, ух как тут понагадили!', u'ААА!! Тётя ася приехала!', u'Щас уберусь, хотя... Кто спёр метёлку!?', u'Ээ не! Вызывай уборщицу!', u'Не могу! У меня мизофобия!']
 			reply(type, source, random.choice(clearfr))
+		elif type != 'private':
+			message = random.choice([u'чистка...', u'Работа по антиупарыванию конфы в разгаре!', 'вычищаю конференцию', 'отсылаю пустые мессаги (не правда ли дебильная работа?)'])
+			status = 'dnd'
+			change_bot_status(source[1], message, status)
 		for x in range(1, 24):
 			JCON.send(xmpp.simplexml.XML2Node(unicode('<message to="%s" type="groupchat"></message>' % (source[1])).encode('utf-8')))
 			time.sleep(1.2)
 		if body not in [u'тихо', u'беспалева']:
 			clearpostfr = [u'Почистил, 100$ с тебя!', u'Чистота чисто Тайд!', u'Хорошая штука этот фэри, и чистит отлично, и по вкусу ничё так', u'Всё прям блистит, сделано!', u'В следующий раз юзай моющий пылесос!', u'Кажись Готово', u'С тебя причитается...', u'Оплачивать будем чеком или наличными?']
 			reply(type, source, random.choice(clearpostfr))
+		elif type != 'private':
+			message = STATUS[source[1]]['message']
+			status = STATUS[source[1]]['status']
+			change_bot_status(source[1], message, status)
 		CHAT_CACHE[source[1]] = {'1': '', '2': ''}
 	else:
 		reply(type, source, u'сам свой ростер чисть!')
