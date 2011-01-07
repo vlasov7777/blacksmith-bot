@@ -7,10 +7,10 @@
 #  Als [Als@exploit.in]
 #  Evgen [meb81@mail.ru]
 #  dimichxp [dimichxp@gmail.com]
+#  mrDoctorWhо [mrdoctorwho@gmail.com]
 #  Boris Kotov [admin@avoozl.ru]
 #  Mike Mintz [mikemintz@gmail.com]
 #  WitcherGeralt [WitcherGeralt@rocketmail.com]
-#  Gigabyte | ferym | 40tman | Avinar | mrDoctorWhо
 
 #  By WitcherGeralt, based on Talisman by Als (Neutron by Gh0st)
 
@@ -67,9 +67,9 @@ def text_color(text, color):
 	return text
 
 def Print(text, color = False):
-	if color:
-		text = text_color(text, color)
 	try:
+		if color:
+			text = text_color(text, color)
 		print text
 	except:
 		LAST['null'] += 1
@@ -99,6 +99,11 @@ ROSTER_FILE = 'dynamic/roster.txt'
 PLUGIN_DIR = 'plugins'
 PID_FILE = 'PID.txt'
 
+BOT_OS, BOT_PID = os.name, os.getpid()
+
+if BOT_OS == 'nt':
+	os.system('COLOR 0C')
+
 def PASS_GENERATOR(codename, col):
 	symbols = '0123456789%s._(!}{#)' % (string.letters)
 	for x in range(0, col):
@@ -122,6 +127,9 @@ try:
 	execfile('static/versions.py')
 except:
 	Exit('\n\nError: verfile (versions.py) isn`t exists!', 1, 30)
+
+if BOT_OS == 'nt':
+	os.system('Title BlackSmith - %s' % (Caps))
 
 DEFAULT_NICK = DEFAULT_NICK_(DEFAULT_NICK)
 MEMORY_LIMIT = MEMORY_LIMIT_(MEMORY_LIMIT)
@@ -163,11 +171,11 @@ GLOBACCESS = {}
 GROUPCHATS = {}
 UNAVALABLE = []
 
-BOT_OS, BOT_PID = os.name, os.getpid()
-
 (JCON, ROSTER) = (None, False)
 
-smph, mtx, wsmph = threading.BoundedSemaphore(value = 100), threading.Lock(), threading.BoundedSemaphore(value = 1)
+smph = threading.BoundedSemaphore(value = 100)
+mtx = threading.Lock()
+wsmph = threading.BoundedSemaphore(value = 1)
 
 ################ file work handlers ############################################################
 
@@ -618,10 +626,10 @@ def Prefix_state(combody, bot_nick):
 
 def check_number(number):
 	try:
-		int(number)
+		answer = number.isdigit()
 	except:
-		return False
-	return True
+		answer = False
+	return answer
 
 def replace_all(retxt, list, data = False):
 	for x in list:
@@ -744,11 +752,11 @@ def handler_rebody(target, body, ltype):
 	col, all = 0, str(len(body) / PRIV_MSG_LIMIT + 1)
 	while len(body) > PRIV_MSG_LIMIT:
 		col = col + 1
-		text = '['+str(col)+'/'+all+'] '+body[:PRIV_MSG_LIMIT]+'[...]'
+		text = '[%d/%s] %s[...]' % (col, all, body[:PRIV_MSG_LIMIT])
 		JCON.send(xmpp.Message(target, text.strip(), ltype))
 		body = body[PRIV_MSG_LIMIT:]
 		time.sleep(2)
-	return '['+str(col + 1)+'/'+all+'] '+body
+	return '[%d/%s] %s' % ((col + 1), all, body)
 
 def delivery(body):
 	if not isinstance(body, unicode):
@@ -1048,12 +1056,12 @@ def PRESENCE_PROCESSING(client, Prs):
 	fromjid = Prs.getFrom()
 	INFO['prs'] += 1
 	conf = fromjid.getStripped()
-	if user_level(fromjid, conf) <= -100:
+	if not has_access(fromjid, -5, conf):
 		return
 	Ptype = Prs.getType()
 	if Ptype == 'subscribe':
 		roster_subscribe(conf)
-	if conf in GROUPCHATS:
+	if GROUPCHATS.has_key(conf):
 		nick = fromjid.getResource()
 		if Ptype == 'unavailable':
 			reason = Prs.getReason() or Prs.getStatus()
@@ -1279,7 +1287,7 @@ def lytic():
 			Print('\nConnection is OK', color3)
 		Print('Using: %s' % str(JCON.isConnected()), color4)
 	else:
-		Exit('\nFucking Connect!!!\nSleep for 30 seconds', 0, 30)
+		Exit('\nFucking Connect!!\nSleep for 30 seconds', 0, 30)
 	Print('\nAuthentication plese wait...', color4)
 	AUTHENT = JCON.auth(USERNAME, PASSWORD, RESOURCE)
 	if AUTHENT:
@@ -1288,8 +1296,8 @@ def lytic():
 		else:
 			Print('Auth is OK', color3)
 	else:
-		Auth_error = str(JCON.lastErr)
-		Error_code = str(JCON.lastErrCode)
+		Auth_error = unicode(JCON.lastErr)
+		Error_code = unicode(JCON.lastErrCode)
 		Exit('\nAuth error!!!\nError: %s %s' % (Auth_error, Error_code), 0, 12)
 	globals()['ONLINE'] = True
 	globals()['ROSTER'] = JCON.getRoster()

@@ -1,7 +1,7 @@
 # |-|-| lytic bot |-|-|
 # -*- coding: utf-8 -*-
 
-#  Лютик Bot plugin
+#  Jaskier Bot plugin
 #  boltun_plugin.py
 
 # Coded: by WitcherGeralt [WitcherGeralt@rocketmail.com]
@@ -12,17 +12,19 @@ BOLTUN_FILE = 'dynamic/boltun.txt'
 
 FLOOD = {}
 FRAZA_BOT = {}
-FRAZA_RANDOM = ['What the fuck!?','How are you?']
+FRAZA_RANDOM = ['What the fuck!?', 'How are you?']
 FRAZA_USER = {}
 FRAZA_ALL = {}
 
 def boltun_check_nick(item, conf):
-	for nick in GROUPCHATS[conf].keys():
-		if item.count(nick):
-			return True
+	if conf in GROUPCHATS.keys():
+		for nick in GROUPCHATS[conf].keys():
+			if item.count(nick):
+				return True
 	return False
 
 def boltun_talk(type, source, body, base):
+	body = body.lower()
 	for fr in base:
 		if body.count(fr):
 			reply(type, source, random.choice(base[fr]))
@@ -31,16 +33,12 @@ def boltun_talk(type, source, body, base):
 
 def boltun_work(raw, type, source, body):
 	if source[1] not in FLOOD or FLOOD[source[1]] != 'off':
-		to_ret = random.randrange(1, 10)
-		if to_ret != 7:
-			direct = Prefix_state(body, handler_botnick(source[1]))
-			User_nick = body.split()[0].strip()
-			body = body.lower()
-			if direct or type == 'private':
+		if 7 != random.randrange(1, 10):
+			if Prefix_state(body, handler_botnick(source[1])) or type == 'private':
 				if not boltun_talk(type, source, body, FRAZA_BOT):
 					reply(type, source, random.choice(FRAZA_RANDOM))
 			elif type == 'public':
-				if boltun_check_nick(User_nick, source[1]):
+				if boltun_check_nick(body.split()[0].strip(), source[1]):
 					boltun_talk(type, source, body, FRAZA_USER)
 				else:
 					boltun_talk(type, source, body, FRAZA_ALL)
@@ -85,7 +83,7 @@ def boltun_base(base, base_name, type, source, Params):
 				list, col = '', 0
 				for fr in base[fraza]:
 					col = col + 1
-					list += '\n'+str(col)+'. '+fr
+					list += '\n%d. %s' % (col, fr)
 				reply(type, source, u'Всего фраз '+str(col)+':'+list)
 			else:
 				reply(type, source, u'такого ключа в базе нет')
@@ -95,7 +93,7 @@ def boltun_base(base, base_name, type, source, Params):
 		list, col = '', 0
 		for fr in base:
 			col = col + 1
-			list += '\n'+str(col)+'. '+fr
+			list += '\n%d. %s' % (col, fr)
 		if col != 0:
 			reply(type, source, u'Всего ключей '+str(col)+':'+list)
 		else:
@@ -131,7 +129,7 @@ def boltun_rand(type, source, Params):
 		list, col = '', 0
 		for fr in FRAZA_RANDOM:
 			col = col + 1
-			list += '\n'+str(col)+'. '+fr
+			list += '\n%d. %s' % (col, fr)
 		reply(type, source, u'Всего фраз в базе '+str(col)+':'+list)
 
 def boltun_user(type, source, Params):
@@ -141,15 +139,15 @@ def boltun_all(type, source, Params):
 	boltun_base(FRAZA_ALL, 'FRAZA_ALL', type, source, Params)
 
 def boltun_base_export(name, list, type, source):
-	col, text = 0, '\t\t'+name
+	col, text = 0, '\t\t%s' % (name)
 	for key in sorted(list.keys()):
 		col += 1
-		text += '\n\n'+str(col)+'. '+unicode(key).encode('utf-8')+':'
+		text += '\n\n%d. %s:' % (col, key.encode('utf-8'))
 		keys_col = 0
 		for item in list[key]:
 			keys_col += 1
-			text += '\n\t'+str(keys_col)+'. '+unicode(item).encode('utf-8')
-	filename = 'exported/'+name+'.txt'
+			text += '\n\t%d. %s' % (keys_col, item.encode('utf-8'))
+	filename = 'exported/%s.txt' % (name)
 	if initialize_file(filename, text):
 		reply(type, source, filename)
 	else:
@@ -164,7 +162,7 @@ def boltun_export(type, source, body):
 			text, col = '\t\tFRAZA_RANDOM\n', 0
 			for key in FRAZA_RANDOM:
 				col += 1
-				text += '\n'+str(col)+'. '+unicode(key).encode('utf-8')
+				text += '\n%d. %s' % (col, key.encode('utf-8'))
 			if initialize_file('exported/FRAZA_RANDOM.txt', text):
 				reply(type, source, 'exported/FRAZA_RANDOM.txt')
 			else:
@@ -182,7 +180,7 @@ def boltun_control(type, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			body = body.lower()
-			filename = 'dynamic/'+source[1]+'/flood.txt'
+			filename = 'dynamic/%s/flood.txt' % (source[1])
 			if body in [u'вкл', 'on', '1']:
 				FLOOD[source[1]] = 'on'
 				write_file(filename, "'on'")
@@ -193,16 +191,15 @@ def boltun_control(type, source, body):
 				reply(type, source, u'болталка выключена')
 			else:
 				reply(type, source, u'читай помощь по команде')
+		elif FLOOD[source[1]] == 'off':
+			reply(type, source, u'сейчас болталка выключена')
 		else:
-			if FLOOD[source[1]] == 'off':
-				reply(type, source, u'сейчас болталка выключена')
-			else:
-				reply(type, source, u'сейчас болталка включена')
+			reply(type, source, u'сейчас болталка включена')
 	else:
 		reply(type, source, u'только в чате мудак!')
 
 def boltun_file_init():
-	if initialize_file(BOLTUN_FILE, str({'FRAZA_BOT': {}, 'FRAZA_RANDOM': ['What the fuck!?','How are you?'], 'FRAZA_USER': {}, 'FRAZA_ALL': {}})):
+	if initialize_file(BOLTUN_FILE, str({'FRAZA_BOT': {}, 'FRAZA_RANDOM': FRAZA_RANDOM, 'FRAZA_USER': {}, 'FRAZA_ALL': {}})):
 		base = eval(read_file(BOLTUN_FILE))
 		globals()['FRAZA_BOT'] = base['FRAZA_BOT']
 		globals()['FRAZA_RANDOM'] = base['FRAZA_RANDOM']
@@ -213,11 +210,10 @@ def boltun_file_init():
 
 def boltun_work_init(conf):
 	if check_file(conf, 'flood.txt', "'on'"):
-		state = eval(read_file('dynamic/'+conf+'/flood.txt'))
+		FLOOD[conf] = eval(read_file('dynamic/%s/flood.txt' % (conf)))
 	else:
-		state = 'on'
+		FLOOD[conf] = 'on'
 		delivery(u'Внимание! Не удалось создать flood.txt для "%s"!' % (conf))
-	FLOOD[conf] = state
 
 register_message_handler(boltun_work)
 register_command_handler(boltun_bot, 'болтун', ['болтун','все'], 100, 'Добавляет/удаляет ключ базы для работы при обращении к боту, без параметров покажет текущие ключи базы, с параметром в виде ключа базы выдаст фразы закреплённые за ключём (аргумент "*")', 'болтун [+/-/*] [ключ = фраза/фраза]', ['болтун спартак = в жопу Спартак!/мясо гавно! я за ЛОКО болею!','болтун','болтун * привет'])

@@ -59,7 +59,7 @@ def handler_admin_join(type, source, body):
 					join_groupchat(conf, handler_botnick(conf), codename)
 				else:
 					join_groupchat(conf, handler_botnick(conf))
-				time.sleep(12)
+				time.sleep(6)
 				if GROUPCHATS.has_key(conf):
 					reply(type, source, u'Я зашёл в -> "%s"' % (conf))
 					info = u'Я от %s' % (source[2])
@@ -88,7 +88,7 @@ def handler_admin_rejoin(type, source, body):
 		leave_groupchat(conf, reason)
 		time.sleep(2)
 		join_groupchat(conf, handler_botnick(conf), chats[conf]['code'])
-		time.sleep(12)
+		time.sleep(6)
 		if GROUPCHATS.has_key(conf):
 			reply(type, source, u'Перезашёл!')
 		else:

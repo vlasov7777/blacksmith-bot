@@ -17,7 +17,7 @@ def handler_more(type, source, body):
 		reply(type, source, u'а смысл?')
 
 def handler_more_outmsg(target, body, obody):
-	if type == 'public' and MORE.has_key(target):
+	if MORE.has_key(target):
 		if hash(obody) != MORE[target]:
 			if len(obody) > CHAT_MSG_LIMIT:
 				MORE[target] = obody[CHAT_MSG_LIMIT:]
