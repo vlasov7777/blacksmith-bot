@@ -436,31 +436,19 @@ def execut_stage_init(stage_handler, conf = None):
 
 def call_stage0_init():
 	for handler in STAGE0_INIT:
-		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execut_stage_init, 'stage0_init-%d' % (INFO['thr']),(handler,))
-			Thread_Run(Thread, handler)
+		execut_stage_init(handler)
 
 def call_stage1_init(conf):
 	for handler in STAGE1_INIT:
-		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execut_stage_init, 'stage1_init-%d' % (INFO['thr']),(handler, conf,))
-			Thread_Run(Thread, handler)
+		execut_stage_init(handler, conf)
 
 def call_stage2_init():
 	for handler in STAGE2_INIT:
-		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execut_stage_init, 'stage2_init-%d' % (INFO['thr']),(handler,))
-			Thread_Run(Thread, handler)
+		execut_stage_init(handler)
 
 def call_stage3_init():
 	for handler in STAGE3_INIT:
-		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execut_stage_init, 'stage3_init-%d' % (INFO['thr']),(handler,))
-			Thread_Run(Thread, handler)
+		execut_stage_init(handler)
 
 def execute_command_handler(commnad_handler, command, type, source, body):
 	try:
