@@ -1056,14 +1056,19 @@ def PRESENCE_PROCESSING(client, Prs):
 			if nick in GROUPCHATS[conf] and GROUPCHATS[conf][nick]['ishere']:
 				GROUPCHATS[conf][nick]['ishere'] = False
 			scode = Prs.getStatusCode()
-			if scode == '303':
+			if scode in ['301', '307'] and nick == handler_botnick(conf):
+				leave_groupchat(conf, u'Got %s code!' % str(scode))
+				text = (u'забанили' if scode == '301' else u'кикнули')
+				delivery(u'Меня %s в "%s" и я оттуда вышел.' % (text, conf))
+				return
+			elif scode == '303':
 				full_jid = Prs.getJid()
 				if not full_jid:
 					full_jid = unicode(fromjid)
 					jid = unicode(fromjid)
 				else:
 					full_jid = unicode(full_jid)
-					jid = string.split(full_jid, '/', 1)[0]
+					jid = full_jid.split('/')[0].lower()
 				newnick = Prs.getNick()
 				join_date = GROUPCHATS[conf].get(nick, {'join_date': [that_day(), time.gmtime()]})['join_date']
 				joined = GROUPCHATS[conf].get(nick, {'joined': time.time()})['joined']
@@ -1110,15 +1115,16 @@ def PRESENCE_PROCESSING(client, Prs):
 				if ecode == '409':
 					BOT_NICKS[conf] = '%s.' % (nick)
 					send_join_presece(conf, handler_botnick(conf))
-				elif ecode == '404':
-					del GROUPCHATS[conf]
-					delivery(u'Ошибка %s (сервер не найден) - конфа: "%s"' % (ecode, conf))
-				elif ecode in ['301','307','401','403','405']:
+				elif ecode in ['401', '403', '405']:
 					leave_groupchat(conf, u'Got %s error code!' % str(ecode))
 					delivery(u'Ошибка %s, пришлось выйти из -> "%s"' % (ecode, conf))
-				elif ecode == '503':
+				elif ecode in ['404', '503']:
 					try:
-						threading.Timer(180, error_join_timer,(conf,)).start()
+						ThrName = "rejoin-%s" % (conf.decode("utf-8"))
+						if ThrName not in [x._Thread__name for x in threading._active.values()]:
+							Thr = threading.Timer(360, error_join_timer, (conf,))
+							Thr.name(ThrName)
+							Thr.start()
 					except:
 						LAST['null'] += 1
 		call_presence_handlers(Prs)

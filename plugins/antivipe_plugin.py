@@ -30,8 +30,8 @@ def handler_antivipe_presence(Prs):
 def handler_antivipe_join(conf, nick, afl, role):
 	if conf not in UNAVALABLE:
 		now_time = time.time()
-		if (now_time - INFO['start']) >= 60 and conf in AVIPES and afl == 'none':
-			jid = handler_jid(conf+'/'+nick)
+		jid = handler_jid(conf+'/'+nick)
+		if (now_time - INFO['start']) >= 60 and jid not in ADLIST and conf in AVIPES and afl == 'none':
 			if now_time - AVIPES[conf]['ltime'] <= 15:
 				AVIPES[conf]['jids'].append(jid)
 				joined = AVIPES[conf]['jids']
