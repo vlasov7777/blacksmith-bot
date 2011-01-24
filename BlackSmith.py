@@ -290,39 +290,86 @@ def lytic_crashlog(handler, command = None):
 ################ list handlers #################################################################
 
 def register_message_handler(instance):
+	name = instance.func_name
+	for handler in MESSAGE_HANDLERS:
+		if name == handler.func_name:
+			MESSAGE_HANDLERS.remove(handler)
 	MESSAGE_HANDLERS.append(instance)
+
 def register_outgoing_message_handler(instance):
+	name = instance.func_name
+	for handler in OUTGOING_MESSAGE_HANDLERS:
+		if name == handler.func_name:
+			OUTGOING_MESSAGE_HANDLERS.remove(handler)
 	OUTGOING_MESSAGE_HANDLERS.append(instance)
+
 def register_join_handler(instance):
+	name = instance.func_name
+	for handler in JOIN_HANDLERS:
+		if name == handler.func_name:
+			JOIN_HANDLERS.remove(handler)
 	JOIN_HANDLERS.append(instance)
+
 def register_leave_handler(instance):
+	name = instance.func_name
+	for handler in LEAVE_HANDLERS:
+		if name == handler.func_name:
+			LEAVE_HANDLERS.remove(handler)
 	LEAVE_HANDLERS.append(instance)
+
 def register_iq_handler(instance):
+	name = instance.func_name
+	for handler in IQ_HANDLERS:
+		if name == handler.func_name:
+			IQ_HANDLERS.remove(handler)
 	IQ_HANDLERS.append(instance)
+
 def register_presence_handler(instance):
+	name = instance.func_name
+	for handler in PRESENCE_HANDLERS:
+		if name == handler.func_name:
+			PRESENCE_HANDLERS.remove(handler)
 	PRESENCE_HANDLERS.append(instance)
+
 def register_stage0_init(instance):
+	name = instance.func_name
+	for handler in STAGE0_INIT:
+		if name == handler.func_name:
+			STAGE0_INIT.remove(handler)
 	STAGE0_INIT.append(instance)
+
 def register_stage1_init(instance):
+	name = instance.func_name
+	for handler in STAGE1_INIT:
+		if name == handler.func_name:
+			STAGE1_INIT.remove(handler)
 	STAGE1_INIT.append(instance)
+
 def register_stage2_init(instance):
+	name = instance.func_name
+	for handler in STAGE2_INIT:
+		if name == handler.func_name:
+			STAGE2_INIT.remove(handler)
 	STAGE2_INIT.append(instance)
+
 def register_stage3_init(instance):
+	name = instance.func_name
+	for handler in STAGE3_INIT:
+		if name == handler.func_name:
+			STAGE3_INIT.remove(handler)
 	STAGE3_INIT.append(instance)
 
 def register_command_handler(instance, command, category = [], access = 0, desc = None, syntax = None, examples = []):
 	command = command.decode('utf-8')
+	if not COMMSTAT.has_key(command):
+		COMMSTAT[command] = {'col': 0, 'users': []}
 	COMMAND_HANDLERS[command] = instance
-	COMMSTAT[command] = {'col': 0, 'users': []}
 	COMMANDS[command] = {'category': category, 'access': access, 'desc': desc, 'syntax': syntax, 'examples': examples}
 
 ################ call & execut handlers ########################################################
 
 def ThreadError():
-	Error = str(sys.exc_info()[1])
-	if Error == "can't start new thread":
-		return True
-	return False
+	return (str(sys.exc_info()[1]) == "can't start new thread")
 
 def Try_Thr(Thread, number = 0):
 	if number >= 4:
@@ -808,24 +855,34 @@ def handler_iq_send(conf, item_name, item, afrls, afrl, rsn = None):
 
 def handler_unban(conf, jid):
 	handler_iq_send(conf, 'jid', jid, 'affiliation', 'none')
+
 def handler_banjid(conf, jid, reason):
 	handler_iq_send(conf, 'jid', jid, 'affiliation', 'outcast', reason)
+
 def handler_ban(conf, nick, reason):
 	handler_iq_send(conf, 'nick', nick, 'affiliation', 'outcast', reason)
+
 def handler_none(conf, nick, reason):
 	handler_iq_send(conf, 'nick', nick, 'affiliation', 'none', reason)
+
 def handler_member(conf, nick, reason):
 	handler_iq_send(conf, 'nick', nick, 'affiliation', 'member', reason)
+
 def handler_admin(conf, nick, reason):
 	handler_iq_send(conf, 'nick', nick, 'affiliation', 'admin', reason)
+
 def handler_owner(conf, nick, reason):
 	handler_iq_send(conf, 'nick', nick, 'affiliation', 'owner', reason)
+
 def handler_kick(conf, nick, reason):
 	handler_iq_send(conf, 'nick', nick, 'role', 'none', reason)
+
 def handler_visitor(conf, nick, reason):
 	handler_iq_send(conf, 'nick', nick, 'role', 'visitor', reason)
+
 def handler_participant(conf, nick, reason):
 	handler_iq_send(conf, 'nick', nick, 'role', 'participant', reason)
+
 def handler_moder(conf, nick, reason):
 	handler_iq_send(conf, 'nick', nick, 'role', 'moderator', reason)
 
@@ -933,8 +990,7 @@ def MESSAGE_PROCESSING(client, stanza):
 		return
 	if stanza.timestamp:
 		return
-	nick = fromjid.getResource()
-	bot_nick = handler_botnick(instance)
+	bot_nick, nick = handler_botnick(instance), fromjid.getResource()
 	if bot_nick == nick:
 		return
 	body = stanza.getBody()
