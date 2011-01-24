@@ -93,7 +93,7 @@ def handler_userstat_here(type, source, nick):
 		if not nick:
 			nick = source[2]
 		if nick in GROUPCHATS[source[1]] and GROUPCHATS[source[1]][nick]['ishere']:
-			if body:
+			if nick:
 				repl = u'"%s" сидит здесь - ' % (nick)
 			else:
 				repl = u'ты провёл здесь - '

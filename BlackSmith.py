@@ -614,10 +614,10 @@ def Prefix_state(combody, bot_nick):
 
 def check_number(number):
 	try:
-		answer = number.isdigit()
+		int(number)
 	except:
-		answer = False
-	return answer
+		return False
+	return True
 
 def replace_all(retxt, list, data = False):
 	for x in list:
