@@ -1,4 +1,4 @@
-﻿# |-|-| lytic bot |-|-|
+# |-|-| lytic bot |-|-|
 # -*- coding: utf-8 -*-
 
 #  BlackSmith plugin
@@ -57,9 +57,11 @@ def blacksmith_svn(type, source, body):
 			except:
 				repl = u'Аблом, не достучался до репозитория.'
 			reply(type, source, repl)
+		elif req in [u'обновление', 'update']:
+			reply(type, source, u'%s\nПеред перезагрузкой обязательно проверьте совместимость (не изменился ли конфинг и т.п.) по команде "свн инфо".' % read_pipe("svn up"))
 		else:
 			reply(type, source, u'что?')
 	else:
 		reply(type, source, u'мм?')
 
-register_command_handler(blacksmith_svn, 'свн', ['инфо','все'], 10, 'Выдаёт инфу об обновлениях BlackSmith в SVN', 'свн [ласт/last/инфо/info] [№ ревизии/лист]', ['свн ласт', 'свн инфо 40'])
+register_command_handler(blacksmith_svn, 'свн', ['инфо','все'], 10, 'Выдаёт инфу об обновлениях BlackSmith в SVN', 'свн [ласт/last/инфо/info/обновление/update] [№ ревизии/лист]', ['свн ласт', 'свн инфо 40'])
