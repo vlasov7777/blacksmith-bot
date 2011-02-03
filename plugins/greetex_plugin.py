@@ -18,7 +18,7 @@ def handler_greetex(type, source, body):
 			bafl = args[0].strip().lower()
 			if bafl in greet_afls:
 				afl, action = greet_afls[bafl], args[1].strip().lower()
-				filename = 'dynamic/'+source[1]+'/greetex.txt'
+				filename = 'dynamic/%s/greetex.txt' % (conf)
 				if action in [u'добавить', 'add']:
 					if len(args) >= 3:
 						greet = body[((body.lower()).find(action) + (len(action) + 1)):].strip()
@@ -59,17 +59,17 @@ def handler_greetex(type, source, body):
 def atjoin_greetex(conf, nick, afl, role):
 	if (GROUPCHATS[conf][nick]['joined'] - INFO['start']) >= 20:
 		if afl in GRTX[conf]:
-			msg(conf, random.choice(GRTX[conf][afl]))
+			msg(conf, random.choice(GRTX[conf][afl]).replace("%NICK%", nick))
 
 def greetex_init(conf):
 	if check_file(conf, 'greetex.txt'):
-		list = eval(read_file('dynamic/'+conf+'/greetex.txt'))
+		list = eval(read_file('dynamic/%s/greetex.txt' % (conf)))
 	else:
 		list = {}
 		delivery(u'Внимание! Не удалось создать greetex.txt для "%s"!' % (conf))
 	GRTX[conf] = list
 
 register_join_handler(atjoin_greetex)
-register_command_handler(handler_greetex, 'превед*', ['все','фан'], 20, 'Приветствие участников по званиям (овнер, админ, мембер, никто) при входе', 'превед* [звание] [del/show/add/удалить/показать/добавить] [текст приветствия]', ['превед* овнер добавить здарова насяльникама','превед* никто удалить','превед* админ показать'])
+register_command_handler(handler_greetex, 'превед*', ['все','фан'], 20, 'Приветствие участников по званиям (овнер, админ, мембер, никто) при входе', 'превед* [звание] [del/show/add/удалить/показать/добавить] [текст приветствия]', ['превед* овнер добавить %NICK%: здарова насяльникама','превед* никто удалить','превед* админ показать'])
 
 register_stage1_init(greetex_init)

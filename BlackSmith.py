@@ -18,8 +18,6 @@
 
 from __future__ import with_statement
 
-from xml.parsers.expat import ExpatError as BadlyFormedStanza
-
 from traceback import format_exc as error_, print_exc as Print_Error
 
 import sys, os, time, gc, codecs, types, threading, base64
@@ -1088,14 +1086,6 @@ def roster_subscribe(jid):
 		ROSTER.Authorize(jid)
 		ROSTER.setItem(jid, jid, ['USERS'])
 
-def moder_presence(conf):
-	UNAVALABLE.remove(conf)
-	msg(conf, u'Походу дали модера, перезахожу!')
-	time.sleep(2)
-	leave_groupchat(conf, 'Rejoin...')
-	time.sleep(2)
-	join_groupchat(conf, handler_botnick(conf))
-
 def PRESENCE_PROCESSING(client, Prs):
 	fromjid = Prs.getFrom()
 	INFO['prs'] += 1
@@ -1153,7 +1143,13 @@ def PRESENCE_PROCESSING(client, Prs):
 					full_jid = unicode(full_jid)
 					jid = string.split(full_jid, '/', 1)[0]
 				else:
-					moder_presence(conf)
+					if nick == handler_botnick(conf) and "admin" == Prs.getAffiliation():
+						UNAVALABLE.remove(conf)
+						msg(conf, u'Походу дали админа, перезахожу!')
+						time.sleep(2)
+						leave_groupchat(conf, 'Rejoin...')
+						time.sleep(2)
+						join_groupchat(conf, handler_botnick(conf))
 					return
 			else:
 				full_jid = unicode(full_jid)
@@ -1221,12 +1217,12 @@ def IQ_PROCESSING(client, stanza):
 			raise xmpp.NodeProcessed
 		elif stanza.getTags('query', {}, xmpp.NS_DISCO_INFO):
 			ids = []
-			ids.append({'category': 'client','type': 'bot','name': 'lytic'})
+			ids.append({'category': 'client', 'type': 'bot', 'name': 'BlackSmith'})
 			features = [xmpp.NS_DISCO_INFO, xmpp.NS_DISCO_ITEMS, xmpp.NS_MUC, 'urn:xmpp:time', xmpp.NS_PING, xmpp.NS_VERSION, xmpp.NS_PRIVACY, xmpp.NS_ROSTER, xmpp.NS_VCARD, xmpp.NS_DATA, xmpp.NS_LAST, xmpp.NS_COMMANDS, xmpp.NS_TIME, xmpp.NS_MUC_FILTER]
-			info = {'ids': ids,'features': features}
+			info = {'ids': ids, 'features': features}
 			pybr = xmpp.browser.Browser()
 			pybr.PlugIn(JCON)
-			pybr.setDiscoHandler({'items': [],'info': info})
+			pybr.setDiscoHandler({'items': [], 'info': info})
 		elif stanza.getTags('query', {}, xmpp.NS_LAST):
 			last = time.time() - LAST['time']
 			result = stanza.buildReply('result')
@@ -1283,7 +1279,11 @@ def lytic_restart():
 def Dispatch_handler():
 	try:
 		JCON.Process(8)
-	except BadlyFormedStanza:
+	except xmpp.Conflict:
+		Print('\n\nError: XMPP Conflict!', color2)
+		call_stage3_init()
+		os.abort()
+	except xmpp.StreamError:
 		LAST['null'] += 1
 	except KeyboardInterrupt:
 		sys_exit('INTERUPT (Ctrl+C)')
@@ -1292,7 +1292,7 @@ def sys_exit(exit_reason = 'SUICIDE'):
 	Print('\n\n%s' % (exit_reason), color2)
 	if ONLINE:
 		send_unavailable(exit_reason)
-	if time.time() - INFO['start'] >= 30:
+	if (time.time() - INFO['start']) >= 30:
 		call_stage3_init()
 	Exit('\n\nRESTARTING...\n\nPress Ctrl+C to exit', 0, 30)
 
@@ -1401,6 +1401,8 @@ if __name__ == "__main__":
 			lytic()
 		except KeyboardInterrupt:
 			sys_exit('INTERUPT (Ctrl+C)')
+		except xmpp.HostUnknown:
+			Print('\n\nError: host unknown!', color2)
 		except:
 			lytic_crashlog(lytic)
 		try_sleep(30)
