@@ -34,7 +34,7 @@ def handler_python_sh(type, source, body):
 	if BOT_OS == 'posix':
 		command = 'sh -c "%s" 2>&1' % (body.encode('utf-8'))
 	else:
-		command =  body.encode('utf-8')
+		command =  body.encode("cp1251")
 	retval = read_pipe(command)
 	if retval in ['', None]:
 		retval = u'Cделано!'

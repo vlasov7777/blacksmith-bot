@@ -115,7 +115,7 @@ def handler_topic(type, source, body):
 	if body:
 		body = replace_all(body, {'<': u'«', '>': u'»'})
 		try:
-			JCON.send(xmpp.simplexml.XML2Node(unicode('<message to="%s" type="groupchat"><subject>%s</subject></message>' % (source[1], body)).encode('utf-8')))
+			JCON.send(xmpp.Message(unicode(source[1]), "", "groupchat", body))
 		except:
 			reply(type, source, u'Не отправляется как-то эта хрень...')
 	else:
