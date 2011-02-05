@@ -242,7 +242,7 @@ def handler_wtf_export(type, source, body):
 			if check_nosimbols(body):
 				name = 'exported/wtf_'+body+'.txt'
 			else:
-				name = 'exported/wtf_'+base64.b64encode(body.encode('utf-8'))+'.txt'
+				name = 'exported/wtf_'+encode_name(body.encode('utf-8'))+'.txt'
 		else:
 			base = False
 		if base:

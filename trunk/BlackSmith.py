@@ -20,7 +20,7 @@ from __future__ import with_statement
 
 from traceback import format_exc as error_, print_exc as Print_Error
 
-import sys, os, time, gc, codecs, types, threading, base64
+import sys, os, time, gc, codecs, threading, types
 
 os.chdir(os.path.dirname(sys.argv[0]))
 
@@ -981,7 +981,7 @@ def flood_timer(fromjid, instance, nick):
 def MESSAGE_PROCESSING(client, stanza):
 	fromjid = stanza.getFrom()
 	INFO['msg'] += 1
-	instance = fromjid.getStripped()
+	instance = fromjid.getStripped().lower()
 	if user_level(fromjid, instance) <= -100:
 		return
 	if instance in UNAVALABLE and not MSERVE:
@@ -1089,7 +1089,7 @@ def roster_subscribe(jid):
 def PRESENCE_PROCESSING(client, Prs):
 	fromjid = Prs.getFrom()
 	INFO['prs'] += 1
-	conf = fromjid.getStripped()
+	conf = fromjid.getStripped().lower()
 	if not has_access(fromjid, -5, conf):
 		return
 	Ptype = Prs.getType()
@@ -1141,7 +1141,7 @@ def PRESENCE_PROCESSING(client, Prs):
 				if MSERVE:
 					UNAVALABLE.remove(conf)
 					full_jid = unicode(full_jid)
-					jid = string.split(full_jid, '/', 1)[0]
+					jid = string.split(full_jid, '/', 1)[0].lower()
 				else:
 					if nick == handler_botnick(conf) and "admin" == Prs.getAffiliation():
 						UNAVALABLE.remove(conf)
@@ -1153,7 +1153,7 @@ def PRESENCE_PROCESSING(client, Prs):
 					return
 			else:
 				full_jid = unicode(full_jid)
-				jid = string.split(full_jid, '/', 1)[0]
+				jid = string.split(full_jid, '/', 1)[0].lower()
 			if nick in GROUPCHATS[conf] and GROUPCHATS[conf][nick]['jid'] == jid and GROUPCHATS[conf][nick]['ishere']:
 				LAST['null'] += 1
 			else:
@@ -1186,7 +1186,7 @@ def PRESENCE_PROCESSING(client, Prs):
 def IQ_PROCESSING(client, stanza):
 	fromjid = stanza.getFrom()
 	INFO['iq'] += 1
-	instance = fromjid.getStripped()
+	instance = fromjid.getStripped().lower()
 	if user_level(fromjid, instance) <= -100:
 		return
 	Itype = stanza.getType()
