@@ -114,7 +114,7 @@ def form_ping_stat(jid):
 
 def handler_ping_stat(type, source, nick):
 	if nick:
-		if nick in GROUPCHATS[source[1]]:
+		if GROUPCHATS.has_key(source[1] and nick in GROUPCHATS[source[1]]:
 			jid = handler_jid(source[1]+'/'+nick)
 		else:
 			jid = nick

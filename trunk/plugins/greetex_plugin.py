@@ -18,7 +18,7 @@ def handler_greetex(type, source, body):
 			bafl = args[0].strip().lower()
 			if bafl in greet_afls:
 				afl, action = greet_afls[bafl], args[1].strip().lower()
-				filename = 'dynamic/%s/greetex.txt' % (conf)
+				filename = 'dynamic/%s/greetex.txt' % (source[1])
 				if action in [u'добавить', 'add']:
 					if len(args) >= 3:
 						greet = body[((body.lower()).find(action) + (len(action) + 1)):].strip()
