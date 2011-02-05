@@ -3,5 +3,5 @@
 Caps = 'http://witcher-team.ucoz.ru/'
 BOT_VER = 1
 CORE_MODE = 34
-BOT_REV = 49
+BOT_REV = 50
 CapsVer = '%d.%d' % (BOT_VER, CORE_MODE)

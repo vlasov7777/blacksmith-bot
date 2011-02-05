@@ -27,7 +27,7 @@ def handler_chat_cache(raw, ltype, source, body):
 
 def handler_clean(type, source, body):
 	if source[1] in GROUPCHATS:
-		elif type != 'private':
+		if type != 'private':
 			message = random.choice([u'чистка...', u'Работа по антиупарыванию конфы в разгаре!', 'вычищаю конференцию', 'отсылаю пустые мессаги (не правда ли дебильная работа?)'])
 			status = 'dnd'
 			change_bot_status(source[1], message, status)
