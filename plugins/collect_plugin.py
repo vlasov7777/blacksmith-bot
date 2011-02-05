@@ -27,9 +27,6 @@ def handler_chat_cache(raw, ltype, source, body):
 
 def handler_clean(type, source, body):
 	if source[1] in GROUPCHATS:
-		if body not in [u'тихо', u'беспалева']:
-			clearfr = [u'Ну смотря сколько платишь...', u'Сами упарывали, сами и убирайтесь!', u'Ладно пошел за пылесосом...', u'Вызывай мусоровоз, ух как тут понагадили!', u'ААА!! Тётя ася приехала!', u'Щас уберусь, хотя... Кто спёр метёлку!?', u'Ээ не! Вызывай уборщицу!', u'Не могу! У меня мизофобия!']
-			reply(type, source, random.choice(clearfr))
 		elif type != 'private':
 			message = random.choice([u'чистка...', u'Работа по антиупарыванию конфы в разгаре!', 'вычищаю конференцию', 'отсылаю пустые мессаги (не правда ли дебильная работа?)'])
 			status = 'dnd'
@@ -37,10 +34,7 @@ def handler_clean(type, source, body):
 		for x in range(1, 24):
 			JCON.send(xmpp.simplexml.XML2Node(unicode('<message to="%s" type="groupchat"></message>' % (source[1])).encode('utf-8')))
 			time.sleep(1.2)
-		if body not in [u'тихо', u'беспалева']:
-			clearpostfr = [u'Почистил, 100$ с тебя!', u'Чистота чисто Тайд!', u'Хорошая штука этот фэри, и чистит отлично, и по вкусу ничё так', u'Всё прям блистит, сделано!', u'В следующий раз юзай моющий пылесос!', u'Кажись Готово', u'С тебя причитается...', u'Оплачивать будем чеком или наличными?']
-			reply(type, source, random.choice(clearpostfr))
-		elif type != 'private':
+		if type != 'private':
 			message = STATUS[source[1]]['message']
 			status = STATUS[source[1]]['status']
 			change_bot_status(source[1], message, status)
@@ -184,7 +178,7 @@ def chat_cache_init(conf):
 	CHAT_CACHE[conf] = {'1': '', '2': ''}
 
 register_message_handler(handler_chat_cache)
-register_command_handler(handler_clean, 'чисть', ['все','разное'], 15, 'Чистит конфу', 'чисть', ['чисть','чисть беспалева','чисть тихо'])
+register_command_handler(handler_clean, 'чисть', ['все','разное'], 15, 'Чистит конфу', 'чисть', ['чисть'])
 register_command_handler(last_chat_cache, 'ласт', ['фан','все'], 20, 'Показывает последние 2 сообщения в указанной конференции.\nБез параметра покажет пронумерованый список комнат.', 'ласт [конфа/№]', ['ласт','ласт bot-castle@conference.jabber.ru','ласт 3'])
 register_command_handler(handler_test, 'тест', ['фан','все'], 10, 'Тупо отвечает рандомной фразой.', 'тест', ['тест'])
 register_command_handler(handler_admin_message, 'мессага', ['суперадмин','все'], 100, 'Отправляет мессагу от имени бота определённому jid`у.', 'мессага [jid] [мессага]', ['мессага chuvak@jabber.org здарова чувак!'])

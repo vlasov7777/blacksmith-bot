@@ -119,7 +119,7 @@ def Handler_Roster_IQ(stanza):
 				if subscr and user:
 					if IQNT['Yes!']:
 						IQNT['col'] += 1
-						if IQNT['col'] <= 2:
+						if IQNT['col'] <= 4:
 							if subscr == 'both':
 								if ROSTER.getSubscription(user) != 'both' and user not in [BOSS, BOSS.lower()]:
 									delivery(u'Контакт %s добавлен в ростер!' % (user))
@@ -142,4 +142,4 @@ def Handler_Roster_IQ(stanza):
 
 register_command_handler(roster_control, 'ростер', ['суперадмин','все'], 80, 'Позволяет добавить контакт в ростер бота или наоборои удалить, с третьим параметром установит ник в ростере, с четвёртым параметром "админ" добавит контакт в группу "ADMINS" в любом другом случае добавляет в группу "USERS", без параметров покажет текущий список контактов', 'ростер [+/-] [jid] [nick]', ['ростер + ]{vich@xmpp.com ]{vich админ','ростер + usr@xmpp.com User','ростер - usr@xmpp.com','ростер'])
 register_command_handler(roster_work, 'ростер*', ['суперадмин','все'], 80, 'Включает/выключает обработку сообщений из ростера или IQ-проверку, без параметров покажет текущее состояние', 'ростер [on/off/iq]', ['ростер on','ростер off','ростер iq'])
-register_iq_handler(Handler_Roster_IQ)
+#register_iq_handler(Handler_Roster_IQ)

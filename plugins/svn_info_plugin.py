@@ -12,7 +12,7 @@ BLACK_TAGS = {'<br>': '', '&nbsp;&nbsp;&nbsp;&nbsp;': '\t', '&lt;': '<', '&gt;':
 def blacksmith_svn(type, source, body):
 	if body:
 		body, call, rlist = body.split(), 0, {}
-		req = body[0].strip().lower()
+		req = body[0].lower()
 		if req in [u'ласт', 'last']:
 			try:
 				repl = u'Последнее доступное обновление BlackSmith -> r%s' % re_search(read_link('http://blacksmith-bot.googlecode.com/svn/'), 'Revision', ': /') 
@@ -57,11 +57,11 @@ def blacksmith_svn(type, source, body):
 			except:
 				repl = u'Аблом, не достучался до репозитория.'
 			reply(type, source, repl)
-		elif req in [u'обновление', 'update']:
+		elif req in [u'обновление', 'update'] and has_access(source[0], 100, source[1]):
 			reply(type, source, u'%s\nПеред перезагрузкой обязательно проверьте совместимость (не изменился ли конфинг и т.п.) по команде "свн инфо".' % read_pipe("svn up"))
 		else:
 			reply(type, source, u'что?')
 	else:
 		reply(type, source, u'мм?')
 
-register_command_handler(blacksmith_svn, 'свн', ['инфо','все'], 10, 'Выдаёт инфу об обновлениях BlackSmith в SVN', 'свн [ласт/last/инфо/info/обновление/update] [№ ревизии/лист]', ['свн ласт', 'свн инфо 40'])
+register_command_handler(blacksmith_svn, 'свн', ['инфо','все'], 10, 'Выдаёт инфу об обновлениях BlackSmith в SVN. + обновление (только для суперадмина.)', 'свн [ласт/last/инфо/info/обновление/update] [№ ревизии/лист]', ['свн ласт', 'свн инфо 40'])
