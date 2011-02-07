@@ -45,5 +45,5 @@ def handler_facko(type, source, body):
 	else:
 		reply(type, source, u'Нихрена! Только в чате')
 
-register_command_handler(handler_ppc, 'ушатать', ['фан','все'], 10, 'Мочит юзера - "Злой тык"', 'ушатать [nick]', ['ушатаь ]{vich'])
+register_command_handler(handler_ppc, 'ушатать', ['фан','все'], 10, 'Мочит юзера - "Злой тык"', 'ушатать [nick]', ['ушатать ]{vich'])
 register_command_handler(handler_facko, 'мочи',  ['фан','все'], 10, 'Мочит юзера', '\nмочи [ник] [куда бить(в 3ем лице)] [боевой клич]', ['мочи ]{vich голове Спахвати на!!'])

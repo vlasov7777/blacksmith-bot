@@ -7,15 +7,15 @@
 #  Initial Copyright © 2007 Als <Als@exploit.in>
 #  First Version and Idea © 2007 dimichxp <dimichxp@gmail.com>
 
-OBSCENE = [u'бляд', u' блят', u' бля ', u' блять ', u' плять ', u' хуй', u' ибал', u' ебал', u'нахуй', u' хуй', u' хуи', u'хуител', u' хуя', u'хуя', u' хую', u' хуе', u' ахуе', u' охуе', u'хуев', u' хер ', u' хер', u'хер', u' пох ', u' нах ', u'писд', u'пизд', u'рizd', u' пздц ', u' еб', u' епана ', u' епать ', u' ипать ', u' выепать ', u' ибаш', u' уеб', u'проеб', u'праеб', u'приеб', u'съеб', u'сьеб', u'взъеб', u'взьеб', u'въеб', u'вьеб', u'выебан', u'перееб', u'недоеб', u'долбоеб', u'долбаеб', u' ниибац', u' неебац', u' неебат', u' ниибат', u' пидар', u' рidаr', u' пидар', u' пидор', u'педор', u'пидор', u'пидарас', u'пидараз', u' педар', u'педри', u'пидри', u' заеп', u' заип', u' заеб', u'ебучий', u'ебучка ', u'епучий', u'епучка ', u' заиба', u'заебан', u'заебис', u' выеб', u'выебан', u' поеб', u' наеб', u' наеб', u'сьеб', u'взьеб', u'вьеб', u' гандон', u' гондон', u'пахуи', u'похуис', u' манда ', u'мандав', u' залупа', u' залупог']
-ORDERS = {'time': 1, 'presence': 1, 'len': 1, 'like': 0, 'caps': 0, 'prsstlen': 1, 'obscene': 0, 'excess': {'cond': 0, 'mode': 'kick'}, 'kicks': {'cond': 0, 'cnt': 10}, 'fly': {'cond': 1, 'mode': 'ban', 'time': 60}, 'idle': {'cond': 0, 'time': 3600}}
+OBSCENE2 = u'бляд/ блят/ бля / блять / плять /хуй/ ибал/ ебал/ хуи/хуител/хуя/ хую/ хуе/ ахуе/ охуе/хуев/ хер /хер/ пох / нах /писд/пизд/рizd/ пздц / еб/ епана / епать / ипать / выепать / ибаш/ уеб/проеб/праеб/приеб/съеб/взъеб/взьеб/въеб/вьеб/выебан/перееб/недоеб/долбоеб/долбаеб/ ниибац/ неебац/ неебат/ ниибат/ пидар/ рidаr/ пидар/ пидор/педор/пидор/пидарас/пидараз/ педар/педри/пидри/ заеп/ заип/ заеб/ебучий/ебучка /епучий/епучка / заиба/заебан/заебис/ выеб/выебан/ поеб/ наеб/ наеб/сьеб/взьеб/вьеб/ гандон/ гондон/пахуи/похуис/ манда /мандав/залупа/ залупог'
+ORDERS = {'time': 1, 'presence': 1, 'len': 1, 'like': 0, 'caps': 0, 'prsstlen': 1, 'obscene': 0, 'excess': {'cond': 0, 'mode': 'kick'}, 'kicks': {'cond': 0, 'cnt': 10}, 'fly': {'cond': 1, 'mode': 'ban', 'time': 60}}
 
 ORDER_STATS = {}
 ORDER = {}
 
 def order_check_obscene_words(body):
-	body = body.lower()
-	for item in OBSCENE:
+	body = ' %s ' % body.lower()
+	for item in OBSCENE2.split('/'):
 		if body.count(item):
 			return True
 	return False
@@ -28,7 +28,7 @@ def order_check_time_flood(conf, jid, nick):
 			ORDER_STATS[conf][jid]['devoice']['time'] = time.time()
 			ORDER_STATS[conf][jid]['devoice']['cnd'] = 1
 			ORDER_STATS[conf][jid]['msg'] = 0
-			handler_kick(conf, nick, u'слишком быстро отправляешь')
+			handler_kick(conf, nick, u'%s: слишком быстро отправляешь' % handler_botnick(conf))
 			return True
 		return False
 
@@ -36,7 +36,7 @@ def order_check_len_flood(mlen, body, conf, jid, nick):
 	if len(body) > mlen:
 		ORDER_STATS[conf][jid]['devoice']['time'] = time.time()
 		ORDER_STATS[conf][jid]['devoice']['cnd'] = 1
-		handler_kick(conf, nick, u'флуд')
+		handler_kick(conf, nick, u'%s: флуд' % handler_botnick(conf))
 		return True
 	return False
 
@@ -44,22 +44,22 @@ def order_check_obscene(body, conf, jid, nick):
 	if order_check_obscene_words(body):
 		ORDER_STATS[conf][jid]['devoice']['time'] = time.time()
 		ORDER_STATS[conf][jid]['devoice']['cnd'] = 1
-		handler_kick(conf, nick, u'нецензурно')
+		handler_kick(conf, nick, u'%s: нецензурно' % handler_botnick(conf))
 		return True
 	return False
 
 def order_check_caps(body, conf, jid, nick):
 	for x in GROUPCHATS[conf]:
 		if body.count(x):
-			body = body.replace(x,'')
+			body = body.replace(x, "")
 	col = 0
-	for x in [x for x in body.replace(' ','')]:
+	for x in [x for x in body.replace(" ", "")]:
 		if x.isupper():
 			col += 1
-	if col >= len(body)/2 and col > 9:
+	if col >= len(body) / 2 and col > 9:
 		ORDER_STATS[conf][jid]['devoice']['time'] = time.time()
 		ORDER_STATS[conf][jid]['devoice']['cnd'] = 1
-		handler_kick(conf, nick, u'слишком много капса')
+		handler_kick(conf, nick, u'%s слишком много капса' % handler_botnick(conf))
 		return True
 	return False
 
@@ -77,39 +77,39 @@ def order_check_like(body, conf, jid, nick):
 			if lcnt:
 				lensrcmsgbody = len(body.split())
 				lenoldmsgbody = len(ORDER_STATS[conf][jid]['msgbody'])
-				avg = (lensrcmsgbody+lenoldmsgbody /2 )/ 2
+				avg = (lensrcmsgbody+lenoldmsgbody / 2 ) / 2
 				if lcnt > avg:
 					ORDER_STATS[conf][jid]['msg'] += 1
 					if ORDER_STATS[conf][jid]['msg'] >= 2:
 						ORDER_STATS[conf][jid]['devoice']['time'] = time.time()
 						ORDER_STATS[conf][jid]['devoice']['cnd'] = 1
 						ORDER_STATS[conf][jid]['msg'] = 0
-						handler_kick(conf, nick, u'мессаги слишком похожи')
+						handler_kick(conf, nick, u'%s: мессаги слишком похожи' % handler_botnick(conf))
 						return True
 			ORDER_STATS[conf][jid]['msgbody'] = body.split()
 	else:
 		ORDER_STATS[conf][jid]['msgbody'] = body.split()
 	return False
 
-def order_check_idle():
-	for conf in ORDER:
-		if ORDER[conf]['idle']['cond'] == 1:
-			timee = ORDER[conf]['idle']['time']
-			now = time.time()
-			for nick in GROUPCHATS[conf]:
-				if GROUPCHATS[conf][nick]['ishere']:
-					if user_level(conf+'/'+nick, conf) <= 10:
-						idle = now - GROUPCHATS[conf][nick]['idle']
-						if idle > timee:
-							handler_kick(conf, nick, u'молчание более '+timeElapsed(idle))
-	try:
-		threading.Timer(120, order_check_idle).start()
-	except:
-		LAST['null'] += 1
+def handler_reklama_check(body):
+	body = body.lower()
+	c1, c2 = 0, 0
+	for x in ['@', 'conf', 'ence']:
+		if body.count(x):
+			c1 += 1
+	for x in ['http', ':', '/', 'www', '.']:
+		if body.count(x):
+			c2 += 1
+	if c1 > 1 or  c2 > 1:
+		return True
+	return False
 
 def handler_order_message(raw, type, source, body):
 	if source[1] in GROUPCHATS and user_level(source[0], source[1]) <= 10:
 		if source[2] != '':
+			if handler_reklama_check(body):
+				handler_kick(source[1], source[2], u'%s: рекламируй свои канцтовары в другом месте' % handler_botnick(source[1]))
+				return
 			jid = handler_jid(source[0])
 			if source[1] in ORDER_STATS and jid in ORDER_STATS[source[1]]:
 				if ORDER[source[1]]['time'] == 1:
@@ -140,11 +140,11 @@ def handler_order_join(conf, nick, afl, role):
 				if now-ORDER_STATS[conf][jid]['devoice']['time'] > 300:
 					ORDER_STATS[conf][jid]['devoice']['cnd'] = 0
 				else:
-					handler_visitor(conf, nick, u'право голоса снято за предыдущие нарушения')
+					handler_visitor(conf, nick, u'%s: право голоса снято за предыдущие нарушения' % handler_botnick(conf))
 			if ORDER[conf]['kicks']['cond'] == 1:
 				kcnt = ORDER[conf]['kicks']['cnt']
 				if ORDER_STATS[conf][jid]['kicks'] > kcnt:
-					handler_ban(conf, nick, u'слишком много киков')
+					handler_ban(conf, nick, u'%s: слишком много киков' % handler_botnick(conf))
 					return
 			if ORDER[conf]['fly']['cond'] == 1:
 				lastprs = ORDER_STATS[conf][jid]['prstime']['fly']
@@ -156,11 +156,11 @@ def handler_order_join(conf, nick, afl, role):
 						fmode = ORDER[conf]['fly']['mode']
 						ftime = ORDER[conf]['fly']['time']
 						if fmode == 'ban':
-							handler_ban(conf, nick, u'хватит летать')
+							handler_ban(conf, nick, u'%s: хватит летать' % handler_botnick(conf))
 							time.sleep(ftime)
 							handler_unban(conf, jid)
 						else:
-							handler_kick(conf, nick, u'хватит летать')
+							handler_kick(conf, nick, u'%s: хватит летать' % handler_botnick(conf))
 							return
 				else:
 					ORDER_STATS[conf][jid]['prs']['fly'] = 0
@@ -177,42 +177,43 @@ def handler_order_join(conf, nick, afl, role):
 
 def handler_order_presence(Prs):
 	ptype = Prs.getType()
-	if ptype != 'unavailable' and ptype != 'error':
-		conf = Prs.getFrom().getStripped()
+	if ptype not in ['unavailable', 'error']:
+		fromjid = Prs.getFrom()
+		conf = fromjid.getStripped()
 		if conf not in ORDER_STATS:
 			ORDER_STATS[conf] = {}
-		nick = Prs.getFrom().getResource()
-		stmsg = Prs.getStatus()
-		jid = handler_jid(conf+'/'+nick)
-		afl = Prs.getAffiliation()
-		role = Prs.getRole()
-		if jid in ORDER_STATS[conf] and afl in ['member','admin','owner']:
-			del ORDER_STATS[conf][jid]
-		elif jid not in ORDER_STATS[conf]:
-			ORDER_STATS[conf][jid] = {'kicks': 0, 'devoice': {'cnd': 0, 'time': 0}, 'msgbody': None, 'prstime': {'fly': 0, 'status': 0}, 'prs': {'fly': 0, 'status': 0}, 'msg': 0, 'msgtime': 0}
-		if jid in ORDER_STATS[conf]:
-			if user_level(conf+'/'+nick, conf) <= 10:
-				now = time.time()
-				if now - GROUPCHATS[conf][nick]['joined'] > 1:
-					if role == 'participant':
-						ORDER_STATS[conf][jid]['devoice']['cnd'] = 0
-					lastprs = ORDER_STATS[conf][jid]['prstime']['status']
-					ORDER_STATS[conf][jid]['prstime']['status'] = now
-					if ORDER[conf]['presence'] == 1:
-						if now-lastprs > 300:
-							ORDER_STATS[conf][jid]['prs']['status'] = 0
-						else:
-							ORDER_STATS[conf][jid]['prs']['status'] += 1
-							if ORDER_STATS[conf][jid]['prs']['status'] > 5:
+		nick = fromjid.getResource()
+		if nick != handler_botnick(conf):
+			stmsg = Prs.getStatus()
+			jid = handler_jid(fromjid)
+			afl = Prs.getAffiliation()
+			role = Prs.getRole()
+			if jid in ORDER_STATS[conf] and afl in ['member','admin','owner']:
+				del ORDER_STATS[conf][jid]
+			elif jid not in ORDER_STATS[conf]:
+				ORDER_STATS[conf][jid] = {'kicks': 0, 'devoice': {'cnd': 0, 'time': 0}, 'msgbody': None, 'prstime': {'fly': 0, 'status': 0}, 'prs': {'fly': 0, 'status': 0}, 'msg': 0, 'msgtime': 0}
+			if jid in ORDER_STATS[conf] and user_level(fromjid, conf) <= 10:
+				if GROUPCHATS[conf][nick].has_key('joined'):
+					now = time.time()
+					if now - GROUPCHATS[conf][nick]['joined'] > 1:
+						if role == 'participant':
+							ORDER_STATS[conf][jid]['devoice']['cnd'] = 0
+						lastprs = ORDER_STATS[conf][jid]['prstime']['status']
+						ORDER_STATS[conf][jid]['prstime']['status'] = now
+						if ORDER[conf]['presence'] == 1:
+							if now-lastprs > 300:
 								ORDER_STATS[conf][jid]['prs']['status'] = 0
-								handler_kick(conf, nick, u'презенс-флуд')
+							else:
+								ORDER_STATS[conf][jid]['prs']['status'] += 1
+								if ORDER_STATS[conf][jid]['prs']['status'] > 7:
+									ORDER_STATS[conf][jid]['prs']['status'] = 0
+									handler_kick(conf, nick, u'%s: презенс-флуд' % handler_botnick(conf))
+									return
+						if ORDER[conf]['obscene']:
+							if order_check_obscene(nick, conf, jid, nick):
 								return
-					if ORDER[conf]['obscene']:
-						if order_check_obscene(nick, conf, jid, nick):
-							return
-					if stmsg and ORDER[conf]['prsstlen']:
-						if order_check_len_flood(200, nick, conf, jid, nick):
-							return
+						if stmsg and ORDER[conf]['prsstlen']:
+							order_check_len_flood(200, nick, conf, jid, nick)
 
 def handler_order_leave(conf, nick, reason, code):
 	jid = handler_jid(conf+'/'+nick)
@@ -352,19 +353,6 @@ def handler_order_filt(type, source, body):
 					ORDER[source[1]]['kicks']['cond'] = 1
 				else:
 					reply(type, source, u'синтакс инвалид')
-			elif args[0] == 'idle':
-				if args[1] == 'time':
-					if check_number(args[2]):
-						reply(type, source, u'кик за молчание после '+args[2]+u' секунд ('+timeElapsed(int(args[2]))+u')')
-						ORDER[source[1]]['idle']['time'] = int(args[2])
-					else:
-						reply(type, source, u'синтакс инвалид')
-				elif args[1] == '0':
-					reply(type, source, u'фильтр кика за молчание отключен')
-					ORDER[source[1]]['idle']['cond'] = 0
-				elif args[1] == '1':
-					reply(type, source, u'фильтр кика за молчание включен')
-					ORDER[source[1]]['idle']['cond'] = 1
 			else:
 				reply(type, source, u'синтакс инвалид')
 			write_file('dynamic/'+source[1]+'/order.txt', str(ORDER[source[1]]))
@@ -384,8 +372,6 @@ def handler_order_filt(type, source, body):
 		flymode = ORDER[source[1]]['fly']['mode']
 		kicks = ORDER[source[1]]['kicks']['cond']
 		kickscnt = str(ORDER[source[1]]['kicks']['cnt'])
-		idle = ORDER[source[1]]['idle']['cond']
-		idletime = ORDER[source[1]]['idle']['time']
 		if time:
 			fon.append(u'временная фильтрация сообщений')
 		else:
@@ -422,17 +408,13 @@ def handler_order_filt(type, source, body):
 			fon.append(u'автобан после '+kickscnt+u' киков')
 		else:
 			foff.append(u'автобан после нескольких киков')
-		if idle:
-			fon.append(u'кик за молчание через '+str(idletime)+u' секунд ('+timeElapsed(idletime)+u')')
-		else:
-			foff.append(u'кик за молчание')
-		fon = ', '.join(fon)
+		fon = '\n'.join(fon)
 		if fon:
-			repl += u'ВКЛЮЧЕНЫ\n'+fon+'\n\n'
-		foff = ', '.join(foff)
+			repl += u'\nВКЛЮЧЕНЫ\n'+fon+'\n\n'
+		foff = '\n'.join(foff)
 		if foff:
 			repl += u'ВЫКЛЮЧЕНЫ\n'+foff
-		reply(type, source, repl.strip())
+		reply(type, source, repl.rstrip())
 
 def order_init(conf):
 	if check_file(conf, 'order.txt', str(ORDERS)):
@@ -446,7 +428,6 @@ register_message_handler(handler_order_message)
 register_join_handler(handler_order_join)
 register_leave_handler(handler_order_leave)
 register_presence_handler(handler_order_presence)
-register_command_handler(handler_order_filt, 'бодигард', ['админ','все'], 20, 'Включает или отключает определённые фильтры для конференции.\ntime - временной фильтр\nlen - количественный фильтр\npresence - фильтр презенсов\nlike - фильтр одинаковых сообщений\ncaps - фильтр капса (ЗАГЛАВНЫХ букв)\nprsstlen - фильтр длинных статусных сообщений\nobscene - фильтр матов\nfly - фильтр полётов (частых входов/выходов в конмату), имеет два режима ban и kick, таймер от 0 до 120 секунд\nkicks - автобан после N киков, параметр cnt - количество киков от 1 до 10\nidle - кик за молчание в общем чате после N секунд, параметр time - кол-во секунд для срабатывания', 'бодигард [фильтр] [режим] [состояние]', ['бодигард smile 1', 'бодигард len 0','бодигард fly mode ban'])
+register_command_handler(handler_order_filt, 'бодигард', ['админ','все'], 20, 'Включает или отключает определённые фильтры для конференции.\n!! Действие фильтров НЕ распространяется на постоянных участников.\ntime - временной фильтр\nlen - количественный фильтр\npresence - фильтр презенсов\nlike - фильтр одинаковых сообщений\ncaps - фильтр капса (ЗАГЛАВНЫХ букв)\nprsstlen - фильтр длинных статусных сообщений\nobscene - фильтр матов\nfly - фильтр полётов (частых входов/выходов в конмату), имеет два режима ban и kick, таймер от 0 до 120 секунд\nkicks - автобан после N киков, параметр cnt - количество киков от 1 до 10', 'бодигард [фильтр] [режим] [состояние]', ['бодигард smile 1', 'бодигард len 0','бодигард fly mode ban'])
 
 register_stage1_init(order_init)
-register_stage2_init(order_check_idle)

@@ -603,12 +603,14 @@ def handler_botnick(conf):
 	return DEFAULT_NICK
 
 def handler_jid(instance):
-	if (type(instance) is types.InstanceType):
+	if isinstance(instance, types.InstanceType):
 		instance = unicode(instance)
-	list = string.split(instance, '/', 1)
-	if (len(list) == 2) and GROUPCHATS.has_key(list[0]):
-		return GROUPCHATS[list[0]].get(list[1], {'jid': list[0]})['jid']
-	return list[0]
+	list = instance.split('/', 1)
+	chat = list[0].lower()
+	if (len(list) == 2) and GROUPCHATS.has_key(chat):
+		if GROUPCHATS[chat].has_key(list[1]):
+			return GROUPCHATS[chat][list[1]]['jid']
+	return chat
 
 def save_conflist(conf, nick = None, code = None):
 	if initialize_file(GROUPCHATS_FILE):
@@ -1286,7 +1288,7 @@ def Dispatch_handler():
 	except xmpp.StreamError:
 		LAST['null'] += 1
 	except KeyboardInterrupt:
-		sys_exit('INTERUPT (Ctrl+C)')
+		sys_exit('Interrupt (Ctrl+C)')
 
 def sys_exit(exit_reason = 'SUICIDE'):
 	Print('\n\n%s' % (exit_reason), color2)
@@ -1400,7 +1402,7 @@ if __name__ == "__main__":
 		try:
 			lytic()
 		except KeyboardInterrupt:
-			sys_exit('INTERUPT (Ctrl+C)')
+			sys_exit('Interrupt (Ctrl+C)')
 		except xmpp.HostUnknown:
 			Print('\n\nError: host unknown!', color2)
 		except:
