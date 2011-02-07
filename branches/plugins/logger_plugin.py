@@ -90,7 +90,6 @@ def log_get_fp(type, conf, (year, month, day, hour, minute, second, weekday, yea
 	if not check_nosimbols(file_dir):
 		file_dir = encode_filename(file_dir)
 	filename = file_dir+'/'+str_day+'.html'
-	alt_filename = file_dir+'/'+str_day+'._html'
 	if not os.path.exists(file_dir):
 		try:
 			os.makedirs(file_dir)
@@ -103,26 +102,15 @@ def log_get_fp(type, conf, (year, month, day, hour, minute, second, weekday, yea
 				fl_old = file(xfile, 'a')
 				fl_old.write('\n</tt>\n</div>\n</body>\n</html>')
 				fl_old.close()
-		if os.path.exists(filename):
-			fl = file(filename, 'a')
-			return fl
-		else:
-			LOG_FILENAME_CACHE[conf] = filename
-			write_file(LOG_CACHE_FILE, str(LOG_FILENAME_CACHE))
-			fl = file(filename, 'w')
-			log_write_header(fl, conf, (year, month, day, hour, minute, second, weekday, yearday, daylightsavings))
-			return fl
+	if os.path.exists(filename):
+		fl = file(filename, 'a')
 	else:
-		if os.path.exists(filename):
-			LOG_FILENAME_CACHE[conf] = filename
-			write_file(LOG_CACHE_FILE, str(LOG_FILENAME_CACHE))
-			fl = file(alt_filename, 'a')
-			return fl
-		else:
-			LOG_FILENAME_CACHE[conf] = filename
-			fl = file(filename, 'w')
-			log_write_header(fl, conf, (year, month, day, hour, minute, second, weekday, yearday, daylightsavings))
-			return fl
+		LOG_FILENAME_CACHE[conf] = filename
+		write_file(LOG_CACHE_FILE, str(LOG_FILENAME_CACHE))
+		fl = file(filename, 'a')
+		INFA['fcr'] += 1
+		log_write_header(fl, conf, (year, month, day, hour, minute, second, weekday, yearday, daylightsavings))
+	return fl
 
 def log_regex_url(matchobj):
 	return '<a href="'+matchobj.group(0)+'">'+matchobj.group(0)+'</a>'
