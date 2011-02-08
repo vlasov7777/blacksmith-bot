@@ -7,7 +7,7 @@
 # Coded by: 40tman (40tman@qip.ru)
 # ReCoded: by WitcherGeralt (WitcherGeralt@jabber.ru)
 
-IDS_AFLIST = []
+AFLIST_SEARCH = {}
 
 def get_afl_hnd(body):
 	list = {u'овнер': 'owner', u'админ': 'admin', u'мембер': 'member', u'бан': 'outcast'}
@@ -17,63 +17,105 @@ def get_afl_hnd(body):
 	return None
 
 def handler_afl_list(type, source, body):
-	if source[1] in GROUPCHATS:
+	if GROUPCHATS.has_key(source[1]):
 		if body:
-			afl = get_afl_hnd(body.lower())
-			if afl:
-				iq = xmpp.Iq(to = source[1], typ = 'get')
-				INFA['outiq'] += 1
-				ID = 'list_'+str(INFA['outiq'])
-				IDS_AFLIST.append(ID)
-				iq.setID(ID)
-				query = xmpp.Node('query')
-				query.setNamespace(xmpp.NS_MUC_ADMIN)
-				query.addChild('item', {'affiliation': afl})
-				iq.addChild(node = query)
-				JCON.SendAndCallForResponse(iq, handler_list_answer, {'type': type, 'source': source, 'afl': afl})
+			body = body.lower()
+			list = body.split()
+			if list[0] in [u'искать', 'search']:
+				if len(list) >= 2:
+					id = '%s-%s' % (source[0], str(time.time()))
+					AFLIST_SEARCH[id] = {}
+					for afl in ['owner', 'admin', 'member', 'outcast']:
+						iq = xmpp.Iq(to = source[1], typ = 'get')
+						INFA['outiq'] += 1
+						iq.setID('list_'+str(INFA['outiq']))
+						query = xmpp.Node('query')
+						query.setNamespace(xmpp.NS_MUC_ADMIN)
+						query.addChild('item', {'affiliation': afl})
+						iq.addChild(node = query)
+						JCON.SendAndCallForResponse(iq, list_search_answer, {'id': id, 'afl': afl, 'name': list[1]})
+					reply(type, source, u'ответ жди в привате через 32 секунды')
+					time.sleep(32)
+					answer = ''
+					for x in AFLIST_SEARCH[id].keys():
+						if AFLIST_SEARCH[id][x]:
+							answer += '\n%s:' % (x.upper())
+							col = 0
+							for y in AFLIST_SEARCH[id][x]:
+								col += 1
+								answer += '\n%d. %s' % (col, y)
+					del AFLIST_SEARCH[id]
+					if answer:
+						msg(source[0], answer)
+					else:
+						reply(type, source, u'ничего не нашел')
+				else:
+					reply(type, source, u'инвалид синтакс')
 			else:
-				reply(type, source, u'чего?')
+				afl = get_afl_hnd(body)
+				if afl:
+					iq = xmpp.Iq(to = source[1], typ = 'get')
+					INFA['outiq'] += 1
+					iq.setID('list_'+str(INFA['outiq']))
+					query = xmpp.Node('query')
+					query.setNamespace(xmpp.NS_MUC_ADMIN)
+					query.addChild('item', {'affiliation': afl})
+					iq.addChild(node = query)
+					JCON.SendAndCallForResponse(iq, handler_list_answer, {'type': type, 'source': source, 'afl': afl})
+				else:
+					reply(type, source, u'чего?')
 		else:
 			reply(type, source, u'ты точно ничего не забыл?')
 	else:
 		reply(type, source, u'ты не в чате мундос')
 
-def handler_list_answer(coze, stanza, type, source, afl):
-	ID = stanza.getID()
-	if ID in IDS_AFLIST:
-		IDS_AFLIST.remove(ID)
+def list_search_answer(coze, stanza, id, afl, name):
+	if AFLIST_SEARCH.has_key(id):
+		AFLIST_SEARCH[id][afl] = []
 		if stanza:
 			if stanza.getType() == 'result':
 				MASS = stanza.getChildren()
 				if MASS:
-					Props, col, list = MASS[0].getChildren(), 0, u'Список %s:' % (afl)
-					for item in Props:
+					for item in MASS[0].getChildren():
 						if item != 'None':
-							col = col + 1
 							jid = item.getAttrs()['jid']
-							if afl == 'outcast':
-								if jid in ADLIST:
-									handler_unban(source[1], jid)
-							list += '\n'+str(col)+'. '+jid
-							try:
-								reason = (item.getTag('reason')).getData()
-								if reason:
-									list += ' ['+reason+']'
-							except:
-								LAST['null'] += 1
-					if col != 0:
-						if type == 'public':
-							reply(type, source, u'глянь в приват')
-						reply('private', source, list)
-					else:
-						reply(type, source, u'пусто')
+							if jid.count(name):
+								try:
+									AFLIST_SEARCH[id][afl].append(jid)
+								except:
+									break
+
+def handler_list_answer(coze, stanza, type, source, afl):
+	if stanza:
+		if stanza.getType() == 'result':
+			MASS = stanza.getChildren()
+			if MASS:
+				col, list = 0, u'Список %s:' % (afl)
+				for item in MASS[0].getChildren():
+					if item != 'None':
+						col = col + 1
+						jid = item.getAttrs()['jid']
+						if afl == 'outcast':
+							if jid in ADLIST:
+								handler_unban(source[1], jid)
+						list += '\n'+str(col)+'. '+jid
+						try:
+							reason = (item.getTag('reason')).getData()
+							if reason:
+								list += ' ['+reason+']'
+						except:
+							LAST['null'] += 1
+				if col != 0:
+					if type == 'public':
+						reply(type, source, u'глянь в приват')
+					reply('private', source, list)
 				else:
-					reply(type, source, u'что-то не вышло')
+					reply(type, source, u'пусто')
 			else:
-				reply(type, source, u'аблом')
+				reply(type, source, u'что-то не вышло')
 		else:
-			reply(type, source, u'что-то не вышло')
+			reply(type, source, u'аблом')
 	else:
-		reply(type, source, u'не получилось')
+		reply(type, source, u'что-то не вышло')
 	
-register_command_handler(handler_afl_list, 'список', ['админ','все'], 20, 'Показывает в зависимости от выбранного ключа список админов, овнеров, мемберов или забаненных конфы', 'список [параметры]', ['список овнеров','список бани','список мемберов','список админов'])
+register_command_handler(handler_afl_list, 'список', ['админ','все'], 20, 'Показывает в зависимости от выбранного ключа список админов, овнеров, мемберов или забаненных конфы. И осуществляет поиск по спискам.', 'список [параметры/искать] (ключ)', ['список овнеров','список искать User','список бани','список мемберов','список админов'])
