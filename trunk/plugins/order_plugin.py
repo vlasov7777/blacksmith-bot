@@ -93,7 +93,7 @@ def order_check_like(body, conf, jid, nick):
 
 def handler_reklama_check(body):
 	body = body.lower()
-	c1, c2 = 0, body.count()
+	c1, c2 = 0, 0
 	for x in ['@', 'conf', 'ence']:
 		if body.count(x):
 			c1 += 1
