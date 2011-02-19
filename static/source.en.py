@@ -45,7 +45,7 @@ INC_MSG_LIMIT = 8960
 MSERVE = False
 
 # Jabber account of bot`s owner
-BOSS = 'admin[at]tld'
+BOSS = 'admin[at]tld'.lower()
 
 # Memory usage limit (size in kilobytes, 0 - not limited)
 MEMORY_LIMIT = 49152
