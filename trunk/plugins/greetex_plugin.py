@@ -57,7 +57,7 @@ def handler_greetex(type, source, body):
 		reply(type, source, u'Пшел вон мудак!')
 
 def atjoin_greetex(conf, nick, afl, role):
-	if (GROUPCHATS[conf][nick]['joined'] - INFO['start']) >= 20:
+	if (GROUPCHATS[conf][nick].get('joined', 0) - INFO['start']) >= 20:
 		if afl in GRTX[conf]:
 			msg(conf, random.choice(GRTX[conf][afl]).replace("%NICK%", nick))
 

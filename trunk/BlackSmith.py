@@ -76,14 +76,14 @@ def try_sleep(slp):
 	try:
 		time.sleep(slp)
 	except KeyboardInterrupt:
-		os.abort()
+		os._exit(0)
 	except:
 		LAST['null'] += 1
 
 def Exit(text, exit, slp):
 	Print(text, color2); try_sleep(slp)
 	if exit:
-		os.abort()
+		oos._exit(0)
 	else:
 		os.execl(sys.executable, sys.executable, sys.argv[0])
 
@@ -1284,7 +1284,7 @@ def Dispatch_handler():
 	except xmpp.Conflict:
 		Print('\n\nError: XMPP Conflict!', color2)
 		call_stage3_init()
-		os.abort()
+		os._exit(0)
 	except xmpp.StreamError:
 		LAST['null'] += 1
 	except KeyboardInterrupt:

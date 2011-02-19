@@ -94,13 +94,13 @@ def order_check_like(body, conf, jid, nick):
 def handler_reklama_check(body):
 	body = body.lower()
 	c1, c2 = 0, 0
-	for x in ['@', 'conf', 'ence']:
+	for x in ["@", "conf", "ence"]:
 		if body.count(x):
 			c1 += 1
-	for x in ['http', '//', 'www']:
+	for x in ["http", "//", "www"]:
 		if body.count(x):
 			c2 += 1
-	if c1 > 1 or  c2 > 1:
+	if c1 == 3 or c2 > 1:
 		return True
 	return False
 
@@ -213,7 +213,7 @@ def handler_order_presence(Prs):
 							if order_check_obscene(nick, conf, jid, nick):
 								return
 						if stmsg and ORDER[conf]['prsstlen']:
-							order_check_len_flood(200, nick, conf, jid, nick)
+							order_check_len_flood(200, stmsg, conf, jid, nick)
 
 def handler_order_leave(conf, nick, reason, code):
 	jid = handler_jid(conf+'/'+nick)
