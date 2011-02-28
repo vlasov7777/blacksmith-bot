@@ -20,7 +20,7 @@ from __future__ import with_statement
 
 from traceback import format_exc as error_, print_exc as Print_Error
 
-import sys, os, time, gc, codecs, threading, types
+import sys, os, gc, time, types, threading
 
 os.chdir(os.path.dirname(sys.argv[0]))
 
@@ -83,9 +83,9 @@ def try_sleep(slp):
 def Exit(text, exit, slp):
 	Print(text, color2); try_sleep(slp)
 	if exit:
-		oos._exit(0)
+		os._exit(0)
 	else:
-		os.execl(sys.executable, sys.executable, sys.argv[0])
+		os.execl(sys.executable, sys.executable, os.path.abspath(sys.argv[0]))
 
 ################ Configuration Items ###########################################################
 

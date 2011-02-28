@@ -194,7 +194,7 @@ def handler_botup_info(type, source, body):
 			col += 1
 			if xthr.isAlive():
 				acol += 1
-		repl += u'\n-//- Создано %s тредов, %s(%s) из них активно(l)' % (INFO['thr'], acol, col)
+		repl += u'\n-//- Создано %s тредов, %s(%s) из них активно' % (INFO['thr'], acol, col)
 		(user, system, atime, itime, jtime,) = os.times()
 		repl += u'\n-//- Потратил %.2f секунд процессора\n-//- + %.2f секунд системного времени\n-//- Итог %.2f секунд общесистемного времени' % (user, system, (user + system))
 	else:
