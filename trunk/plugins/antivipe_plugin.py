@@ -66,7 +66,7 @@ def handler_antivipe_control(type, source, body):
 			body = body.lower()
 			filename = 'dynamic/'+source[1]+'/antivipe.txt'
 			if body in [u'вкл', 'on', '1']:
-				AVIPES[source[1]] = {'ltime': 0, 'num': 0, 'jids': []}
+				AVIPES[source[1]] = {'ltime': 0, 'jids': []}
 				write_file(filename, "'on'")
 				reply(type, source, u'Функция антивайпа включена!')
 			elif body in [u'выкл', 'off', '0']:
