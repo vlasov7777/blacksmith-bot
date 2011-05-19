@@ -1,0 +1,55 @@
+<div>
+Что это? - это бот <b>BlackSmith</b>&nbsp;<b>[</b><a href="http://neutron.googlecode.com/svn">Neutron</a>&nbsp;//&nbsp;<a href="http://svn.xmpp.ru/repos/talisman/">Talisman</a>&nbsp;//&nbsp;<b>Jaskier]</b>
+<br><br>
+Зачем он тебе сдался? - это один из лучших ботов на оси <span style="color: rgb(70, 130, 180);">Neutron</span>&nbsp;(ИМХО)
+<br><br>
+Как установить:
+<br><br>
+<b>!)</b>  Необходимо иметь интерпритатор <a href="http://python.org/">python</a> не ниже версии 2.5.2 (Python 3 isn&#39;t suppoted!)
+<br><br>
+Скачайте бота:
+<br><br>
+Для Unix (исходник):
+<br>-&gt;&nbsp;&nbsp;
+<a href="http://ru.wikipedia.org/wiki/Subversion">svn</a>&nbsp;
+<b>checkout</b>&nbsp;
+<a href="http://blacksmith-bot.googlecode.com/svn/trunk">http://blacksmith-bot.googlecode.com/svn/trunk</a>
+&nbsp;<b>BlackSmith</b>
+<br><br>
+Для Windows (exe installer):
+<br>-&gt;&nbsp;&nbsp;
+<a href="http://blacksmith-bot.googlecode.com/files/BlackSetup.exe">http://blacksmith-bot.google.../BlackSetup.exe</a>
+<br><br>
+Или-же с официального сайта проекта -&gt;&nbsp;<a href="http://witcher-team.ucoz.ru/load/">http://witcher-team.ucoz.ru/load/</a>
+<br><br>
+Запуск:
+<br><br>
+&gt;&gt;&gt;&nbsp;Unix:
+<br>
+<b>1)</b>  Редактируте sourse.py (<b>BlackSmith</b>/static)
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<b>!)</b> Предварительно переименуйте sourse.ru или source.en в sourse.py
+<br>
+<b>2)</b>  Командуем в консоли &quot;python путь_кдиректории_бота/BlackSmith/BlackSmith.py&quot; (или starter.py)
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<b>!)</b> Под стартером выключение невозможно без предварительного отключения стартера (kill -9 pid_стартера)
+<br><br>
+&gt;&gt;&gt;&nbsp;Windows:
+<br>
+<b>1)</b>  Запускаем BlackSetup.exe и устанавливаем бота, заполняем открыйвшийся файл конфигурации.
+<br>
+<b>2)</b>  Путём банального дабл-клика по ярлыку <b>BlackSmith</b> или <b>BlackStarter</b> запускаем бота.
+<br><br>
+<b>3)</b>  Из ростера с жида администратора командуйте &quot;джойн chat[at]conference.tld&quot;
+<br><br>
+-&gt;&nbsp;И вауаля! Бот обслуживает вашу конференцию!
+<br><br>
+Обратиться по поводу бота можно к:
+<br>
+<br><b>WitcherGeralt</b>&nbsp;[email:&nbsp;<a href="mailto:WitcherGeralt@rocketmail.com">WitcherGeralt@rocketmail.com</a>],
+<br><b>*MAG*</b>&nbsp;[email:&nbsp;<a href="mailto:mag_22@bk.ru">mag_22@bk.ru</a>],
+<br><b>mrDoctorWho</b>&nbsp;[email:&nbsp;<a href="mailto:mrdoctorwho@gmail.com">mrdoctorwho@gmail.com</a>];
+<br>
+<br>в нашей <a href="http://ru.wikipedia.org/wiki/XMPP">официальной</a> конференции <b>Witcher@conference.jabber.ru</b> или на&nbsp;
+<a href="http://witcher-team.ucoz.ru/forum/3-5-1">нашем форуме</a>.
+</div>
