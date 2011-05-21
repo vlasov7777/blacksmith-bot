@@ -195,7 +195,7 @@ def handler_order_presence(Prs):
 			if jid in ORDER_STATS[conf] and user_level(fromjid, conf) <= 10:
 				if GROUPCHATS[conf][nick].has_key('joined'):
 					now = time.time()
-					if now - GROUPCHATS[conf][nick]['joined'] > 1:
+					if now - GROUPCHATS[conf][nick].get('joined', now) > 1:
 						if role == 'participant':
 							ORDER_STATS[conf][jid]['devoice']['cnd'] = 0
 						lastprs = ORDER_STATS[conf][jid]['prstime']['status']

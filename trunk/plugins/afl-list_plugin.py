@@ -77,9 +77,9 @@ def list_search_answer(coze, stanza, id, afl, name):
 				MASS = stanza.getChildren()
 				if MASS:
 					for item in MASS[0].getChildren():
-						if item != 'None':
+						if item and item != 'None':
 							jid = item.getAttrs()['jid']
-							if jid.count(name):
+							if jid and jid.count(name):
 								try:
 									AFLIST_SEARCH[id][afl].append(jid)
 								except:
@@ -90,21 +90,23 @@ def handler_list_answer(coze, stanza, type, source, afl):
 		if stanza.getType() == 'result':
 			MASS = stanza.getChildren()
 			if MASS:
-				col, list = 0, u'Список %s:' % (afl)
+				list = u'Список %s:' % (afl)
+				col = 0
 				for item in MASS[0].getChildren():
-					if item != 'None':
-						col = col + 1
+					if item and item != 'None':
 						jid = item.getAttrs()['jid']
-						if afl == 'outcast':
-							if jid in ADLIST:
-								handler_unban(source[1], jid)
-						list += '\n'+str(col)+'. '+jid
-						try:
-							reason = (item.getTag('reason')).getData()
-							if reason:
-								list += ' ['+reason+']'
-						except:
-							LAST['null'] += 1
+						if jid:
+							col += 1
+							if afl == 'outcast':
+								if jid in ADLIST:
+									handler_unban(source[1], jid)
+							list += '\n'+str(col)+'. '+jid
+							try:
+								reason = (item.getTag('reason')).getData()
+								if reason:
+									list += ' ['+reason+']'
+							except:
+								LAST['null'] += 1
 				if col != 0:
 					if type == 'public':
 						reply(type, source, u'глянь в приват')

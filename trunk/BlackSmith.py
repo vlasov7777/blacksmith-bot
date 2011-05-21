@@ -22,9 +22,9 @@ from traceback import format_exc as error_, print_exc as Print_Error
 
 import sys, os, gc, time, types, threading
 
-os.chdir(os.path.dirname(sys.argv[0]))
+os.chdir(os.path.dirname(__file__))
 
-sys.path.insert(1, "modules")
+sys.path.append("modules")
 
 from enconf import *; from hammer import *
 
@@ -1145,7 +1145,7 @@ def PRESENCE_PROCESSING(client, Prs):
 					full_jid = unicode(full_jid)
 					jid = string.split(full_jid, '/', 1)[0].lower()
 				else:
-					if nick == handler_botnick(conf) and "admin" == Prs.getAffiliation():
+					if nick == handler_botnick(conf) and Prs.getAffiliation() in ['admin','owner']:
 						UNAVALABLE.remove(conf)
 						msg(conf, u'Походу дали админа, перезахожу!')
 						time.sleep(2)
