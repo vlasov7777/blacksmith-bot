@@ -14,7 +14,7 @@ VERON = {}
 def veron_timer(conf, nick, jid):
 	if jid in OTVET[conf]:
 		del OTVET[conf][jid]
-		handler_kick(conf, nick, u'Не прошел авторизацию!')
+		handler_kick(conf, nick, u'%s: Не прошел авторизацию!' % (handler_botnick(conf)))
 
 def handler_verification(conf, nick, afl, role):
 	if VERON[conf] != 'off' and afl == 'none':
@@ -24,7 +24,7 @@ def handler_verification(conf, nick, afl, role):
 				OTVET[conf] = {}
 			QA = random.choice(QUESTIONS.keys())
 			OTVET[conf][jid] = {'ansver': QUESTIONS[QA]['answer'], 'col': 0}
-			handler_visitor(conf, nick, u'Авторизация...')
+			handler_visitor(conf, nick, u'%s: Авторизация...' % (handler_botnick(conf)))
 			msg(conf+'/'+nick, u'Привет! Это IQ проверка, чтобы получить голос %s, У тебя три попытки и 1 минута!' % (QUESTIONS[QA]['question']))
 			try:
 				threading.Timer(60, veron_timer,(conf, nick, jid)).start()
@@ -42,7 +42,7 @@ def handler_verification_answer(raw, type, source, body):
 					reply(type, source, u'Ок, признаю - ты не бот')
 				elif OTVET[source[1]][jid]['col'] >= 3:
 					del OTVET[source[1]][jid]
-					handler_kick(source[1], source[2], u'Не прошел авторизацию!')
+					handler_kick(source[1], source[2], u'%s: Не прошел авторизацию!' % (handler_botnick(source[1])))
 				else:
 					OTVET[source[1]][jid]['col'] += 1
 					reply(type, source, u'Включи мозг! Неправильно!')
