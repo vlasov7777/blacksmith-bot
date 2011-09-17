@@ -43,7 +43,7 @@ def handler_antispamer(type, source, body):
 		else:
 			reply(type, source, u'Читай хелп!')
 	else:
-		answer = u'\nСерверов в списке - %s\nПоследнее овновление - %s\nКогда забанены - %s'
+		answer = u'\nСерверов в списке - %s\nПоследнее обновление - %s\nКогда забанены - %s'
 		col = str(len(SPAMSERVERS.split(';')))
 		update = SPAMSERVINFO['update']
 		state = SPAMSERVINFO['banned'][source[1]]

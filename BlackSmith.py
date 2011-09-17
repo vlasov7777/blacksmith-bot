@@ -195,10 +195,7 @@ def initialize_file(filename, data = ""):
 		folder = os.path.dirname(filename)
 		if folder and not os.path.exists(folder):
 			os.mkdir(folder, 0755)
-		if os.access(filename, os.F_OK):
-			fl = file(filename, 'w')
-		else:
-			fl = open(filename, 'w')
+		fl = open(filename, 'w')
 		INFA['fcr'] += 1
 		if not data:
 			data = '{}'
@@ -1181,7 +1178,8 @@ def PRESENCE_PROCESSING(client, Prs):
 							Thr.start()
 					except:
 						LAST['null'] += 1
-		call_presence_handlers(Prs)
+		if GROUPCHATS.has_key(conf):
+			call_presence_handlers(Prs)
 
 ################ iq handler ####################################################################
 
@@ -1286,6 +1284,8 @@ def Dispatch_handler():
 		call_stage3_init()
 		os._exit(0)
 	except xmpp.StreamError:
+		LAST['null'] += 1
+	except xmpp.simplexml.xml.parsers.expat.ExpatError:
 		LAST['null'] += 1
 	except KeyboardInterrupt:
 		sys_exit('Interrupt (Ctrl+C)')

@@ -124,26 +124,6 @@ def handler_horo(type, source, body):
 	else:
 		reply(type, source, u'введи знак')
 
-def handler_jabber_quotes(type, source, body):
-	if body:
-		body = body.lower()
-	if body in [u'ранд', 'rand']:
-		link = 'http://jabber-quotes.ru/random'
-	elif body in [u'топ20', 'top20']:
-		link = 'http://jabber-quotes.ru/up'
-	else:
-		link = 'http://jabber-quotes.ru/'
-	try:
-		list = read_link(link).split('<blockquote>')
-		list.pop(0)
-		quote = random.choice(list).split('</blockquote>')[0]
-		quote = replace_all(quote, {'<br>': '\n', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&amp;': '&', '&middot;': ';'})
-		while quote.count('\n\n\n'):
-			quote = quote.replace('\n\n\n', '\n\n')
-		reply(type, source, 'Quote:\n%s' % unicode(quote, 'windows-1251'))
-	except:
-		reply(type, source, u'что-то сломалось...')
-
 register_command_handler(handler_pyorg, 'питон', ['фан','все'], 10,'показывает последнии новости с http://python.org/', 'питон', ['питон'])
 register_command_handler(handler_afor, 'афоризм', ['фан','все'], 10,'показывает случайный афоризм с ресурса skio.ru', 'афор', ['афор'])
 register_command_handler(handler_anek, 'анек', ['все', 'фан'], 10, 'Отображает анекдоты с ресурса http://www.hyrax.ru/\nBy *MAG*', 'анек', ['анек'])
@@ -152,4 +132,3 @@ register_command_handler(handler_nyash, 'няш', ['фан','все'], 10, 'По
 register_command_handler(handler_ithappens, 'ит', ['фан','все'], 10, 'Показывает случайную цитату с http://ithappens.ru/', 'ит', ['ит'])
 register_command_handler(handler_sonnik, 'сон', ['фан','все'], 10, 'Сонник.', 'сон', ['сон вода'])
 register_command_handler(handler_horo, 'хоро', ['фан','все'], 10, 'Гороскоп "на сегодня" с сайта http://www.hyrax.ru/\nЧтобы посмотреть общую характеристику дня используем параметр - "день"\nВместо знака можно вводить число (пишем: "хоро хелп")\nBy *MAG* & WitcherGeralt for http://witcher-team.ucoz.ru/', 'хоро [знак]', ['хоро 11','хоро день', 'хоро овен'])
-register_command_handler(handler_jabber_quotes, 'цитата', ['фан','все'], 10, 'Достаёт цитату с http://jabber-quotes.ru/\nПараметры:\nТоп20 - выбирает 1 из самых популярных\nРанд - абсолютно случайная цитата\nБез параметров - выбирает из 20ти новейших', 'цитата [топ20/ранд]', ['цитата','цитата топ20'])
