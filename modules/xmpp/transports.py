@@ -27,8 +27,9 @@ Transports are stackable so you - f.e. TLS use HTPPROXYsocket or TCPsocket as mo
 Also exception 'error' is defined to allow capture of this module specific exceptions.
 """
 
-import socket,select,base64,dispatcher,sys
-if sys.version[:3] == '2.6': import ssl
+import sys, socket, dispatcher
+from base64 import encodestring
+from select import select
 from simplexml import ustr
 from client import PlugIn
 from protocol import *
@@ -48,6 +49,7 @@ except ImportError:
 
 DATA_RECEIVED='DATA RECEIVED'
 DATA_SENT='DATA SENT'
+DBG_CONNECT_PROXY='CONNECTproxy'
 
 class error:
 	"""An exception to be raised in case of low-level errors in methods of 'transports' module."""
@@ -64,7 +66,7 @@ class TCPsocket(PlugIn):
 	""" This class defines direct TCP connection method. """
 	def __init__(self, server=None, use_srv=True):
 		""" Cache connection point 'server'. 'server' is the tuple of (host, port)
-			absolutely the same as standard tcp socket uses. However library will lookup for 
+			absolutely the same as standard tcp socket uses. However library will lookup for
 			('_xmpp-client._tcp.' + host) SRV record in DNS and connect to the found (if it is)
 			server instead
 		"""
@@ -78,7 +80,6 @@ class TCPsocket(PlugIn):
 		if HAVE_DNSPYTHON or HAVE_PYDNS:
 			host, port = server
 			possible_queries = ['_xmpp-client._tcp.' + host]
-
 			for query in possible_queries:
 				try:
 					if HAVE_DNSPYTHON:
@@ -136,7 +137,7 @@ class TCPsocket(PlugIn):
 			self._recv=self._sock.recv
 			self.DEBUG("Successfully connected to remote host %s"%`server`,'start')
 			return 'ok'
-		except socket.error, (errno, strerror): 
+		except socket.error, (errno, strerror):
 			self.DEBUG("Failed to connect to remote host %s: %s (%s)"%(`server`, strerror, errno),'error')
 		except: pass
 
@@ -152,22 +153,22 @@ class TCPsocket(PlugIn):
 		""" Reads all pending incoming data.
 			In case of disconnection calls owner's disconnected() method and then raises IOError exception."""
 		try: received = self._recv(BUFLEN)
-		except socket.sslerror,e:
+		except socket.sslerror, e:
 			self._seen_data=0
 			if e[0]==socket.SSL_ERROR_WANT_READ: return ''
 			if e[0]==socket.SSL_ERROR_WANT_WRITE: return ''
 			self.DEBUG('Socket error while receiving data','error')
 			sys.exc_clear()
 			self._owner.disconnected()
-			raise IOError("Disconnected from server")
-		except: received = ''
-
+			raise IOError("Disconnected!")
+		except:
+			received = ''
 		while self.pending_data(0):
 			try: add = self._recv(BUFLEN)
 			except: add=''
 			received +=add
-			if not add: break
-
+			if not add:
+				break
 		if len(received): # length of 0 means disconnect
 			self._seen_data=1
 			self.DEBUG(received,'got')
@@ -176,7 +177,7 @@ class TCPsocket(PlugIn):
 		else:
 			self.DEBUG('Socket error while receiving data','error')
 			self._owner.disconnected()
-			raise IOError("Disconnected from server")
+			raise IOError("Disconnected!")
 		return received
 
 	def send(self,raw_data):
@@ -197,7 +198,7 @@ class TCPsocket(PlugIn):
 
 	def pending_data(self,timeout=0):
 		""" Returns true if there is a data ready to be read. """
-		return select.select([self._sock],[],[],timeout)[0]
+		return select([self._sock],[],[],timeout)[0]
 
 	def disconnect(self):
 		""" Closes the socket. """
@@ -209,7 +210,6 @@ class TCPsocket(PlugIn):
 			Designed to be overidden. """
 		self.DEBUG("Socket operation failed",'error')
 
-DBG_CONNECT_PROXY='CONNECTproxy'
 class HTTPPROXYsocket(TCPsocket):
 	""" HTTP (CONNECT) proxy connection class. Uses TCPsocket as the base class
 		redefines only connect method. Allows to use HTTP proxies like squid with
@@ -241,7 +241,7 @@ class HTTPPROXYsocket(TCPsocket):
 			'User-Agent: HTTPPROXYsocket/v0.1']
 		if self._proxy.has_key('user') and self._proxy.has_key('password'):
 			credentials = '%s:%s'%(self._proxy['user'],self._proxy['password'])
-			credentials = base64.encodestring(credentials).strip()
+			credentials = encodestring(credentials).strip()
 			connector.append('Proxy-Authorization: Basic '+credentials)
 		connector.append('\r\n')
 		self.send('\r\n'.join(connector))
@@ -307,29 +307,26 @@ class TLS(PlugIn):
 
 	def pending_data(self,timeout=0):
 		""" Returns true if there possible is a data ready to be read. """
-		return self._tcpsock._seen_data or select.select([self._tcpsock._sock],[],[],timeout)[0]
+		return self._tcpsock._seen_data or select([self._tcpsock._sock],[],[],timeout)[0]
 
 	def _startSSL(self):
 		tcpsock=self._owner.Connection
-		if sys.version[:3]=='2.6':
-			tcpsock._sslObj = ssl.wrap_socket(tcpsock._sock, None, None)
-		else:
-			tcpsock._sslObj = socket.ssl(tcpsock._sock, None, None)
-			tcpsock._sslIssuer = tcpsock._sslObj.issuer()
-			tcpsock._sslServer = tcpsock._sslObj.server()
+		tcpsock._sslObj = socket.ssl(tcpsock._sock, None, None)
+		tcpsock._sslIssuer = tcpsock._sslObj.issuer()
+		tcpsock._sslServer = tcpsock._sslObj.server()
 		tcpsock._recv = tcpsock._sslObj.read
 		tcpsock._send = tcpsock._sslObj.write
 		tcpsock._seen_data=1
 		self._tcpsock=tcpsock
 		tcpsock.pending_data=self.pending_data
 		tcpsock._sock.setblocking(0)
-
 		self.starttls='success'
 
 	def StartTLSHandler(self, conn, starttls):
 		""" Handle server reply if TLS is allowed to process. Behaves accordingly.
 			Used internally."""
-		if starttls.getNamespace()<>NS_TLS: return
+		if starttls.getNamespace()<>NS_TLS:
+			return
 		self.starttls=starttls.getName()
 		if self.starttls=='failure':
 			self.DEBUG("Got starttls response: "+self.starttls,'error')
