@@ -15,10 +15,10 @@ def dns_query(query):
 	except ValueError:
 		try:
 			(hostname, aliaslist, ipaddrlist) = socket.gethostbyname_ex(query)
-			return ', '.join(ipaddrlist)
 		except socket.gaierror:
 			return u'не нахожу что-то'
-	except:
+		return ', '.join(ipaddrlist)
+	else:
 		try:
 			(hostname, aliaslist, ipaddrlist) = socket.gethostbyaddr(query)
 		except socket.herror:

@@ -182,7 +182,9 @@ def handler_timeup_info(type, source, body):
 def handler_botup_info(type, source, body):
 	if INFO['start']:
 		PID, Now_time = str(BOT_PID), time.time()
-		repl = u'\n*// Статистика работы (Bot PID: %s):\n-//- Рабочая сессия %s\n-//- Онлайн сессия %s' % (PID, timeElapsed(Now_time - RUNTIMES['START']), timeElapsed(Now_time - INFO['start']))
+		repl = u'\n*// Статистика работы (Bot PID: %s):\n-//- Рабочая сессия %s' % (PID, timeElapsed(Now_time - RUNTIMES['START']))
+		if RUNTIMES['REST']:
+			repl += u'\n-//- Последняя сессия %s' % (timeElapsed(Now_time - INFO['start']))
 		repl += u'\n-//- Обработано %s презенсов и %s iq-запросов\n-//- Отправлено %s сообщений и %s iq-запросов' % (str(INFO['prs']), str(INFO['iq']), str(INFA['outmsg']), str(INFA['outiq']))
 		repl += u'\n-//- Произошло %s ошибок и %s Dispatch Errors\n-//- Получено %s сообщений\n-//- Выполнено %s команд' % (str(len(ERRORS.keys())), str(INFO['errs']), str(INFO['msg']), str(INFO['cmd']))
 		repl += u'\n-//- Создано файлов %s\n-//- Прочтений файлов %s\n-//- Записей в файлах %s\n-//- Записей crash логов %s' % (str(INFA['fcr']), str(INFA['fr']), str(INFA['fw']), str(INFA['cfw']))
@@ -196,7 +198,7 @@ def handler_botup_info(type, source, body):
 				acol += 1
 		repl += u'\n-//- Создано %s тредов, %s(%s) из них активно' % (INFO['thr'], acol, col)
 		(user, system, atime, itime, jtime,) = os.times()
-		repl += u'\n-//- Потратил %.2f секунд процессора\n-//- + %.2f секунд системного времени\n-//- Итог %.2f секунд общесистемного времени' % (user, system, (user + system))
+		repl += u'\n-//- Потратил %.2f секунд процессора\n-//- + %.2f секунд системного времени\n-//- Итог: %.2f секунд общесистемного времени' % (user, system, (user + system))
 	else:
 		repl = u'Упс попоему я выключен! lol'
 	reply(type, source, repl)
