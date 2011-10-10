@@ -27,7 +27,7 @@ XML_ls = [
 	(">", "&gt;"),
 	('"', "&quot;"),
 	("'", "&apos;")
-		]
+			]
 
 def XMLescape(body):
 	for char, edef in XML_ls:
@@ -105,7 +105,7 @@ class Node(object):
 			if isinstance(i, Node): self.addChild(node=i)
 			else: self.data.append(ustr(i))
 
-	def lookup_nsp(self,pfx=''):
+	def lookup_nsp(self, pfx=''):
 		ns = self.nsd.get(pfx,None)
 		if ns is None:
 			ns = self.nsp_cache.get(pfx,None)
