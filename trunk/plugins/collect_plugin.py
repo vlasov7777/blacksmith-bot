@@ -11,10 +11,11 @@ BLACK_LIST = 'dynamic/blacklist.txt'
 
 CHAT_CACHE = {}
 AMSGBL = []
+CHAT_DIRTY = {}
 
-def handler_chat_cache(raw, ltype, source, body):
+def handler_chat_cache(stanza, ltype, source, body):
 	try:
-		subject = raw.getTag('subject')
+		subject = stanza.getTag('subject')
 	except:
 		subject = False
 	if ltype != 'public' or subject or not source[2]:
@@ -26,19 +27,32 @@ def handler_chat_cache(raw, ltype, source, body):
 	CHAT_CACHE[source[1]]['2'] = header+body
 
 def handler_clean(type, source, body):
-	if source[1] in GROUPCHATS:
-		if type != 'private':
-			message = random.choice([u'чистка...', u'Работа по антиупарыванию конфы в разгаре!', 'вычищаю конференцию', 'отсылаю пустые мессаги (не правда ли дебильная работа?)'])
-			status = 'dnd'
-			change_bot_status(source[1], message, status)
-		for x in range(1, 24):
-			JCON.send(xmpp.simplexml.XML2Node(unicode('<message to="%s" type="groupchat"></message>' % (source[1])).encode('utf-8')))
-			time.sleep(1.2)
-		if type != 'private':
-			message = STATUS[source[1]]['message']
-			status = STATUS[source[1]]['status']
-			change_bot_status(source[1], message, status)
-		CHAT_CACHE[source[1]] = {'1': '', '2': ''}
+	if GROUPCHATS.has_key(source[1]):
+		if CHAT_DIRTY[source[1]]:
+			CHAT_DIRTY[source[1]] = False
+			if type != 'private':
+				message = random.choice([u'чистка...', u'Работа по антиупарыванию конфы в разгаре!', 'вычищаю конференцию', 'отсылаю пустые мессаги (не правда ли дебильная работа?)'])
+				status = 'dnd'
+				change_bot_status(source[1], message, status)
+			zero = xmpp.Message(to = source[1], typ = "groupchat")
+			for Numb in xrange(24):
+				if not GROUPCHATS.has_key(source[1]):
+					return
+				try:
+					JCON.send(zero)
+				except IOError:
+					return
+				INFA['outmsg'] += 1
+				if (Numb != 23):
+					time.sleep(1.4)
+			if type != 'private':
+				message = STATUS[source[1]]['message']
+				status = STATUS[source[1]]['status']
+				change_bot_status(source[1], message, status)
+			CHAT_CACHE[source[1]] = {'1': '', '2': ''}
+			CHAT_DIRTY[source[1]] = True
+		else:
+			reply(type, source, u'итак чищу!')
 	else:
 		reply(type, source, u'сам свой ростер чисть!')
 
@@ -176,6 +190,7 @@ def amsg_blacklist_init():
 
 def chat_cache_init(conf):
 	CHAT_CACHE[conf] = {'1': '', '2': ''}
+	CHAT_DIRTY[conf] = True
 
 register_message_handler(handler_chat_cache)
 register_command_handler(handler_clean, 'чисть', ['все','разное'], 15, 'Чистит конфу', 'чисть', ['чисть'])
