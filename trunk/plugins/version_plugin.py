@@ -52,7 +52,7 @@ def handler_version_answer(coze, stanza, type, source):
 						ver = Prop.getData()
 					elif Pname == 'os':
 						os = Prop.getData()
-				repl = name+' '+ver+' on '+os
+				repl = "\nName: %s\nVer.: %s\nOS: %s" % (name, ver, os)
 			else:
 				repl = u'он зашифровался'
 		else:

@@ -1,47 +1,63 @@
 """
 enconf module. by WitcherGeralt (AlKorgun@gmail.com)
 
-BlacSmith xmpp bot module.
-Provides not ascii chat`s path name encoding to base16.
+BlacSmith bot's module.
+Normalize unsupported chat's path to base16.
 """
 
-from string import digits, letters, punctuation
+from os.path import supports_unicode_filenames, sep as os_dsep
 
-ascii_tab = tuple(digits + letters + punctuation)
+AsciiSys = (not supports_unicode_filenames)
 
-del digits, letters, punctuation
+del supports_unicode_filenames
 
-from os.path import supports_unicode_filenames as supports_unicode
 from base64 import b16encode as encode_name
 
-__all__ = ["ascii_tab", "supports_unicode", "encode_name", "cefile", "check_nosimbols", "encode_filename"]
+__all__ = [
+	"AsciiSys",
+	"CharCase",
+	"AsciiTab",
+	"encode_name",
+	"cefile",
+	"check_nosimbols",
+	"encode_filename"
+			]
 
-__version__ = "2.3"
+__version__ = "2.5"
 
-def cefile(filename):
-	if filename.count("/") > 1:
-		if not check_nosimbols(filename):
-			filename = encode_filename(filename)
-	return filename
+CharCase = [
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+	"abcdefghijklmnopqrstuvwxyz",
+	"0123456789",
+	'''!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~'''
+			]
 
-def check_nosimbols(body):
-	if not supports_unicode:
-		body_tab = [x for x in body]
-		for symbol in body_tab:
-			if symbol not in ascii_tab:
+AsciiTab = tuple(str.join("", CharCase))
+
+def cefile(path):
+	path = path.replace("\t", "\\t")
+	path = path.replace("\n", "\\n")
+	path = path.replace("\r", "\\r")
+	if (path.count(chr(47)) > 1):
+		if not check_nosimbols(path):
+			path = encode_filename(path)
+	return path
+
+def check_nosimbols(Case):
+	if AsciiSys:
+		for Char in Case:
+			if not AsciiTab.count(Char):
 				return False
 	return True
 
-def encode_filename(filename):
-	encodedName = ""
-	for name in filename.split("/"):
-		if name.count("."):
-			if name.count("@"):
-				list = name.split("@", 1)
-				chatname = encode_name(list[0].encode("utf-8"))
-				encodedName +=  "%s@%s/" % (chatname[(len(chatname) / 2):].decode("utf-8"), list[1])
-			else:
-				encodedName += name
+def encode_filename(dpath):
+	encodedName = []
+	for Name in dpath.split(chr(47)):
+		At = chr(64)
+		if Name.count(At):
+			list = Name.split(At, 1)
+			chatName = encode_name(list[0].encode("utf-8"))
+			encodedName.append("%s@%s" % (chatName[(len(chatName) / 2):], list[1]))
 		else:
-			encodedName += "%s/" % (name)
-	return encodedName
+			encodedName.append(Name)
+	return os_dsep.join(encodedName)
