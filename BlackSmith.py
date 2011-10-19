@@ -26,7 +26,7 @@ os.chdir(os.path.dirname(__file__))
 
 sys.path.append("modules")
 
-from enconf import *; from hammer import *
+from enconf import *
 
 import xmpp, macros, simplejson, re, string, random, urllib, urllib2
 
@@ -41,22 +41,19 @@ LAST = {'time': 0, 'null': 0, 'cmd': 'start'}
 
 ################ friendly handlers #############################################################
 
-if os.environ.has_key("TERM"):
-	COLORS_ENABLED = True
-else:
-	COLORS_ENABLED = False
+COLORS_ENABLED = xmpp.debug.colors_enabled
 
-color0 = chr(27)+"[0m"
-color1 = chr(27)+"[33m"
-color2 = chr(27)+"[31;1m"
-color3 = chr(27)+"[32m"
-color4 = chr(27)+"[34;1m"
+color0 = chr(27) + "[0m"
+color1 = chr(27) + "[33m"
+color2 = chr(27) + "[31;1m"
+color3 = chr(27) + "[32m"
+color4 = chr(27) + "[34;1m"
 
 def retry_body(x, y):
 	try:
-		body, color = unicode(x), y
+		body = unicode(x)
 	except:
-		body, color = x, False
+		color = False
 	return (body, color)
 
 def text_color(text, color):
@@ -102,9 +99,9 @@ BOT_OS, BOT_PID = os.name, os.getpid()
 if BOT_OS == 'nt':
 	os.system('COLOR 0C')
 
-def PASS_GENERATOR(codename, col):
+def PASS_GENERATOR(codename, Number):
 	symbols = '0123456789%s._(!}{#)' % (string.letters)
-	for x in range(0, col):
+	for Numb in xrange(Number):
 		codename += random.choice(symbols)
 	return codename
 
@@ -129,8 +126,8 @@ except:
 if BOT_OS == 'nt':
 	os.system('Title BlackSmith - %s' % (Caps))
 
-DEFAULT_NICK = DEFAULT_NICK_(DEFAULT_NICK)
-MEMORY_LIMIT = MEMORY_LIMIT_(MEMORY_LIMIT)
+DEFAULT_NICK = DEFAULT_NICK[:16].replace(chr(32), chr(95))
+MEMORY_LIMIT = (24576 if MEMORY_LIMIT and MEMORY_LIMIT <= 24576 else MEMORY_LIMIT)
 
 ################ lists handlers ################################################################
 
@@ -171,22 +168,18 @@ UNAVALABLE = []
 
 (JCON, ROSTER) = (None, False)
 
-smph = threading.BoundedSemaphore(value = 100)
-mtx = threading.Lock()
-wsmph = threading.BoundedSemaphore(value = 1)
+wsmph, smph = threading.Semaphore(), threading.Semaphore(60)
 
 ################ file work handlers ############################################################
 
-def check_file(conf = None, file = "", data = ""):
+def check_file(conf = None, file = None, data = "{}"):
 	if conf:
-		filename = 'dynamic/%s/%s' % (conf, file)
-		if not check_nosimbols(filename):
-			filename = encode_filename(filename)
+		filename = cefile('dynamic/%s/%s' % (conf, file))
 	else:
 		filename = 'dynamic/%s' % (file)
 	return initialize_file(filename, data)
 
-def initialize_file(filename, data = ""):
+def initialize_file(filename, data = "{}"):
 	if len(filename.split('/')) >= 4:
 		return False
 	if os.path.exists(filename):
@@ -194,57 +187,31 @@ def initialize_file(filename, data = ""):
 	try:
 		folder = os.path.dirname(filename)
 		if folder and not os.path.exists(folder):
-			os.mkdir(folder, 0755)
-		fl = open(filename, 'w')
-		INFA['fcr'] += 1
-		if not data:
-			data = '{}'
-		fl.write(data)
-		fl.close()
+			os.mkdirs(folder, 0755)
+		with open(filename, 'w') as fp:
+			INFA['fcr'] += 1
+			fp.write(data)
 	except:
 		return False
 	return True
 
 def read_file(filename):
-	if filename.count('/') > 1:
-		if not check_nosimbols(filename):
-			filename = encode_filename(filename)
-	fl = file(filename, 'r')
-	INFA['fr'] += 1
-	data = fl.read()
-	fl.close()
-	return data
+	path = cefile(filename)
+	with open(path, 'r') as fp:
+		INFA['fr'] += 1
+		return fp.read()
 
-def file_add(filename, data):
-	if filename.count('/') > 1:
-		if not check_nosimbols(filename):
-			filename = encode_filename(filename)
-	try:
-		fl = file(filename, 'a')
-		INFA['fw'] += 1
-		fl.write(data)
-		fl.close()
-	except:
-		LAST['null'] += 1
-
-def write_file(filename, data):
-	if filename.count('/') > 1:
-		if not check_nosimbols(filename):
-			filename = encode_filename(filename)
+def write_file(filename, data, otp = 'w'):
+	path = cefile(filename)
 	with wsmph:
-		mtx.acquire()
-		try:
-			fl = file(filename, 'w')
+		with open(path, otp) as fp:
 			INFA['fw'] += 1
-			fl.write(data)
-			fl.close()
-		finally:
-			mtx.release()
+			fp.write(data)
 
 ################ lytic crashlog ################################################################
 
 def Dispatch_fail():
-	crashfile = file('__main__.crash', 'a')
+	crashfile = open('__main__.crash', 'a')
 	Print_Error(limit = None, file = crashfile)
 	crashfile.close()
 
@@ -263,7 +230,7 @@ def lytic_crashlog(handler, command = None):
 	try:
 		if not os.path.exists(DIR):
 			os.mkdir(DIR, 0755)
-		crashfile = file(filename, 'w')
+		crashfile = open(filename, 'w')
 		INFA['cfw'] += 1
 		Print_Error(limit = None, file = crashfile)
 		crashfile.close()
@@ -589,10 +556,14 @@ def read_url(link, Browser = False):
 	data = site.read()
 	return data
 
-def re_search(lt, key, key2):
-	lt = lt[re.search(key, lt).end():]
-	data = lt[:re.search(key2, lt).start()]
-	return data.strip()
+def re_search(body, s0, s2, s1 = "(?:.|\s)+"):
+	comp = compile__("%s(%s?)%s" % (s0, s1, s2), 16)
+	body = comp.search(body)
+	if body:
+		body = (body.group(1)).strip()
+	else:
+		raise KeyError()
+	return body
 
 def handler_botnick(conf):
 	if conf in BOT_NICKS:
@@ -797,7 +768,7 @@ def delivery(body):
 	try:
 		JCON.send(xmpp.Message(BOSS, body, 'chat'))
 	except:
-		file_add('delivery.txt', body)
+		write_file('delivery.txt', body, 'a')
 
 def msg(target, body):
 	if not isinstance(body, unicode):
@@ -1194,8 +1165,8 @@ def IQ_PROCESSING(client, stanza):
 		if stanza.getTags('query', {}, xmpp.NS_VERSION):
 			result = stanza.buildReply('result')
 			query = result.getTag('query')
-			query.setTagData('name', BOT_VERSION(BOT_VER, CORE_MODE))
-			query.setTagData('version', BOT_REVISION(BOT_REV))
+			query.setTagData('name', "BlackSmith mark.%d [Neutron/Talisman]" % BOT_VER)
+			query.setTagData('version', "%d (r.%d)" % (CORE_MODE, BOT_REV))
 			PyVer = str(sys.version).split()[0]
 			if BOT_OS == 'nt':
 				os_name = read_pipe('ver').strip()
@@ -1243,10 +1214,7 @@ def IQ_PROCESSING(client, stanza):
 			JCON.send(result)
 			raise xmpp.NodeProcessed
 		elif stanza.getTags('ping', {}, xmpp.NS_PING):
-			result = xmpp.Iq('result')
-			result.setTo(stanza.getFrom())
-			result.setID(stanza.getID())
-			JCON.send(result)
+			JCON.send(stanza.buildReply('result'))
 			raise xmpp.NodeProcessed
 	call_iq_handlers(stanza)
 
@@ -1278,7 +1246,7 @@ def lytic_restart():
 
 def Dispatch_handler():
 	try:
-		JCON.Process(8)
+		JCON.Process(4)
 	except xmpp.Conflict:
 		Print('\n\nError: XMPP Conflict!', color2)
 		call_stage3_init()

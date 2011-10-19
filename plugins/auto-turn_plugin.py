@@ -21,6 +21,12 @@ def check_obscene_words(body):
 			return True
 	return False
 
+def check_nosimbols__(Case):
+	for Char in Case:
+		if not AsciiTab.count(Char):
+			return False
+	return True
+
 def handler_aturn(raw, type, source, body):
 	if type == 'public' and source[2] != '':
 		if ATURN[source[1]] != 'off':
@@ -36,7 +42,7 @@ def handler_aturn(raw, type, source, body):
 					col2 = '*%s*' % str(len(list.keys()) + 1)
 					list[col2] = nick
 					body = body.replace(nick, col2)
-			if check_nosimbols(body):
+			if check_nosimbols__(body):
 				rebody2 = replace_all(body, list.keys(), '').strip()
 				if rebody2 and not check_number(rebody2) and rebody2 not in SMILES.split('4*'):
 					rebody = reduce(lambda x,y: en2ru_table.get(x,x)+en2ru_table.get(y,y), body)
