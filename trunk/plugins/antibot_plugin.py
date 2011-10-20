@@ -82,7 +82,7 @@ def handler_antibot_exceptions(type, source, body):
 		args = body.split()
 		if len(args) == 2:
 			conf = args[1].strip().lower()
-			if conf.count('@conference.') and conf.count('.') >= 2:
+			if conf.count('@conference.') and conf.count('.') >= 2 and conf in GROUPCHATS:
 				check = args[0].strip()
 				if check == '+':
 					if conf not in EXCEPTIONS:
@@ -101,7 +101,7 @@ def handler_antibot_exceptions(type, source, body):
 				else:
 					repl = u'инвалид синтакс'
 			else:
-				repl = u'это вообще не конфожид!'
+				repl = u'что-то не то...'
 		else:
 			repl = u'инвалид синтакс'
 	else:

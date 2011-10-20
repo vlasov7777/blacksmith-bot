@@ -5,10 +5,10 @@
 
 # (c) WitcherGeralt [WitcherGeralt@rocketmail.com]
 
-from os import system as start_bot
+from os import system
 
 while True:
 	try:
-		start_bot('python ./BlackSmith.py')
+		system('python ./BlackSmith.py')
 	except:
 		pass

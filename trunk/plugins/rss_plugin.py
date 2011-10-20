@@ -243,7 +243,7 @@ def handler_rss_info(type, source, name):
 	reply(type, source, repl)
 
 def rss_file_init():
-	if initialize_file(RSS_CACHE_FILE, str()):
+	if initialize_file(RSS_CACHE_FILE):
 		rss_read_file()
 	else:
 		Print('\n\nError: can`t create RSS cache file!', color2)

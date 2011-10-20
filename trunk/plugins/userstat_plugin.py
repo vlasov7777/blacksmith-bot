@@ -60,7 +60,7 @@ def handler_userstat(Prs):
 			try:
 				write_file('dynamic/%s/userstat.txt' % (conf), str(USERSTAT[conf]['jids']))
 			except MemoryError:
-				LAST['null'] += 1
+				upkeep()
 
 def handler_check_userstat(type, source, body):
 	if source[1] in GROUPCHATS:
@@ -94,9 +94,9 @@ def handler_userstat_here(type, source, nick):
 			nick = source[2]
 		if nick in GROUPCHATS[source[1]] and GROUPCHATS[source[1]][nick]['ishere']:
 			if nick:
-				repl = u'"%s" сидит здесь - ' % (nick)
+				repl = u'"%s" сидит здесь ' % (nick)
 			else:
-				repl = u'ты провёл здесь - '
+				repl = u'ты провёл здесь '
 			reply(type, source, repl+timeElapsed(time.time() - GROUPCHATS[source[1]][nick]['joined']))
 		else:
 			reply(type, source, u'сейчас его нет здесь')
@@ -109,7 +109,7 @@ def userstat_save():
 			try:
 				write_file('dynamic/%s/userstat.txt' % (conf), str(USERSTAT[conf]['jids']))
 			except:
-				LAST['null'] += 1
+				pass
 
 def userstat_init(conf):
 	USERSTAT[conf] = {'col': 0, 'jids': {}}
@@ -119,7 +119,7 @@ def userstat_init(conf):
 			for jid in USERSTAT[conf]['jids']:
 				USERSTAT[conf]['jids'][jid]['ishere'] = False
 		except:
-			LAST['null'] += 1
+			pass
 	else:
 		delivery(u'Внимание! Не удалось создать userstat.txt для "%s"!' % (conf))
 

@@ -30,7 +30,7 @@ RESOURCE = u'BlackSmith by WitcherGeralt'# You may write ru symbols here
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # Default chatroom nick
-DEFAULT_NICK = u'BlackSmith[бот]'# You may write ru symbols here
+DEFAULT_NICK = u'BlackSmith[bot]'.strip()# You may write ru symbols here
 
 # Groupchat message size limit
 CHAT_MSG_LIMIT = 1024
