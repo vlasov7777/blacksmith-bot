@@ -1,48 +1,44 @@
 #! /usr/bin/env python
-# -*- coding: utf-8 -*-
+# /* coding: utf-8 */
 
 #  BlackSmith Bot Core
 #  BlackSmith.py
 
-#  Als [Als@exploit.in]
-#  Evgen [meb81@mail.ru]
-#  dimichxp [dimichxp@gmail.com]
-#  mrDoctorWhо [mrdoctorwho@gmail.com]
-#  Boris Kotov [admin@avoozl.ru]
-#  Mike Mintz [mikemintz@gmail.com]
-#  WitcherGeralt [WitcherGeralt@rocketmail.com]
+#  Thanks to:
+#    Als [Als@exploit.in]
+#    Evgen [meb81@mail.ru]
+#    dimichxp [dimichxp@gmail.com]
+#    mrDoctorWhо [mrdoctorwho@gmail.com]
+#    Boris Kotov [admin@avoozl.ru]
+#    Mike Mintz [mikemintz@gmail.com]
 
-#  By WitcherGeralt, based on Talisman by Als (Neutron by Gh0st)
+#  © WitcherGeralt, based on Talisman by Als (Neutron by Gh0st)
+#  The new bot life © simpleApps.
 
-################ import modules ################################################################
-
+## Imports.
 from __future__ import with_statement
+from urllib2 import urlopen
+from traceback import format_exc, print_exc
+import gc, os, re, sys, time, random, threading
 
-from traceback import format_exc as error_, print_exc as Print_Error
-
-import sys, os, gc, time, types, threading
-
-os.chdir(os.path.dirname(__file__))
-
+## Set "sys.path".
+if not (hasattr(sys, "argv") and sys.argv and sys.argv[0]):
+	sys.argv = [__file__]
+os.chdir(os.path.dirname(sys.argv[0]))
 sys.path.append("modules")
 
 from enconf import *
+import xmpp, macros, simplejson
 
-import xmpp, macros, simplejson, re, string, random, urllib, urllib2
-
-################ Statistics cache ##############################################################
-
+## Stats.
 INFO = {'start': 0, 'msg': 0, 'prs': 0, 'iq': 0, 'cmd': 0, 'thr': 0, 'errs': 0}
 INFA = {'outmsg': 0, 'outiq': 0, 'fr': 0, 'fw': 0, 'fcr': 0, 'cfw': 0}
 RSTR = {'AUTH': [], 'BAN': [], 'VN': 'off'}
-STOP = {'mto': 0, 'jids': {}}
+LAST = {'time': 0, 'cmd': 'start'}
 DCNT = {'col': 0, 'Yes!': True}
-LAST = {'time': 0, 'null': 0, 'cmd': 'start'}
+STOP = {'mto': 0, 'jids': {}}
 
-################ friendly handlers #############################################################
-
-COLORS_ENABLED = xmpp.debug.colors_enabled
-
+## Colored stdout.
 color0 = chr(27) + "[0m"
 color1 = chr(27) + "[33m"
 color2 = chr(27) + "[31;1m"
@@ -50,15 +46,12 @@ color3 = chr(27) + "[32m"
 color4 = chr(27) + "[34;1m"
 
 def retry_body(x, y):
-	try:
-		body = unicode(x)
-	except:
-		color = False
+	try: body = unicode(x)
+	except: color = False
 	return (body, color)
 
 def text_color(text, color):
-	if COLORS_ENABLED:
-		text = color+text+color0
+	text = color+text+color0
 	return text
 
 def Print(text, color = False):
@@ -67,15 +60,14 @@ def Print(text, color = False):
 			text = text_color(text, color)
 		print text
 	except:
-		LAST['null'] += 1
+		pass
 
+## Increase convenience.
 def try_sleep(slp):
 	try:
 		time.sleep(slp)
 	except KeyboardInterrupt:
 		os._exit(0)
-	except:
-		LAST['null'] += 1
 
 def Exit(text, exit, slp):
 	Print(text, color2); try_sleep(slp)
@@ -84,8 +76,7 @@ def Exit(text, exit, slp):
 	else:
 		os.execl(sys.executable, sys.executable, os.path.abspath(sys.argv[0]))
 
-################ Configuration Items ###########################################################
-
+## Configuration.
 GENERAL_CONFIG_FILE = 'static/source.py'
 GLOBACCESS_FILE = 'dynamic/access.txt'
 GROUPCHATS_FILE = 'dynamic/chats.txt'
@@ -96,59 +87,39 @@ PID_FILE = 'PID.txt'
 
 BOT_OS, BOT_PID = os.name, os.getpid()
 
-if BOT_OS == 'nt':
-	os.system('COLOR 0C')
-
 def PASS_GENERATOR(codename, Number):
-	symbols = '0123456789%s._(!}{#)' % (string.letters)
+	symbols = "".join(ascii_tab)
 	for Numb in xrange(Number):
 		codename += random.choice(symbols)
 	return codename
 
 try:
-	GENERAL_CONFIG = file(GENERAL_CONFIG_FILE)
-	exec GENERAL_CONFIG in globals()
-	GENERAL_CONFIG.close()
-except:
-	Exit('\n\nError: unable to read general config file!', 1, 30)
-
-try:
-	reload(sys)
-	sys.setdefaultencoding('utf-8')
-except:
-	Print('\n\nError: can`t set default encoding!', color2)
-
-try:
+	execfile(GENERAL_CONFIG_FILE)
 	execfile('static/versions.py')
-except:
-	Exit('\n\nError: verfile (versions.py) isn`t exists!', 1, 30)
+	reload(sys).setdefaultencoding('utf-8')
+except Exception, e:
+	Print('\n\nError: %s' % `e`, color2)
 
 if BOT_OS == 'nt':
 	os.system('Title BlackSmith - %s' % (Caps))
 
-DEFAULT_NICK = DEFAULT_NICK[:16].replace(chr(32), chr(95))
 MEMORY_LIMIT = (24576 if MEMORY_LIMIT and MEMORY_LIMIT <= 24576 else MEMORY_LIMIT)
 
-################ lists handlers ################################################################
-
-MESSAGE_HANDLERS = []
-OUTGOING_MESSAGE_HANDLERS = []
+## Lists of handlers.
+IQ_HANDLERS = []
 JOIN_HANDLERS = []
 LEAVE_HANDLERS = []
-IQ_HANDLERS = []
-PRESENCE_HANDLERS = []
+MESSAGE_HANDLERS = []
 COMMAND_HANDLERS = {}
+PRESENCE_HANDLERS = []
+OUTGOING_MESSAGE_HANDLERS = []
 
 STAGE0_INIT = []
 STAGE1_INIT = []
 STAGE2_INIT = []
 STAGE3_INIT = []
 
-################ lists & client & others #######################################################
-
-MACROS = macros.Macros()
-ONLINE = False
-online = lambda cl: cl.isConnected()
+## Dictionaries, lists.
 ADLIST = []
 ANSWER = {}
 PREFIX = {}
@@ -166,57 +137,83 @@ GLOBACCESS = {}
 GROUPCHATS = {}
 UNAVALABLE = []
 
-(JCON, ROSTER) = (None, False)
+MACROS = macros.Macros()
+online = lambda cl: cl.isConnected()
+JCON, ROSTER, ONLINE = None, None, None
 
 wsmph, smph = threading.Semaphore(), threading.Semaphore(60)
 
-################ file work handlers ############################################################
+from sTools import *
+from platform import win32_ver
+## os info.
+if os.name == "nt":
+	if not ntDetect().lower().count("windows"):
+		isOS = ntDetect()
+	else:
+		isOS = "Windows"
+	os_name = " ".join([isOS, win32_ver()[0], win32_ver()[2]])
 
+elif os.name == "posix":
+	from platform import dist
+	if dist()[0]:
+		os_name = "POSIX (%s with %s, %s)" % (dist()[0], 
+											  os.uname()[0], os.uname()[2])
+	else:
+		os_name = "POSIX (%s, %s)" % (os.uname()[0], os.uname()[2])
+	if os.uname()[0].lower().count("darwin"):
+		print "#! Warning: The Darwin kernel poorly maintained."
+else:
+	os_name = os.name.upper()
+
+del ZLIBEncoder, ZLIBDecoder, ntDetect, win32_ver, getArchitecture
+
+## File workers.
 def check_file(conf = None, file = None, data = "{}"):
 	if conf:
-		filename = cefile('dynamic/%s/%s' % (conf, file))
+		filename = chkFile('dynamic/%s/%s' % (conf, file))
 	else:
 		filename = 'dynamic/%s' % (file)
 	return initialize_file(filename, data)
 
-def initialize_file(filename, data = "{}"):
-	if len(filename.split('/')) >= 4:
+def initialize_file(name, data = "{}"):
+	name = chkFile(name)
+	if len(name.split('/')) >= 4:
 		return False
-	if os.path.exists(filename):
+	if os.path.exists(name):
 		return True
 	try:
-		folder = os.path.dirname(filename)
+		folder = os.path.dirname(name)
 		if folder and not os.path.exists(folder):
-			os.mkdirs(folder, 0755)
-		with open(filename, 'w') as fp:
-			INFA['fcr'] += 1
-			fp.write(data)
+			os.makedirs(folder, 0755)
+		write_file(name, data)
+		INFA['fcr'] += 1
 	except:
+		lytic_crashlog(initialize_file)
 		return False
 	return True
 
-def read_file(filename):
-	path = cefile(filename)
-	with open(path, 'r') as fp:
-		INFA['fr'] += 1
-		return fp.read()
+def read_file(name):
+	fl = open(chkFile(name), "r")
+	text = fl.read()
+	INFA['fr'] += 1
+	fl.close()
+	return text
 
-def write_file(filename, data, otp = 'w'):
-	path = cefile(filename)
+def write_file(name, data, mode = "w"):
 	with wsmph:
-		with open(path, otp) as fp:
-			INFA['fw'] += 1
-			fp.write(data)
+		fl = open(chkFile(name), mode)
+		fl.write(data)
+		fl.close()
+		INFA['fw'] += 1
 
-################ lytic crashlog ################################################################
-
+## Crashfile writers.
 def Dispatch_fail():
 	crashfile = open('__main__.crash', 'a')
-	Print_Error(limit = None, file = crashfile)
+	print_exc(limit = None, file = crashfile)
 	crashfile.close()
 
 def lytic_crashlog(handler, command = None):
-	DIR, handler, Number, error_body = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), error_()
+	DIR, handler, Number, error_body = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), format_exc()
 	ERRORS[Number] = error_body
 	if ONLINE:
 		if command:
@@ -232,7 +229,7 @@ def lytic_crashlog(handler, command = None):
 			os.mkdir(DIR, 0755)
 		crashfile = open(filename, 'w')
 		INFA['cfw'] += 1
-		Print_Error(limit = None, file = crashfile)
+		print_exc(limit = None, file = crashfile)
 		crashfile.close()
 		if ONLINE:
 			if BOT_OS == 'nt':
@@ -242,15 +239,14 @@ def lytic_crashlog(handler, command = None):
 		else:
 			Print('\n\nCrash file --> %s\nError number --> %s' % (filename, str(Number)), color2)
 	except:
-		Print_Error()
+		print_exc()
 		if ONLINE:
 			delivery(error_body)
 		else:
 			(body, color) = retry_body(error_body, color2)
 			Print(body, color)
 
-################ list handlers #################################################################
-
+## Handlers register.
 def register_message_handler(instance):
 	name = instance.func_name
 	for handler in MESSAGE_HANDLERS:
@@ -328,7 +324,7 @@ def register_command_handler(instance, command, category = [], access = 0, desc 
 	COMMAND_HANDLERS[command] = instance
 	COMMANDS[command] = {'category': category, 'access': access, 'desc': desc, 'syntax': syntax, 'examples': examples}
 
-################ call & execut handlers ########################################################
+## Call, execute handlers.
 
 def ThreadError():
 	return (str(sys.exc_info()[1]) == "can't start new thread")
@@ -483,8 +479,7 @@ def call_command_handlers(command, type, source, body, callee):
 		else:
 			reply(type, source, u'недостаточный доступ')
 
-################ load pugins ###################################################################
-
+## Plugins loader.
 def load_plugins():
 	Print('\n\nLOADING PLUGINS:', color4)
 	ltc, tal, Npl = [], [], []
@@ -520,9 +515,9 @@ def load_plugins():
 		Print(('\n\nThere are %d unloadable plugins:\n' % len(Npl))+Ns, color2)
 	else:
 		Print('\n\nThere are not unloadable plugins!', color3)
+	del tal, ltc, Npl
 
-################ other handlers ################################################################
-
+## Other.
 def load_roster_config():
 	if initialize_file(ROSTER_FILE, str(RSTR)):
 		globals()['RSTR'] = eval(read_file(ROSTER_FILE))
@@ -546,23 +541,25 @@ def read_pipe(command):
 		data = '(error)'
 	return data
 
-read_link = lambda link: urllib.urlopen(link).read()
+read_link = lambda link: urlopen(link).read()
 
 def read_url(link, Browser = False):
-	req = urllib2.Request(link)
+	from urllib2 import Request
+	req = Request(link)
 	if Browser:
 		req.add_header('User-agent', Browser)
-	site = urllib2.urlopen(req)
+	site = urlopen(req)
 	data = site.read()
+	del Request
 	return data
 
 def re_search(body, s0, s2, s1 = "(?:.|\s)+"):
-	comp = compile__("%s(%s?)%s" % (s0, s1, s2), 16)
+	comp = re.compile("%s(%s?)%s" % (s0, s1, s2), 16)
 	body = comp.search(body)
 	if body:
 		body = (body.group(1)).strip()
 	else:
-		raise KeyError()
+		raise KeyError
 	return body
 
 def handler_botnick(conf):
@@ -571,13 +568,13 @@ def handler_botnick(conf):
 	return DEFAULT_NICK
 
 def handler_jid(instance):
-	if isinstance(instance, types.InstanceType):
-		instance = unicode(instance)
-	list = instance.split('/', 1)
-	chat = list[0].lower()
-	if (len(list) == 2) and GROUPCHATS.has_key(chat):
-		if GROUPCHATS[chat].has_key(list[1]):
-			return GROUPCHATS[chat][list[1]]['jid']
+##	if isinstance(instance, types.InstanceType):
+	instance = unicode(instance)
+	List = instance.split('/', 1)
+	chat = List[0].lower()
+	if (len(List) == 2) and GROUPCHATS.has_key(chat):
+		if GROUPCHATS[chat].has_key(List[1]):
+			return GROUPCHATS[chat][List[1]]['jid']
 	return chat
 
 def save_conflist(conf, nick = None, code = None):
@@ -664,19 +661,13 @@ def timeElapsed(or_seconds):
 	return replace_all(text, Elist, '')
 
 def upkeep():
-	try:
-		threading.Timer(360, upkeep).start()
-	except:
-		delivery(u'Внимание! Командуй --> "exec threading.Timer(360, upkeep).start()"')
+	threading.Timer(360, upkeep).start()
 	sys.exc_clear()
-	if BOT_OS == 'nt':
-		import msvcrt; msvcrt.heapmin()
 	gc.collect()
 	if MEMORY_LIMIT and memory_usage() >= MEMORY_LIMIT:
 		sys_exit('memory leak')
 
-################ access handlers ###############################################################
-
+## Access handlers.
 def load_access_levels():
 	if initialize_file(GLOBACCESS_FILE):
 		globals()['GLOBACCESS'] = eval(read_file(GLOBACCESS_FILE))
@@ -720,8 +711,7 @@ def has_access(source, level, conf):
 		return True
 	return False
 
-################ join/leave & message send handlers ############################################
-
+## MUC & Roster handlers.
 def send_join_presece(conf, nick, code = None):
 	Presence = xmpp.protocol.Presence('%s/%s' % (conf, nick))
 	Presence.setStatus(STATUS[conf]['message'])
@@ -807,8 +797,6 @@ def change_bot_status(conf, text, status):
 	Presence.setTag('c', namespace = xmpp.NS_CAPS, attrs = {'node': Caps, 'ver': CapsVer})
 	JCON.send(Presence)
 
-################ role/afl iq handlers ##########################################################
-
 def handler_iq_send(conf, item_name, item, afrls, afrl, rsn = None):
 	stanza = xmpp.Iq(to = conf, typ = 'set')
 	INFA['outiq'] += 1
@@ -854,24 +842,22 @@ def handler_participant(conf, nick, reason):
 def handler_moder(conf, nick, reason):
 	handler_iq_send(conf, 'nick', nick, 'role', 'moderator', reason)
 
-################ message handler & others ######################################################
-
 def roster_check(instance, body):
 	if instance not in ANSWER:
 		QA = random.choice(QUESTIONS.keys())
 		ANSWER[instance] = {'key': QUESTIONS[QA]['answer'], 'tryes': 0}
-		msg(instance, u'Привет! Мне нужно убедиться что ты не бот, %s, У тебя три попытки и 1 минута!' % (QUESTIONS[QA]['question']))
+		msg(instance, u'Привет! Мне нужно убедиться, что ты не бот: %s. У тебя три попытки и 1 минута!' % (QUESTIONS[QA]['question']))
 		INFO['thr'] += 1
 		try:
 			threading.Timer(60, roster_timer,(instance,)).start()
 		except:
-			LAST['null'] += 1
+			pass
 	elif ANSWER[instance]['tryes'] >= 3:
 		roster_ban(instance)
 	elif ANSWER[instance]['key'] == body.lower():
 		RSTR['AUTH'].append(instance)
 		write_file(ROSTER_FILE, str(RSTR))
-		msg(instance, u'Праильно! Вэлкам!')
+		msg(instance, u'Праильно!')
 		ROSTER.Authorize(instance)
 		ROSTER.Subscribe(instance)
 		ROSTER.setItem(instance, instance, ['USERS'])
@@ -885,7 +871,7 @@ def roster_ban(instance):
 	if not instance.count('@conf'):
 		RSTR['BAN'].append(instance)
 		write_file(ROSTER_FILE, str(RSTR))
-		msg(instance, u'Поздравляю ты в бане!')
+		msg(instance, u'Поздравляю, ты в бане!')
 		ROSTER.Unsubscribe(instance)
 		if instance in ROSTER.getItems():
 			ROSTER.delItem(instance)
@@ -915,7 +901,7 @@ def kill_flooder(flooder, roster, nick, instance):
 	try:
 		threading.Timer(360, change_global_access,(flooder, -5)).start()
 	except:
-		LAST['null'] += 1
+		pass
 
 def flood_timer(fromjid, instance, nick):
 	STOP['mto'] += 1
@@ -992,7 +978,7 @@ def MESSAGE_PROCESSING(client, stanza):
 	try:
 		threading.Thread(None, flood_timer, 'timer-%d' % (INFO['thr']),(fromjid, instance, nick,)).start()
 	except:
-		LAST['null'] += 1
+		pass
 	command, Parameters, cbody, rcmd, combody = '', '', '', '', body
 	for key in [bot_nick+key for key in [':',',','>']]:
 		combody = combody.replace(key, '')
@@ -1031,14 +1017,12 @@ def MESSAGE_PROCESSING(client, stanza):
 	else:
 		call_message_handlers(stanza, type, [fromjid, instance, nick], body)
 
-################ presence handler & others #####################################################
-
 def status_code_change(items, conf, nick):
 	for item in items:
 		try:
 			del GROUPCHATS[conf][nick][item]
 		except:
-			LAST['null'] += 1
+			pass
 
 def error_join_timer(conf):
 	if conf in GROUPCHATS:
@@ -1111,7 +1095,7 @@ def PRESENCE_PROCESSING(client, Prs):
 				if MSERVE:
 					UNAVALABLE.remove(conf)
 					full_jid = unicode(full_jid)
-					jid = string.split(full_jid, '/', 1)[0].lower()
+					jid = full_jid.split("/", 1)[0].lower()
 				else:
 					if nick == handler_botnick(conf) and Prs.getAffiliation() in ['admin','owner']:
 						UNAVALABLE.remove(conf)
@@ -1123,9 +1107,9 @@ def PRESENCE_PROCESSING(client, Prs):
 					return
 			else:
 				full_jid = unicode(full_jid)
-				jid = string.split(full_jid, '/', 1)[0].lower()
+				jid = full_jid.split("/", 1)[0].lower()
 			if nick in GROUPCHATS[conf] and GROUPCHATS[conf][nick]['jid'] == jid and GROUPCHATS[conf][nick]['ishere']:
-				LAST['null'] += 1
+				pass
 			else:
 				GROUPCHATS[conf][nick] = {'full_jid': full_jid, 'jid': jid, 'join_date': [that_day(), time.gmtime()], 'idle': time.time(), 'joined': time.time(), 'ishere': True}
 				afl = Prs.getAffiliation()
@@ -1148,78 +1132,56 @@ def PRESENCE_PROCESSING(client, Prs):
 							Thr.name(ThrName)
 							Thr.start()
 					except:
-						LAST['null'] += 1
+						pass
 		if GROUPCHATS.has_key(conf):
 			call_presence_handlers(Prs)
 
-################ iq handler ####################################################################
-
-def IQ_PROCESSING(client, stanza):
-	fromjid = stanza.getFrom()
-	INFO['iq'] += 1
-	instance = fromjid.getStripped().lower()
-	if user_level(fromjid, instance) <= -100:
+def IQ_PROCESSING(client, iq):
+	INFO["iq"] += 1
+	fromjid = iq.getFrom()
+	if user_level(fromjid, fromjid.getStripped().lower()) <= -100:
 		return
-	Itype = stanza.getType()
-	if Itype != 'error':
-		if stanza.getTags('query', {}, xmpp.NS_VERSION):
-			result = stanza.buildReply('result')
-			query = result.getTag('query')
-			query.setTagData('name', "BlackSmith mark.%d [Neutron/Talisman]" % BOT_VER)
-			query.setTagData('version', "%d (r.%d)" % (CORE_MODE, BOT_REV))
-			PyVer = str(sys.version).split()[0]
-			if BOT_OS == 'nt':
-				os_name = read_pipe('ver').strip()
-			elif BOT_OS == 'posix':
-				os_name = os.uname()[0]
-			else:
-				os_name = 'Unknown[OS]'
-			query.setTagData('os', '%s / PyVer[%s]' % (os_name, PyVer))
-			JCON.send(result)
-			raise xmpp.NodeProcessed
-		elif stanza.getTags('time', {}, 'urn:xmpp:time'):
+	if iq.getType() == "get":
+		nsType = iq.getQueryNS()
+		result = iq.buildReply("result")
+		query = result.getTag("query")
+		if nsType == xmpp.NS_VERSION:
+			query.setTagData("name", "BlackSmith mark.1")
+			query.setTagData("version", "%d (r.%d)" % (CORE_MODE, BOT_REV))
+			PyVer = sys.version[:3]
+			query.setTagData("os", os_name)
+		elif nsType == xmpp.NS_URN_TIME:
 			tzo = (lambda tup: tup[0]+"%02d:" % tup[1]+"%02d" % tup[2])((lambda t: tuple(['+' if t < 0 else '-', abs(t)/3600, abs(t)/60%60]))(time.altzone if time.daylight else time.timezone))
 			utc = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
-			result = stanza.buildReply('result')
 			repl = result.addChild('time', {}, [], 'urn:xmpp:time')
 			repl.setTagData('tzo', tzo)
 			repl.setTagData('utc', utc)
-			JCON.send(result)
-			raise xmpp.NodeProcessed
-		elif stanza.getTags('query', {}, xmpp.NS_DISCO_INFO):
+		elif nsType == xmpp.NS_DISCO_INFO:
 			ids = []
 			ids.append({'category': 'client', 'type': 'bot', 'name': 'BlackSmith'})
-			features = [xmpp.NS_DISCO_INFO, xmpp.NS_DISCO_ITEMS, xmpp.NS_MUC, 'urn:xmpp:time', xmpp.NS_PING, xmpp.NS_VERSION, xmpp.NS_PRIVACY, xmpp.NS_ROSTER, xmpp.NS_VCARD, xmpp.NS_DATA, xmpp.NS_LAST, xmpp.NS_COMMANDS, xmpp.NS_TIME, xmpp.NS_MUC_FILTER]
+			features = [xmpp.NS_DISCO_INFO, xmpp.NS_DISCO_ITEMS, xmpp.NS_MUC, xmpp.NS_URN_TIME, xmpp.NS_PING, xmpp.NS_VERSION, xmpp.NS_PRIVACY, xmpp.NS_ROSTER, xmpp.NS_VCARD, xmpp.NS_DATA, xmpp.NS_LAST, xmpp.NS_COMMANDS, xmpp.NS_TIME, xmpp.NS_MUC_FILTER]
 			info = {'ids': ids, 'features': features}
 			pybr = xmpp.browser.Browser()
 			pybr.PlugIn(JCON)
 			pybr.setDiscoHandler({'items': [], 'info': info})
-		elif stanza.getTags('query', {}, xmpp.NS_LAST):
+		elif nsType == xmpp.NS_LAST:
 			last = time.time() - LAST['time']
-			result = stanza.buildReply('result')
-			query = result.getTag('query')
 			query.setAttr('seconds', int(last))
 			query.setData(LAST['cmd'])
-			JCON.send(result)
-			raise xmpp.NodeProcessed
-		elif stanza.getTags('query', {}, xmpp.NS_TIME):
-			timedisp = time.strftime("%a, %d %b %Y %H:%M:%S UTC", time.localtime())
-			timeutc = time.strftime('%Y%m%dT%H:%M:%S', time.gmtime())
-			result = xmpp.Iq('result')
-			result.setTo(fromjid)
-			result.setID(stanza.getID())
-			query = result.addChild('query', {}, [], xmpp.NS_TIME)
-			query.setTagData('utc', timeutc)
-			query.setTagData('display', timedisp)
-			JCON.send(result)
-			raise xmpp.NodeProcessed
-		elif stanza.getTags('ping', {}, xmpp.NS_PING):
-			JCON.send(stanza.buildReply('result'))
-			raise xmpp.NodeProcessed
-	call_iq_handlers(stanza)
+		elif nsType == xmpp.NS_TIME:
+			LocTime = time.strftime("%a, %d %b %Y %H:%M:%S")
+			GMTime = time.strftime("%Y%m%dT%H:%M:%S (GMT)", time.gmtime())
+			tz = time.strftime("%Z")
+			if BOT_OS == "nt":
+				tz = tz.decode("cp1251")
+			query.setTagData("utc", GMTime)
+			query.setTagData("tz", tz)
+			query.setTagData("display", LocTime)
+		client.send(result)
+		raise xmpp.NodeProcessed
+	call_iq_handlers(iq)
 
-################ starting actions & lytic restart ##############################################
-
+## actions start.
 def starting_actions():
 	load_access_levels()
 	form_admins_list()
@@ -1242,7 +1204,7 @@ def lytic_restart():
 	try:
 		threading.Timer(3, col_minus).start()
 	except:
-		LAST['null'] += 1
+		pass
 
 def Dispatch_handler():
 	try:
@@ -1252,9 +1214,9 @@ def Dispatch_handler():
 		call_stage3_init()
 		os._exit(0)
 	except xmpp.StreamError:
-		LAST['null'] += 1
+		pass
 	except xmpp.simplexml.xml.parsers.expat.ExpatError:
-		LAST['null'] += 1
+		pass
 	except KeyboardInterrupt:
 		sys_exit('Interrupt (Ctrl+C)')
 
@@ -1266,9 +1228,8 @@ def sys_exit(exit_reason = 'SUICIDE'):
 		call_stage3_init()
 	Exit('\n\nRESTARTING...\n\nPress Ctrl+C to exit', 0, 30)
 
-################ Bot starting ##################################################################
-
-def lytic():
+## Main.
+def main():
 	Print('\n\n--> BOT STARTED\n\n\nChecking PID...', color4)
 	if os.path.exists(PID_FILE):
 		CACHE = eval(read_file(PID_FILE))
@@ -1292,7 +1253,6 @@ def lytic():
 	Print('\nBot`s PID: %d' % (BOT_PID), color4)
 	write_file(PID_FILE, str(CACHE))
 	globals()['RUNTIMES'] = {'START': CACHE['START'], 'REST': CACHE['REST']}
-	Print('\n\nGENERAL CONFIG:\n\nBOT JID: %s@%s\nJID PASS: %s\nBOSS JID: %s\nBOSS PASS: %s' % (USERNAME, HOST, PASSWORD, BOSS, BOSS_PASS), color4)
 	globals()['JCON'] = xmpp.Client(server = HOST, port = PORT, debug = [])
 	starting_actions()
 	Print('\n\nConnecting...', color4)
@@ -1307,7 +1267,7 @@ def lytic():
 			Print('\nConnection is OK', color3)
 		Print('Using: %s' % str(JCON.isConnected()), color4)
 	else:
-		Exit('\nFucking Connect!!\nSleep for 30 seconds', 0, 30)
+		Exit("\nCan't Connect.\nSleep for 30 seconds", 0, 30)
 	Print('\nAuthentication plese wait...', color4)
 	AUTHENT = JCON.auth(USERNAME, PASSWORD, RESOURCE)
 	if AUTHENT:
@@ -1316,11 +1276,9 @@ def lytic():
 		else:
 			Print('Auth is OK', color3)
 	else:
-		Auth_error = unicode(JCON.lastErr)
-		Error_code = unicode(JCON.lastErrCode)
-		Exit('\nAuth error!!!\nError: %s %s' % (Auth_error, Error_code), 0, 12)
+		Exit('\nAuth error!!!\nError: %s %s' % (`JCON.lastErr`, `JCON.lastErrCode`), 0, 12)
 	globals()['ONLINE'] = True
-	globals()['ROSTER'] = JCON.getRoster()
+	JCON.getRoster()
 	call_stage0_init()
 	JCON.RegisterHandler('message', MESSAGE_PROCESSING)
 	JCON.RegisterHandler('presence', PRESENCE_PROCESSING)
@@ -1334,16 +1292,16 @@ def lytic():
 		Print('\n\nThere are %d rooms in list:' % len(CONFS), color4)
 		for conf in CONFS:
 			list = ['Joined %s' % (conf), 'Joined conference!', 'Can`t join %s' % (conf), 'Unable conference!']
-			if check_nosimbols(conf):
+			if chkUnicode(conf):
 				Number = 0
 			else:
 				Number = 1
 			BOT_NICKS[conf] = CONFS[conf]['nick']
 			try:
-				Fuck = join_groupchat(conf, handler_botnick(conf), CONFS[conf]['code'])
+				muc = join_groupchat(conf, handler_botnick(conf), CONFS[conf]['code'])
 			except:
-				Fuck = True
-			if not Fuck:
+				muc = True
+			if not muc:
 				state, color =  list[Number], color3
 			else:
 				state, color =  list[Number + 2], color2
@@ -1368,13 +1326,13 @@ def lytic():
 if __name__ == "__main__":
 	while True:
 		try:
-			lytic()
+			main()
 		except KeyboardInterrupt:
 			sys_exit('Interrupt (Ctrl+C)')
 		except xmpp.HostUnknown:
 			Print('\n\nError: host unknown!', color2)
 		except:
-			lytic_crashlog(lytic)
-		try_sleep(30)
+			lytic_crashlog(main)
+		try_sleep(5)
 
-### end ########################################################################################
+## That is all...

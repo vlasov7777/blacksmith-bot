@@ -4,7 +4,7 @@
 #  BlackSmith plugin
 #  antispamer_plugin.py
 
-# Coded by: mrDoctorWho [JID: nexus@xmpp.ru] & WitcherGeralt (WitcherGeralt@jabber.ru)
+# Coded by: mrDoctorWho & WitcherGeralt (WitcherGeralt@jabber.ru)
 # for http://witcher-team.ucoz.ru/
 
 SPAMSERVERS = u'jabber.454.ru;jabber.fr;pluser.ru;12jabber.com;jabber.3gnt.org;gabbler.de;jabber.workaround.org;12jabber.com;ipse.zapto.org;jabber80.com;headcounter.org;users.gauner.org;jabber.produm.net'
@@ -14,7 +14,7 @@ def handler_antispamer(type, source, body):
 	if body:
 		filename = 'dynamic/'+source[1]+'/antispamer.txt'
 		body = body.lower()
-		if body in [u'бан', 'ban', '13']:
+		if body in [u'бан', 'ban']:
 			reply(type, source, u'OK. Начинаю банить...')
 			reason = u'спамерский сервер (%s/%s: antispamer plugin)' % (handler_botnick(source[1]), source[2])
 			for jid in SPAMSERVERS.split(';'):
@@ -24,7 +24,7 @@ def handler_antispamer(type, source, body):
 			SPAMSERVINFO['banned'][source[1]] = ban_time
 			write_file(filename, ban_time)
 			reply(type, source, u'Все в бане!')
-		elif body in [u'унбан', 'unban', '0']:
+		elif body in [u'унбан', 'unban']:
 			reply(type, source, u'OK. Начинаю амнистию...')
 			for jid in SPAMSERVERS.split(';'):
 				handler_unban(source[1], jid)
@@ -65,9 +65,10 @@ def load_servers():
 		globals()['SPAMSERVERS'] = re_search(data, servers[0], servers[1])
 		SPAMSERVINFO['update'] = re_search(data, update[0], update[1])
 	except:
+		print_exc()
 		delivery(u'Внимание! Список спамсерверов не подгружен!')
 
-register_command_handler(handler_antispamer, 'спамеры', ['все','разное'], 30, 'Банит основные сервера спамеров, без параметров покажет время бана спамсерверов, а также дату обновления списка спамсерверов и их колличество.', 'спамеры [бан/ban/унбан/unban/лист/list/*]', ['спамеры бан','спамеры унбан','спамеры','спамеры лист'])
+register_command_handler(handler_antispamer, 'спамеры', ['все','разное'], 30, 'Банит основные сервера спамеров, без параметров покажет время бана спамсерверов, а также дату обновления списка и их количество.', 'спамеры [бан/ban/унбан/unban/лист/list/*]', ['спамеры бан','спамеры унбан','спамеры','спамеры лист'])
 
 register_stage1_init(spamer_state)
 register_stage2_init(load_servers)

@@ -1,63 +1,36 @@
-"""
-enconf module. by WitcherGeralt (AlKorgun@gmail.com)
+# /* coding: utf-8 */
+# Conference Encoder.
+# © WitcherGeralt, modifications by simpleApps
 
-BlacSmith bot's module.
-Normalize unsupported chat's path to base16.
-"""
+from string import digits, ascii_letters
+ascii_tab = tuple(digits + ascii_letters + "." + "@" + "/")
 
-from os.path import supports_unicode_filenames, sep as os_dsep
+def chkFile(filename):
+	if filename.count("/") > 1:
+		if not chkUnicode(filename):
+			filename = nameEncode(filename)
+	return filename
 
-AsciiSys = (not supports_unicode_filenames)
-
-del supports_unicode_filenames
-
-from base64 import b16encode as encode_name
-
-__all__ = [
-	"AsciiSys",
-	"CharCase",
-	"AsciiTab",
-	"encode_name",
-	"cefile",
-	"check_nosimbols",
-	"encode_filename"
-			]
-
-__version__ = "2.5"
-
-CharCase = [
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-	"abcdefghijklmnopqrstuvwxyz",
-	"0123456789",
-	'''!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~'''
-			]
-
-AsciiTab = tuple(str.join("", CharCase))
-
-def cefile(path):
-	path = path.replace("\t", "\\t")
-	path = path.replace("\n", "\\n")
-	path = path.replace("\r", "\\r")
-	if (path.count(chr(47)) > 1):
-		if not check_nosimbols(path):
-			path = encode_filename(path)
-	return path
-
-def check_nosimbols(Case):
-	if AsciiSys:
-		for Char in Case:
-			if not AsciiTab.count(Char):
-				return False
+def chkUnicode(body):
+	for symbol in body:
+		if symbol not in ascii_tab:
+			return False
 	return True
 
-def encode_filename(dpath):
-	encodedName = []
-	for Name in dpath.split(chr(47)):
-		At = chr(64)
-		if Name.count(At):
-			list = Name.split(At, 1)
-			chatName = encode_name(list[0].encode("utf-8"))
-			encodedName.append("%s@%s" % (chatName[(len(chatName) / 2):], list[1]))
+def nameEncode(filename):
+	from base64 import b16encode
+	encodedName = str()
+	for name in filename.split("/"):
+		if name.count("."):
+			if name.count("@"):
+				_list = name.split("@", 1)
+				chatname = b16encode(_list[0].encode("utf-8"))
+				encodedName += "%s@%s/" % (chatname[(len(chatname) / 2):].decode("utf-8"), _list[1])
+			else:
+				encodedName += name
 		else:
-			encodedName.append(Name)
-	return os_dsep.join(encodedName)
+			encodedName += u"%s/" % (name)
+	del b16encode
+	return encodedName
+	
+del digits, ascii_letters

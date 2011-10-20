@@ -23,7 +23,7 @@ def afls_roles_userlevel(Prs):
 	jid = handler_jid(conf+'/'+nick)
 	if jid not in GLOBACCESS:
 		if conf in CONFACCESS and jid in CONFACCESS[conf]:
-			LAST['null'] += 1
+			pass
 		elif conf in GROUPCHATS and nick in GROUPCHATS[conf]:
 			afl = Prs.getAffiliation()
 			if afl in AFLS:
@@ -75,7 +75,7 @@ def check_alive_handler():
 	try:
 		threading.Timer(360, check_alive_handler).start()
 	except:
-		LAST['null'] += 1
+		pass
 
 def check_alive_answer(coze, stanza):
 	ID = stanza.getID()
@@ -84,12 +84,12 @@ def check_alive_answer(coze, stanza):
 		if stanza:
 			conf, error = (stanza.getFrom()).getStripped(), stanza.getErrorCode()
 			if error in ['405', None]:
-				LAST['null'] += 1
+				pass
 			else:
 				try:
 					threading.Timer(180, error_join_timer,(conf,)).start()
 				except:
-					LAST['null'] += 1
+					pass
 
 register_presence_handler(afls_roles_userlevel)
 register_presence_handler(check_nick_command)

@@ -136,7 +136,7 @@ def handler_admin_restart(type, source, reason):
 	time.sleep(6)
 	send_unavailable(status)
 	call_stage3_init()
-	Exit('\n\nRESTARTING...', 0, 30)
+	Exit('\n\nRESTARTING...', 0, 5)
 
 def handler_admin_exit(type, source, reason):
 	status = u'Выключение... Command from %s' % (source[2])

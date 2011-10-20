@@ -10,7 +10,7 @@
 #  Als [Als@exploit.in]
 #  WitcherGeralt [WitcherGeralt@rocketmail.com]
 
-import random, string, re, os, base64, simplejson
+import random, re, os
 
 def shell_esc(_shell_):
 	for symbol in [';', '&', '|', '`', '$', '\\', '#']:
