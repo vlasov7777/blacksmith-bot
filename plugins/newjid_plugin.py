@@ -28,7 +28,7 @@ def handler_REGJID(User, Server, codename):
 			try:
 				cl.disconnect()
 			except:
-				LAST['null'] += 1
+				pass
 
 def handler_REGJID_command(type, source, body):
 	timer = (time.time() - LASTREG)
@@ -53,14 +53,14 @@ def handler_REGJID_command(type, source, body):
 						if REG[1]:
 							reply(type, source, u'%s@%s успешно зарегистрирован!' % (aka, host))
 						else:
-							reply(type, source, u'Помоему %s@%s уже был зареган, но мы вроде-бы угадали с паролем :lol:' % (aka, host))
+							reply(type, source, u'По-моему, %s@%s уже был зареган, но мы вроде бы угадали с паролем :lol:' % (aka, host))
 						msg(source[0], codename)
 					elif REG[1] == 'None':
 						reply(type, source, u'Нет соединения с указанным хостом!')
 					elif REG[1] == '0':
 						reply(type, source, u'Критическая ошибка регистрации!')
 					elif REG[1]:
-						reply(type, source, u'Непонятно зарегал (%s@%s) или нет *dknow*' % (aka, host))
+						reply(type, source, u'Не понятно, зарегал (%s@%s) или нет' % (aka, host))
 						msg(source[0], codename)
 					else:
 						reply(type, source, u'Неудачная попытка регистрации...')

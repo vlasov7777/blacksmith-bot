@@ -24,6 +24,6 @@ def handler_shifr(type, source, body):
 		else:
 			reply(type, source, u'слово должно содержать от 2 до 10 букв')
 	else:
-		reply(type, source, u'а что расшифровать то?')
+		reply(type, source, u'а что расшифровать-то?')
 
 register_command_handler(handler_shifr, 'шифр', ['фан','все'], 10,'Расшифровывает любое слово','шифр <слово>', ['шифр админ\nby ferym'])

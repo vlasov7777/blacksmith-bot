@@ -1,134 +1,81 @@
-# |-|-| lytic bot |-|-|
-# -*- coding: utf-8 -*-
-
-#  BlackSmith plugin
-#  quotes_plugin.py
-
-# Some of ideas and part of code:
-#  Gigabyte (gigabyte@ngs.ru)
-#  ferym (ferym@jabbim.org.ru)
-# --> http://jabbrik.ru/
-# Coded By:
-#  WitcherGeralt (WitcherGeralt@jabber.ru)
-#  *MAG* (admin@jabbon.ru)
-# --> http://witcher-team.ucoz.ru/
+#===istalismanplugin===
+# /* coding: utf-8 */
+# © simpleApps Unofficial.
 
 strip_tags = re.compile(r'<[^<>]+>')
 
-def url_dec(body):
-	body = strip_tags.sub('', replace_all(body, {'<br />': ' ', '<br>': '\n'}))
-	body = replace_all(body, {'&nbsp;': ' ', '&lt;': '<', '&gt;': '>', '&quot;': '"', '\t': '', '||||:]': '', '>[:\n': '', '&deg;': '°'})
-	return body.strip()
+def uHTML(text):
+	from HTMLParser import HTMLParser 
+	text = text.replace("<br>", "\n").replace("</br>", "\n").replace("<br />", "\n")
+	text = HTMLParser().unescape(text)
+	del HTMLParser
+	return text
 
-def handler_bashorgru(type, source, body):
+def returnExc():
+	from sys import exc_info
+	if exc_info()[0] or exc_info()[1]:
+		error = "error: %s" % \
+			str(exc_info()[0])+" - "+str(exc_info()[1])
+	else:
+		return None
+	del exc_info
+	return error
+
+def joke(type, source, parameters):
+	from xml.dom import minidom
+	target = urlopen("http://anekdot.odessa.ua/rand-anekdot.php").read()
+	od = re.search(">", target)
+	text = target[od.end():]
+	text = text[:re.search("<a href=", text).start()]
+	reply(type ,source, u"Анекдот: %s" % uHTML(text.decode("cp1251")))
+
+
+def bashorg(type, source, parameters):
+	if parameters.strip()=='':
+		target = urlopen('http://bash.org.ru/random').read()
+	else:
+		target = urlopen('http://bash.org.ru/quote/'+parameters.strip()).read()
 	try:
-		if body:
-			site = read_url('http://bash.org.ru/quote/%s' % (body), 'Mozilla/5.0')
-		else:
-			site = read_url('http://bash.org.ru/random', 'Mozilla/5.0')
-		od = re.search(r'<div class="q">.*?<div class="vote">.*?</div>.*?<div>(.*?)</div>.*?</div>', site, re.DOTALL)
-		b1 = strip_tags.sub('', re_search(site, '<div class="vote">', '</a>').replace('\n', ''))
-		repl = replace_all('%s\n%s' % (b1, od.group(1)), {'&nbsp;': ' ', '<br />': '\n', '&lt;': '<', '&gt;': '>', '&quot;': '"', '\t': '', '||||:]': '', '>[:\n': '', '&deg;': '°', '<br>': '\n', '\n\n\n': '\n', '\n\n': '\n'}).strip()
-		reply(type, source, 'http://bash.org.ru/quote/%s' % (unicode(repl, 'windows-1251')))
+		od = re.search('<div class="vote">',target)
+		b1 = target[od.end():]
+		b1 = b1[:re.search('</a>',b1).start()]
+		b1 = strip_tags.sub('', b1.replace('\n', '').replace(chr(9), ""))
+		b1 = 'http://bash.org.ru/quote/'+b1+'\n'
+		od = re.search(r'<div class="q">.*?<div class="vote">.*?</div>.*?<div>(.*?)</div>.*?</div>', target, re.DOTALL)		
+		message = b1+od.group(1)
+		reply(type,source, uHTML(message.decode('cp1251')))
 	except:
-		reply(type, source, u'очевидно, они опять сменили разметку')
+		reply(type,source, returnExc())
+        
 
-def handler_nyash(type, source, body):
-	try:
-		target = read_url('http://nya.sh/', 'Mozilla/5.0')
-		b1 = re_search(target, '<div align="right" class="sm"><a href="/', '"><b>')
-		post = random.randrange(1, int(b1.split('/')[1]))
-		target = read_link('http://nya.sh/post/%d' % (post))
-		b1 = re_search(target, '</a></div><div class="content">', '</div>')
-		reply(type, source, u'Цитата #%d:\n%s' % (post, unicode(url_dec(b1), 'windows-1251')))
-	except:
-		reply(type, source, u'повторите запрос')
+def ithappens(type, source, parameters):
+	main = urlopen("http://ithappens.ru/random").read()
+	od = re.search("<h3>#", main)
+	id = main[od.end():]
+	id = id[:re.search(":", id).start()].strip()
+	od = re.search('id="story_%s">' % id, main)
+	text = main[od.end():]
+	text = text[:re.search("</p>", text).start()]
+	reply(type,source, u"Цитата #%s:\n%s" % (id, uHTML(text.decode("cp1251"))))
 
-def handler_ithappens(type, source, body):
-	try:
-		target = read_url('http://ithappens.ru/', 'Mozilla/5.0')
-		b1 = re_search(target, '<h3><a href="/', '">')
-		post = random.randrange(1, int(b1.split('/')[1]))
-		target = read_link('http://ithappens.ru/story%d' % (post))
-		b1 = re_search(target, '<p class="text">', '</p>')
-		reply(type, source, u'Цитата #%d:\n%s' % (post, unicode(url_dec(b1), 'windows-1251')))
-	except:
-		reply(type, source, u'повторите запрос')
 
-def handler_sonnik(type, source, body):
-	if body:
+def bashAbyss(type, source, args):
+	if not args:
+		target = urlopen('http://bash.org.ru/abysstop').read()
 		try:
-			target = read_url('http://sonnik.ru/search.php?key=%s' % (body.encode('windows-1251')), 'Mozilla/5.0')
-			data = re_search(target, '</p><br><p class="smalltxt"><strong>', '<br><strong>')
-			data1 = re_search(data, 'html">', '</a>')
-			data2 = re_search(target, '<title>', '</title>')
-			data3 = re_search(target, '<p id="main3">', '</p>')
-			reply(type, source, u'Тема: %s\n%s\n%s' % (unicode(data1, 'windows-1251'), unicode(data2, 'windows-1251'), unicode(data3, 'windows-1251')))
+			id=`random.randrange(1, 25)`
+			od = re.search('<b>'+id+':',target)
+			q1 = target[od.end():]
+			q1 = q1[:re.search('\n</div>',q1).start()]
+			od = re.search('<div>',q1)
+			message = q1[od.end():]
+			message = message[:re.search('</div>',message).start()]	         
+			reply(type,source, uHTML(message.decode('cp1251')))
 		except:
-			reply(type, source, u'Странные у тебя сны... Нет такого в соннике!')
-	else:
-		reply(type, source, u'введи слово')
+			reply(type,source, returnExc())
 
-def handler_anek(type, source, body):
-	try:
-		list = re_search(read_link('http://www.hyrax.ru/cgi-bin/an_java.cgi'), 'td aling=left><br>', '</td></tr></table>').split('<br><br><hr>')
-		list.pop(3)
-		anek = u'Анекдот:\n%s' % unicode(random.choice(list), 'windows-1251')
-		reply(type, source, replace_all(anek, {'<br>': '', '&nbsp;&nbsp;&nbsp;&nbsp;': '\n', '&nbsp;': '', '\n\n': '\n'}).strip())
-	except:
-		reply(type, source, u'что-то сломалось...')
 
-def handler_afor(type, source, body):
-	try:
-		data = re_search(read_url('http://skio.ru/quotes/humour_quotes.php', 'Mozilla/5.0'), '<form id="qForm" method="post"><div align="center">', '</div>')
-		data = strip_tags.sub('', replace_all(data, {'<br />': '\n', '<br>': '\n'}))
-		reply(type, source, unicode(data, 'windows-1251'))
-	except:
-		reply(type, source, u'что-то сломалось...')
-
-def handler_pyorg(type, source, body):
-	try:
-		data = re_search(read_link('http://python.org/'), '<h2 class="news">', '</div>')
-		data, repl = replace_all(strip_tags.sub('', data.replace('<br>','\n')), {'&nbsp;': ' ', '&lt;': '<', '&gt;': '>', '&quot;': '"', '<br />': '\n', '<li>': '\r\n'}).strip(), '\n'
-		for line in data.splitlines():
-			if line.strip():
-				repl += '%s\r\n' % (line)
-		reply(type, source, unicode(repl, 'koi8-r'))
-	except:
-		reply(type, source, u'что-то сломалось...')
-
-HORO_SIGNS = {u'день': 0, u'овен': 1, u'телец': 2, u'близнецы': 3, u'рак': 4, u'лев': 5, u'дева': 6, u'весы': 7, u'скорпион': 8, u'стрелец': 9, u'козерог': 10, u'водолей': 11, u'рыбы': 12}
-
-def handler_horo(type, source, body):
-	if body:
-		body, number = body.lower(), None
-		if body in [u'хелп', 'help']:
-			reply(type, source, '\n'+'\n'.join(sorted(['%s - %d' % (x, y) for x, y in HORO_SIGNS.iteritems()])))
-		else:
-			if HORO_SIGNS.has_key(body):
-				number = HORO_SIGNS[body]
-			elif check_number(body):
-				chislo = int(body)
-				if -1 < chislo < 13:
-					number = chislo
-			if number != None:
-				try:
-					data = re_search(read_link('http://www.hyrax.ru/cgi-bin/bn_html.cgi'), '<!-- %d --><b>' % (number), '<br><br>')
-					horo = replace_all(data, [' </b><br>', '</b><br>'], ':')
-					repl = unicode(horo, 'windows-1251')
-				except:
-					repl = u'что-то сломалось...'
-				reply(type, source, repl)
-			else:
-				reply(type, source, u'не понимаю')
-	else:
-		reply(type, source, u'введи знак')
-
-register_command_handler(handler_pyorg, 'питон', ['фан','все'], 10,'показывает последнии новости с http://python.org/', 'питон', ['питон'])
-register_command_handler(handler_afor, 'афоризм', ['фан','все'], 10,'показывает случайный афоризм с ресурса skio.ru', 'афор', ['афор'])
-register_command_handler(handler_anek, 'анек', ['все', 'фан'], 10, 'Отображает анекдоты с ресурса http://www.hyrax.ru/\nBy *MAG*', 'анек', ['анек'])
-register_command_handler(handler_bashorgru, 'баш', ['фан','все'], 10, 'Показывает случайную цитату (или по номеру) с баш.орг', 'баш', ['баш','баш 3557'])
-register_command_handler(handler_nyash, 'няш', ['фан','все'], 10, 'Показывает случайную цитату из НЯШа .', 'няш', ['няш'])
-register_command_handler(handler_ithappens, 'ит', ['фан','все'], 10, 'Показывает случайную цитату с http://ithappens.ru/', 'ит', ['ит'])
-register_command_handler(handler_sonnik, 'сон', ['фан','все'], 10, 'Сонник.', 'сон', ['сон вода'])
-register_command_handler(handler_horo, 'хоро', ['фан','все'], 10, 'Гороскоп "на сегодня" с сайта http://www.hyrax.ru/\nЧтобы посмотреть общую характеристику дня используем параметр - "день"\nВместо знака можно вводить число (пишем: "хоро хелп")\nBy *MAG* & WitcherGeralt for http://witcher-team.ucoz.ru/', 'хоро [знак]', ['хоро 11','хоро день', 'хоро овен'])
+register_command_handler(bashorg, 'баш', ['фан','инфо','все'], 0, 'Показывает случайную цитату из бора (bash.org.ru). Также может по заданному номеру вывести.', 'бгг', ['бгг 223344','бгг'])
+register_command_handler(ithappens, 'ит', ['фан','граббер','все'], 10, 'Показывает случайную цитату ithappens (http://ithappens.ru).', 'ит', ['ит'])
+register_command_handler(joke, 'анек', ['все', 'new'], 10, 'Показывает случайный анекдот с ресурса http://anekdot.odessa.ua/', 'анекдот', ['анекдот'])
+register_command_handler(bashAbyss, 'борб', ['фан','инфо','все'], 0, 'Показывает случпйную цитату из бездны бора (bash.org.ru).', 'борб', ['борб'])

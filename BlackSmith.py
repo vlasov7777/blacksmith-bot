@@ -138,20 +138,19 @@ GROUPCHATS = {}
 UNAVALABLE = []
 
 MACROS = macros.Macros()
-online = lambda cl: cl.isConnected()
-JCON, ROSTER, ONLINE = None, None, None
 
 wsmph, smph = threading.Semaphore(), threading.Semaphore(60)
 
 from sTools import *
-from platform import win32_ver
 ## os info.
 if os.name == "nt":
 	if not ntDetect().lower().count("windows"):
 		isOS = ntDetect()
 	else:
 		isOS = "Windows"
+	from platform import win32_ver
 	os_name = " ".join([isOS, win32_ver()[0], win32_ver()[2]])
+	del win32_ver
 
 elif os.name == "posix":
 	from platform import dist
@@ -162,10 +161,12 @@ elif os.name == "posix":
 		os_name = "POSIX (%s, %s)" % (os.uname()[0], os.uname()[2])
 	if os.uname()[0].lower().count("darwin"):
 		print "#! Warning: The Darwin kernel poorly maintained."
+	del dist
 else:
 	os_name = os.name.upper()
+os_name = os_name + " " + getArchitecture()
 
-del ZLIBEncoder, ZLIBDecoder, ntDetect, win32_ver, getArchitecture
+del ZLIBEncoder, ZLIBDecoder, ntDetect, getArchitecture
 
 ## File workers.
 def check_file(conf = None, file = None, data = "{}"):
@@ -215,14 +216,14 @@ def Dispatch_fail():
 def lytic_crashlog(handler, command = None):
 	DIR, handler, Number, error_body = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), format_exc()
 	ERRORS[Number] = error_body
-	if ONLINE:
+	if JCON.isConnected():
 		if command:
 			error = u'команды "%s" (%s)' % (command, handler)
 		else:
 			error = u'процесса "%s"' % (handler)
 		delivery(u'При выполнении %s --> произошла ошибка!' % (error))
 	else:
-		Print('\n\nError: can`t execut "%s"!' % (handler), color2)
+		Print('\n\nError: can`t execute "%s"!' % (handler), color2)
 	filename = (DIR+'/error[%s]%s.crash') % (str(INFA['cfw'] + 1), time.strftime('[%H.%M.%S][%d.%m.%Y]', time.localtime()))
 	try:
 		if not os.path.exists(DIR):
@@ -231,7 +232,7 @@ def lytic_crashlog(handler, command = None):
 		INFA['cfw'] += 1
 		print_exc(limit = None, file = crashfile)
 		crashfile.close()
-		if ONLINE:
+		if JCON.isConnected():
 			if BOT_OS == 'nt':
 				delivery(u'Ошибку смотри по команде --> "ошибка %s" (Крэшфайл --> %s)' % (str(Number), filename))
 			else:
@@ -240,7 +241,7 @@ def lytic_crashlog(handler, command = None):
 			Print('\n\nCrash file --> %s\nError number --> %s' % (filename, str(Number)), color2)
 	except:
 		print_exc()
-		if ONLINE:
+		if JCON.isConnected():
 			delivery(error_body)
 		else:
 			(body, color) = retry_body(error_body, color2)
@@ -858,9 +859,9 @@ def roster_check(instance, body):
 		RSTR['AUTH'].append(instance)
 		write_file(ROSTER_FILE, str(RSTR))
 		msg(instance, u'Праильно!')
-		ROSTER.Authorize(instance)
-		ROSTER.Subscribe(instance)
-		ROSTER.setItem(instance, instance, ['USERS'])
+		JCON.Roster.Authorize(instance)
+		JCON.Roster.Subscribe(instance)
+		JCON.Roster.setItem(instance, instance, ['USERS'])
 		del ANSWER[instance]
 		delivery(u'Контакт %s прошел IQ проверку и был добавлен в группу "USERS"!' % (instance))
 	else:
@@ -872,9 +873,9 @@ def roster_ban(instance):
 		RSTR['BAN'].append(instance)
 		write_file(ROSTER_FILE, str(RSTR))
 		msg(instance, u'Поздравляю, ты в бане!')
-		ROSTER.Unsubscribe(instance)
-		if instance in ROSTER.getItems():
-			ROSTER.delItem(instance)
+		JCON.Roster.Unsubscribe(instance)
+		if instance in JCON.Roster.getItems():
+			JCON.Roster.delItem(instance)
 		del ANSWER[instance]
 		delivery(u'Контакт %s не прошел IQ проверку и был добавлен в ростер бан!' % (instance))
 
@@ -1030,15 +1031,15 @@ def error_join_timer(conf):
 
 def roster_subscribe(jid):
 	if jid in ADLIST:
-		ROSTER.Authorize(jid)
-		ROSTER.setItem(jid, jid, ['ADMINS'])
+		JCON.Roster.Authorize(jid)
+		JCON.Roster.setItem(jid, jid, ['ADMINS'])
 	elif RSTR['VN'] == 'off':
-		ROSTER.Unauthorize(jid)
-		if jid in ROSTER.getItems():
-			ROSTER.delItem(jid)
+		JCON.Roster.Unauthorize(jid)
+		if jid in JCON.Roster.getItems():
+			JCON.Roster.delItem(jid)
 	elif jid not in RSTR['BAN'] and RSTR['VN'] in ['iq', 'on']:
-		ROSTER.Authorize(jid)
-		ROSTER.setItem(jid, jid, ['USERS'])
+		JCON.Roster.Authorize(jid)
+		JCON.Roster.setItem(jid, jid, ['USERS'])
 
 def PRESENCE_PROCESSING(client, Prs):
 	fromjid = Prs.getFrom()
@@ -1197,7 +1198,6 @@ def lytic_restart():
 	DCNT['col'] += 1
 	if DCNT['Yes!'] and DCNT['col'] >= 3:
 		DCNT['Yes!'] = False
-		globals()['ONLINE'] = False
 		Print('\n\nDISCONNECTED', color2)
 		call_stage3_init()
 		Exit('\n\nRESTARTING...', 0, 30)
@@ -1222,7 +1222,7 @@ def Dispatch_handler():
 
 def sys_exit(exit_reason = 'SUICIDE'):
 	Print('\n\n%s' % (exit_reason), color2)
-	if ONLINE:
+	if JCON.isConnected():
 		send_unavailable(exit_reason)
 	if (time.time() - INFO['start']) >= 30:
 		call_stage3_init()
@@ -1277,7 +1277,6 @@ def main():
 			Print('Auth is OK', color3)
 	else:
 		Exit('\nAuth error!!!\nError: %s %s' % (`JCON.lastErr`, `JCON.lastErrCode`), 0, 12)
-	globals()['ONLINE'] = True
 	JCON.getRoster()
 	call_stage0_init()
 	JCON.RegisterHandler('message', MESSAGE_PROCESSING)

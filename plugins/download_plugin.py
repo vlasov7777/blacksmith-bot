@@ -49,7 +49,9 @@ def download_handler(type, source, body):
 			delivery(u'Внимание! Качаю --> %s' % (link))
 		dname = build_filename(DIR, name)
 		try:
-			downloaded = urllib.urlretrieve(link, dname)
+			from urllib import urlretrieve
+			downloaded = urlretrieve(link, dname)
+			del urlretrieve
 		except:
 			downloaded = False
 		if downloaded and os.path.exists(dname):

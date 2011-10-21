@@ -182,8 +182,8 @@ def handler_rss_channels(type, source, body):
 			cmd = list[0].strip().lower()
 			if cmd in [u'адд', '+']:
 				Params = body[(body.find(' ') + 1):].strip()
-				if len(string.split(Params)) >= 2:
-					(Name, url) = string.split(Params)
+				if len(Params.split()) >= 2:
+					(Name, url) = Params.split()
 					rss_add_channel(Name, url)
 					reply(type, source, u'Добавил: %s - %s' % (Name, url))
 				else:

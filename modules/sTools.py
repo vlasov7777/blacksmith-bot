@@ -10,7 +10,6 @@ def ZLIBEncoder(__x__):
 			return type(__x__)(repr(x.encode("zlib")) for x in __x__)
 		return repr(__x__.encode("zlib"))
 	except:
-		crashlog("ZLIBEncoder")
 		return __x__
 		
 def ZLIBDecoder(__x__):
@@ -19,7 +18,6 @@ def ZLIBDecoder(__x__):
 			return type(__x__)(repr(x.decode("zlib")) for x in __x__)
 		return repr(__x__.decode("zlib"))
 	except:
-		crashlog("ZLIBDecoder")
 		return __x__
 
 # OS.
