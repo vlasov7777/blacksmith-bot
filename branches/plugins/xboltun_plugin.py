@@ -30,7 +30,7 @@ def handler_get_reply(fraza):
 		if not line:
 			break
 		base_fraza = unicode(line, 'utf-8')
-		(key, otvet) = string.split(base_fraza, ' = ', 1)
+		(key, otvet) = base_fraza.split(' = ', 1)
 		key = key.strip().lower()
 		if fraza.count(key):
 			if otvet.count('/'):

@@ -107,8 +107,7 @@ class MacroCommands:
 		return self.execute_cmd(command, fk, source)
 
 def read_file(filename):
-	if not check_nosimbols(filename):
-		filename = encode_filename(filename)
+	filename = chkFile(filename)
 	try:
 		fl = file(filename, 'r')
 		data = fl.read()
@@ -118,8 +117,7 @@ def read_file(filename):
 	return data
 
 def write_file(filename, data):
-	if not check_nosimbols(filename):
-		filename = encode_filename(filename)
+	filename = chkFile(filename)
 	try:
 		fl = file(filename, 'w')
 		fl.write(data)
