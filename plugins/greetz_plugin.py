@@ -12,7 +12,7 @@ GREETZ = {}
 def handler_greet(type, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
-			args = string.split(body, '=', 1)
+			args = body.split('=', 1)
 			if len(args) == 2:
 				item = args[0].strip()
 				if item in GROUPCHATS[source[1]]:

@@ -200,7 +200,7 @@ def handler_botup_info(type, source, body):
 		(user, system, atime, itime, jtime,) = os.times()
 		repl += u'\n-//- Потратил %.2f секунд процессора\n-//- + %.2f секунд системного времени\n-//- Итог: %.2f секунд общесистемного времени' % (user, system, (user + system))
 	else:
-		repl = u'Упс попоему я выключен! lol'
+		repl = u'Кажется, я выключен...'
 	reply(type, source, repl)
 
 def handler_command_stat(type, source, body):

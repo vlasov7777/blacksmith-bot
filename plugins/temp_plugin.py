@@ -9,7 +9,7 @@
 
 def handler_convert_temperature(type, source, body):
 	if body:
-		splitdata = string.split(body)
+		splitdata = body.split()
 		try:
 			input_value = float(splitdata[0])
 			if len(splitdata) >= 2:
@@ -23,7 +23,7 @@ def handler_convert_temperature(type, source, body):
 				reply(type, source, 'Syntax Error')
 				return
 			unit_system = splitdata[0][-1]
-		unit_system = string.lower(unit_system)
+		unit_system = unit_system.lower()
 		if unit_system == 'c':
 			repl = '%s F' % str(round(input_value * 9 / 5 + 32, 1))
 		else:

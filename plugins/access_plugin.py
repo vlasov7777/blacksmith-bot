@@ -104,15 +104,15 @@ def handler_set_access(type, source, Params):
 						else:
 							reply(type, source, u'нет доступа!')
 					else:
-						reply(type, source, u'Это не жид да и никого с таким ником я незнаю!')
+						reply(type, source, u'Это не жид, да и никого с таким ником я не знаю!')
 				else:
 					reply(type, source, u'Доступ что ты пытаешся дать не является числом!')
 			else:
 				reply(type, source, u'перебор параметров')
 		else:
-			reply(type, source, u'Чего ты он меня хочеш?')
+			reply(type, source, u'Чего ты от меня хочешь?')
 	else:
-		reply(type, source, u'ты не в чате мудило!')
+		reply(type, source, u'ты не в чате!')
 
 def handler_set_access_glob(type, source, Params):
 	if Params:
