@@ -16,38 +16,38 @@ def roster_control(type, source, body):
 			if jid.count('@') and jid.count('.'):
 				action = args[0].strip()
 				if action == '+':
-					ROSTER.Authorize(jid)
-					ROSTER.Subscribe(jid)
+					JCON.Roster.Authorize(jid)
+					JCON.Roster.Subscribe(jid)
 					if len(args) >= 3:
 						if len(args) >= 4:
 							lx = args[3].strip().lower()
 						else:
 							lx = 'el-lx body'
 						if lx in [u'админ', 'admin']:
-							ROSTER.setItem(jid, args[2].strip(), ['ADMINS'])
+							JCON.Roster.setItem(jid, args[2].strip(), ['ADMINS'])
 							reply(type, source, u'добавил в группу "ADMINS" с ником "%s"' % (args[2].strip()))
 						else:
 							RSTR['AUTH'].append(jid)
 							if jid in RSTR['BAN']:
 								RSTR['BAN'].remove(jid)
 							write_file(ROSTER_FILE, str(RSTR))
-							ROSTER.setItem(jid, args[2].strip(), ['USERS'])
+							JCON.Roster.setItem(jid, args[2].strip(), ['USERS'])
 							reply(type, source, u'добавил в группу "USERS" с ником "%s"' % (args[2].strip()))
 					else:
 						RSTR['AUTH'].append(jid)
 						if jid in RSTR['BAN']:
 							RSTR['BAN'].remove(jid)
 						write_file(ROSTER_FILE, str(RSTR))
-						ROSTER.setItem(jid, jid.split('@')[0], ['USERS'])
+						JCON.Roster.setItem(jid, jid.split('@')[0], ['USERS'])
 						reply(type, source, u'добавил в группу "USERS"')
 				elif action == '-':
-					if jid in ROSTER.getItems():
+					if jid in JCON.Roster.getItems():
 						RSTR['BAN'].append(jid)
 						if jid in RSTR['AUTH']:
 							RSTR['AUTH'].remove(jid)
 						write_file(ROSTER_FILE, str(RSTR))
-						ROSTER.Unsubscribe(jid)
-						ROSTER.delItem(jid)
+						JCON.Roster.Unsubscribe(jid)
+						JCON.Roster.delItem(jid)
 						reply(type, source, u'сделано')
 					else:
 						reply(type, source, u'у меня в ростере его и так нет')
@@ -59,7 +59,7 @@ def roster_control(type, source, body):
 			reply(type, source, u'инвалид синтакс')
 	else:
 		list, col = '', 0
-		for jid in ROSTER.getItems():
+		for jid in JCON.Roster.getItems():
 			if not jid.count('@conf'):
 				col = col + 1
 				list += '\n'+str(col)+'. '+jid
@@ -121,7 +121,7 @@ def Handler_Roster_IQ(stanza):
 						IQNT['col'] += 1
 						if IQNT['col'] <= 4:
 							if subscr == 'both':
-								if ROSTER.getSubscription(user) != 'both' and user not in [BOSS, BOSS.lower()]:
+								if JCON.Roster.getSubscription(user) != 'both' and user not in [BOSS, BOSS.lower()]:
 									delivery(u'Контакт %s добавлен в ростер!' % (user))
 							elif subscr == 'remove':
 								delivery(u'Контакт %s удалился из ростера!' % (user))

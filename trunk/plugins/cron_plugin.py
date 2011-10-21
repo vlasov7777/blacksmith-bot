@@ -43,7 +43,7 @@ def execute_cron_handler(commnad_handler, timer, cycles, command, type, source, 
 			try:
 				del CRON['tmrs'][NUM]
 			except:
-				LAST['null'] += 1
+				pass
 
 def handler_cron_command(type, source, body):
 	if body:
@@ -101,7 +101,7 @@ def handler_cron_command(type, source, body):
 													try:
 														del CRON['tmrs'][NUM]
 													except:
-														LAST['null'] += 1
+														pass
 													reply(type, source, u'Ошибка! Не удалось создать cron!')
 												else:
 													CRON['col'] += 1
