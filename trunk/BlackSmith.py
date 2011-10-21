@@ -164,7 +164,7 @@ elif os.name == "posix":
 	del dist
 else:
 	os_name = os.name.upper()
-os_name = os_name + " " + getArchitecture()
+os_name = os_name.strip() + " " + getArchitecture()
 
 del ZLIBEncoder, ZLIBDecoder, ntDetect, getArchitecture
 
