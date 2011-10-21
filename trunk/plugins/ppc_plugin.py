@@ -30,7 +30,7 @@ def handler_facko(type, source, body):
 			if body != handler_botnick(source[1]):
 				args = body.split()
 				if len(args) >= 3:
-					HIT = [u'ногогй', u'битой', u'кулаком', u'хлыстом', u'молотком', u'палкой с гвоздями', u'кастетом', u'ногой с вертухи', u'кирпичом']
+					HIT = [u'ногой', u'битой', u'кулаком', u'хлыстом', u'молотком', u'палкой с гвоздями', u'кастетом', u'ногой с вертухи', u'кирпичом']
 					veapoon = random.choice(HIT)
 					nick = args[0].strip()
 					part = args[1].strip()

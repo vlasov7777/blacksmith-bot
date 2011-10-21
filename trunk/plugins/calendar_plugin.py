@@ -7,8 +7,6 @@
 # Ported by: WitcherGeralt (WitcherGeralt@jabber.ru)
 # http://witcher-team.ucoz.ru/
 
-import calendar
-
 def space2number(number):
 	if number <= 9:
 		number = ' %s ' % (number)
@@ -32,13 +30,15 @@ def month_cal(type, sourse, body):
 		smbl = '_'
 	repl = u'\nПн Вт Ср Чт Пт Сб Вс\n'
 	try:
-		for x in calendar.monthcalendar(year, month):
+		from calendar import monthcalendar
+		for x in monthcalendar(year, month):
 			for y in x:
 				if y:
 					repl += space2number(y)
 				else:
 					repl += '   '
 			repl = repl[:-1]+'\n'
+		del monthcalendar
 		repl = u'\nСейчас: %s%s' % (time.strftime('%d.%m.%Y (%H:%M:%S)', time.gmtime()), repl[:-1].replace(' ', smbl))
 	except:
 		repl = u'Ошибка!'

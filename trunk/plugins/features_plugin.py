@@ -40,7 +40,7 @@ def handler_features_answer(coze, stanza, type, source, nick):
 			for x in stanza:
 				att = x.getAttrs()
 				if att.has_key('var'):
-					attlist = string.split(att['var'])
+					attlist = att['var'].split()
 					for x in attlist:
 						for y in features:
 							if x.count(y):

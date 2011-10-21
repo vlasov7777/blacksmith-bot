@@ -6,8 +6,6 @@
 
 # (C) 2004 Lars Strand
 
-import struct, array, select, binascii, math, getopt, socket
-
 ICMP_DATA_STR = 56
 ICMP_TYPE = 8
 ICMP_TYPE_IP6 = 128
@@ -71,7 +69,7 @@ def PING_START(type, source, alive = 0, timeout = 1.0, ipv6 = 0, number = sys.ma
 			repl +=  (u'Не могу найти %s: Неизвестный хост' % node)+'\n'
 	if not ipv6:
 		try:
-			if int(string.split(host, ".")[-1]) == 0:
+			if int(host.split(".")[-1]) == 0:
 				repl +=  u'Нет поддержки пинга в сети'+'\n'
 		except:
 			repl +=  u'Пинг: ошибка, не корректный запрос'+'\n'
@@ -178,6 +176,7 @@ def PING_START(type, source, alive = 0, timeout = 1.0, ipv6 = 0, number = sys.ma
 	return repl
 
 def handler_NetPING(type, source, body):
+	import array, select, binascii, math, getopt, socket, struct
 	if body:
 		sicle, ipv6, flood, size = 1.0, 0, 0, ICMP_DATA_STR
 		node = body.split()[0].strip()
@@ -203,5 +202,6 @@ def handler_NetPING(type, source, body):
 		reply(type, source, repl)
 	else:
 		reply(type, source, u'Что пингуем?')
+	del array, select, binascii, math, getopt, socket, struct
 
-register_command_handler(handler_NetPING, 'нэтпинг', ['инфо','все'], 10, 'NET PING. Пингует любой адрес/IP-адрес', 'нэтпинг [адрес] [ключи]', ['нэтпинг 127.0.0.1', 'нэтпинг 127.0.0.1 -a', 'нэтпинг 127.0.0.1 -c=5'])
+register_command_handler(handler_NetPING, 'нетпинг', ['инфо','все'], 10, 'NET PING. Пингует любой адрес/IP-адрес', 'нэтпинг [адрес] [ключи]', ['нэтпинг 127.0.0.1', 'нэтпинг 127.0.0.1 -a', 'нэтпинг 127.0.0.1 -c=5'])

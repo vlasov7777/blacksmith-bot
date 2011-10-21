@@ -44,6 +44,7 @@ color1 = chr(27) + "[33m"
 color2 = chr(27) + "[31;1m"
 color3 = chr(27) + "[32m"
 color4 = chr(27) + "[34;1m"
+colored = xmpp.debug.colors_enabled
 
 def retry_body(x, y):
 	try: body = unicode(x)
@@ -51,7 +52,8 @@ def retry_body(x, y):
 	return (body, color)
 
 def text_color(text, color):
-	text = color+text+color0
+	if colored:
+		text = color+text+color0
 	return text
 
 def Print(text, color = False):
@@ -165,8 +167,7 @@ elif os.name == "posix":
 else:
 	os_name = os.name.upper()
 os_name = os_name.strip() + " " + getArchitecture()
-
-del ZLIBEncoder, ZLIBDecoder, ntDetect, getArchitecture
+del ntDetect, getArchitecture
 
 ## File workers.
 def check_file(conf = None, file = None, data = "{}"):
@@ -326,7 +327,6 @@ def register_command_handler(instance, command, category = [], access = 0, desc 
 	COMMANDS[command] = {'category': category, 'access': access, 'desc': desc, 'syntax': syntax, 'examples': examples}
 
 ## Call, execute handlers.
-
 def ThreadError():
 	return (str(sys.exc_info()[1]) == "can't start new thread")
 
@@ -596,7 +596,7 @@ def save_conflist(conf, nick = None, code = None):
 		Print('\n\nError: can`t append conference to chatrooms list file!', color2)
 
 def memory_usage():
-	PID, memory = str(BOT_PID), '0'
+	PID, memory = `BOT_PID`, `0`
 	if BOT_OS == 'posix':
 		lines = read_pipe('ps -o rss -p %s' % (PID)).splitlines()
 		if len(lines) >= 2:
@@ -662,11 +662,12 @@ def timeElapsed(or_seconds):
 	return replace_all(text, Elist, '')
 
 def upkeep():
-	threading.Timer(360, upkeep).start()
-	sys.exc_clear()
-	gc.collect()
-	if MEMORY_LIMIT and memory_usage() >= MEMORY_LIMIT:
-		sys_exit('memory leak')
+	while True:
+		gc.collect()
+		sys.exc_clear()
+		time.sleep(120)
+		if MEMORY_LIMIT and memory_usage() >= MEMORY_LIMIT:
+			sys_exit('memory leak')
 
 ## Access handlers.
 def load_access_levels():
@@ -729,7 +730,7 @@ def join_groupchat(conf, nick, code = None):
 	if conf not in GROUPCHATS:
 		GROUPCHATS[conf] = {}
 	if conf not in STATUS:
-		STATUS[conf] = {'message': 'BlackSmith by WitcherGeralt', 'status': 'chat'}
+		STATUS[conf] = {'message': 'BlackSmith, XMPP BOT, is ready to work.', 'status': 'chat'}
 	save_conflist(conf, nick, code)
 	send_join_presece(conf, nick, code)
 
@@ -858,7 +859,7 @@ def roster_check(instance, body):
 	elif ANSWER[instance]['key'] == body.lower():
 		RSTR['AUTH'].append(instance)
 		write_file(ROSTER_FILE, str(RSTR))
-		msg(instance, u'Праильно!')
+		msg(instance, u'Правильно!')
 		JCON.Roster.Authorize(instance)
 		JCON.Roster.Subscribe(instance)
 		JCON.Roster.setItem(instance, instance, ['USERS'])
@@ -1084,8 +1085,7 @@ def PRESENCE_PROCESSING(client, Prs):
 				if MSERVE:
 					if conf not in UNAVALABLE:
 						UNAVALABLE.append(conf)
-					full_jid = unicode(fromjid)
-					jid = full_jid
+					jid = full_jid = unicode(fromjid)
 				else:
 					if conf not in UNAVALABLE:
 						UNAVALABLE.append(conf)
@@ -1149,7 +1149,6 @@ def IQ_PROCESSING(client, iq):
 		if nsType == xmpp.NS_VERSION:
 			query.setTagData("name", "BlackSmith mark.1")
 			query.setTagData("version", "%d (r.%d)" % (CORE_MODE, BOT_REV))
-			PyVer = sys.version[:3]
 			query.setTagData("os", os_name)
 		elif nsType == xmpp.NS_URN_TIME:
 			tzo = (lambda tup: tup[0]+"%02d:" % tup[1]+"%02d" % tup[2])((lambda t: tuple(['+' if t < 0 else '-', abs(t)/3600, abs(t)/60%60]))(time.altzone if time.daylight else time.timezone))
@@ -1158,8 +1157,7 @@ def IQ_PROCESSING(client, iq):
 			repl.setTagData('tzo', tzo)
 			repl.setTagData('utc', utc)
 		elif nsType == xmpp.NS_DISCO_INFO:
-			ids = []
-			ids.append({'category': 'client', 'type': 'bot', 'name': 'BlackSmith'})
+			ids == [{'category': 'client', 'type': 'bot', 'name': 'BlackSmith'}]
 			features = [xmpp.NS_DISCO_INFO, xmpp.NS_DISCO_ITEMS, xmpp.NS_MUC, xmpp.NS_URN_TIME, xmpp.NS_PING, xmpp.NS_VERSION, xmpp.NS_PRIVACY, xmpp.NS_ROSTER, xmpp.NS_VCARD, xmpp.NS_DATA, xmpp.NS_LAST, xmpp.NS_COMMANDS, xmpp.NS_TIME, xmpp.NS_MUC_FILTER]
 			info = {'ids': ids, 'features': features}
 			pybr = xmpp.browser.Browser()
@@ -1208,7 +1206,7 @@ def lytic_restart():
 
 def Dispatch_handler():
 	try:
-		JCON.Process(4)
+		JCON.Process(8)
 	except xmpp.Conflict:
 		Print('\n\nError: XMPP Conflict!', color2)
 		call_stage3_init()
@@ -1247,7 +1245,7 @@ def main():
 				Print(killed, color3)
 			CACHE = {'PID': BOT_PID, 'START': time.time(), 'REST': []}
 		else:
-			CACHE['REST'].append(time.strftime('%d.%m.%Y (%H:%M:%S)', time.localtime()))
+			CACHE['REST'].append(time.strftime('%d.%m.%Y (%H:%M:%S)'))
 	else:
 		CACHE = {'PID': BOT_PID, 'START': time.time(), 'REST': []}
 	Print('\nBot`s PID: %d' % (BOT_PID), color4)
@@ -1309,18 +1307,19 @@ def main():
 		Print('\n\nError: unable to create chatrooms list file!', color2)
 	Print('\n\nBlackSmith is ready to work!\n\n', color3)
 	INFO['start'] = time.time()
-	upkeep()
+	threading.Thread(None, upkeep, upkeep, (),).start()
 	call_stage2_init()
 	CAN_LIVE = True
 	while CAN_LIVE:
 		try:
 			Dispatch_handler()
-		except:
+		except Exception, e:
 			Dispatch_fail()
 			INFO['errs'] += 1
 			if INFO['errs'] >= 7:
 				CAN_LIVE = False
-	sys_exit('Dispatch Errors')
+				sys_exit('Fatal exception: %s' % `e`)
+				break
 
 if __name__ == "__main__":
 	while True:

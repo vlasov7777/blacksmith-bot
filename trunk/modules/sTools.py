@@ -3,23 +3,6 @@
 # This program published under GPL v3 license
 # See LICENSE.GPL for more details
 
-## ZLIB.
-def ZLIBEncoder(__x__):
-	try:
-		if type(__x__) != str:
-			return type(__x__)(repr(x.encode("zlib")) for x in __x__)
-		return repr(__x__.encode("zlib"))
-	except:
-		return __x__
-		
-def ZLIBDecoder(__x__):
-	try:
-		if type(__x__) != str:
-			return type(__x__)(repr(x.decode("zlib")) for x in __x__)
-		return repr(__x__.decode("zlib"))
-	except:
-		return __x__
-
 # OS.
 def getArchitecture():
 	from struct import calcsize

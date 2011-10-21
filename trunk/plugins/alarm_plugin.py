@@ -56,7 +56,7 @@ def alarm_data_save(jid, data):
 def handler_alarm_work(conf, nick, afl, role):
 	jid = handler_jid(conf+'/'+nick)
 	if jid in ALARM_LIST:
-		msg(conf+'/'+nick, u'!Напоминаю: '+ALARM_LIST[jid])
+		msg(conf+'/'+nick, u'Напоминаю: '+ALARM_LIST[jid])
 
 def alarm_file_init():
 	if initialize_file(ALARM_FILE):

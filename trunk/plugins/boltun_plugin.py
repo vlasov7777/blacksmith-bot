@@ -54,7 +54,7 @@ def boltun_base(base, base_name, type, source, Params):
 		fraza = Params[(Params.find(' ') + 1):].strip()
 		action = body[0].strip()
 		if action == '+':
-			args = string.split(fraza, '=', 1)
+			args = fraza.split('=', 1)
 			if len(args) == 2:
 				if args[1].count('/'):
 					key, items = args[0].strip().lower(), args[1].split('/')

@@ -19,7 +19,7 @@ def handler_REGJID(User, Server, codename):
 		except:
 			return [False, '0']
 		try:
-			Auth = cl.auth(User, codename, 'QIP')
+			Auth = cl.auth(User, codename, 'BS-BOT')
 		except:
 			Auth = False
 		return [Auth, REG]

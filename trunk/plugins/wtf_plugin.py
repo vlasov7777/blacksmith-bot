@@ -14,13 +14,13 @@ WTF_FILE = 'dynamic/wtf.txt'
 
 def handler_wtf_global(type, source, body):
 	if body:
-		args = string.split(body, '=', 1)
+		args = body.slit('=', 1)
 		if len(args) == 2:
 			try:
 				globaldb = eval(read_file(WTF_FILE))
 			except:
 				globaldb = {}
-			key, value = string.lower(args[0]).strip(), args[1].strip()
+			key, value = args[0].lower().strip(), args[1].strip()
 			if not value:
 				if globaldb.has_key(key):
 					del globaldb[key]
@@ -40,7 +40,7 @@ def handler_wtf_global(type, source, body):
 def handler_wtf_lokal(type, source, body):
 	if body:
 		if source[1] in GROUPCHATS:
-			args = string.split(body, '=', 1)
+			args = body.split('=', 1)
 			if len(args) == 2:
 				base = 'dynamic/'+source[1]+'/localdb.txt'
 				try:
@@ -51,7 +51,7 @@ def handler_wtf_lokal(type, source, body):
 					localdb = eval(read_file(base))
 				except:
 					localdb = {}
-				key, value = string.lower(args[0]).strip(), args[1].strip()
+				key, value = args[0].lower().strip(), args[1].strip()
 				if not globaldb.has_key(key):
 					if not value:
 						if localdb.has_key(key):
@@ -94,7 +94,7 @@ def handler_wtf_public(type, source, body):
 					localdb = eval(read_file(base))
 				except:
 					localdb = {}
-				key = string.lower(body).strip()
+				key = body.lower().strip()
 				if globaldb.has_key(key):
 					WTF_TIMES[source[1]] = time.time()
 					reply(type, source, '### '+key+' :\n\n'+globaldb[key])
@@ -141,7 +141,7 @@ def handler_wtf_private(type, source, body):
 						localdb = eval(read_file(base))
 					except:
 						localdb = {}
-					key = string.lower(ckey).strip()
+					key = ckey.lower().strip()
 					if globaldb.has_key(key):
 						WTF_TIMES[source[1]] = time.time()
 						if type == 'public':

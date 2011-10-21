@@ -33,7 +33,7 @@ def opros_results():
 			col = col + 1
 			ovet += str(col)+'. '+usr+': '+OPROS_USERS[usr]['text']+'\n'
 	if col != 0:
-		result = (u'\n### Мнения юзеров (высказалось %s юзеров):\n' % str(col))+ovet
+		result = (u'\n### Мнения юзеров (высказалось %d юзеров):\n' % col)+ovet
 	else:
 		result = u'\n### Мнений небыло высказано'
 	return items+result

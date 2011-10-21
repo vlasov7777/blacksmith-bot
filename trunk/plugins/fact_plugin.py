@@ -15,8 +15,8 @@ def fact_tld(query):
 		line = fl.readline()
 		if not line:
 			return u'не нашёл'
-		(key, value) = string.split(line, ': ', 1)
-		if string.lower(query).strip() == string.lower(key).strip():
+		(key, value) = linesplit(': ', 1)
+		if query.lower().strip() == key.lower().strip():
 			return value.strip()
 
 def handler_fact_tld(type, source, body):
