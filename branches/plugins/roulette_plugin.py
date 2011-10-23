@@ -14,7 +14,7 @@ def handler_roulette_one(type, source, nick):
 	if source[1] in GROUPCHATS:
 		if nick:
 			if not user_level(source[0], source[1]) < 15 and nick != source[2]:
-				reply(type, source, u'ты можеш стрелять только в себя')
+				reply(type, source, u'ты можешь стрелять только в себя')
 				return
 			if not nick in GROUPCHATS[source[1]] or not GROUPCHATS[source[1]][nick]['ishere']:
 				reply(type, source, u'юзера с таким ником здесь нет')

@@ -13,8 +13,6 @@ def handler_more(type, source, body):
 	if type == 'public' and MORE.has_key(source[1]):
 		if MORE[source[1]]:
 			reply(type, source, MORE[source[1]])
-	else:
-		reply(type, source, u'а смысл?')
 
 def handler_more_outmsg(target, body, obody):
 	if MORE.has_key(target):

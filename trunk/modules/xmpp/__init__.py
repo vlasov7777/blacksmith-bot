@@ -1,7 +1,6 @@
 # $Id: __init__.py,v 1.9 2005/03/07 09:34:51 snakeru Exp $
 
-"""
-All features of xmpppy library contained within separate modules.
+"""All features of xmpppy library contained within separate modules.
 At present there are modules:
 simplexml - XML handling routines
 protocol - jabber-objects (I.e. JID and different stanzas and sub-stanzas) handling routines.
@@ -25,7 +24,7 @@ session-related info. Though if you are not accessing instances variables direct
 and use only methods for access all values you should not have any problems.
 
 """
-
-import simplexml,protocol,debug,auth,transports,roster,dispatcher,features,browser,filetransfer,commands
+del __doc__
+import simplexml,protocol,debug,auth,dispatcher,features,browser
 from client import *
 from protocol import *

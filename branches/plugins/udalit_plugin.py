@@ -27,6 +27,6 @@ def handler_user_del(type, source, body):
 		else:
 			reply(type, source, u'попробуй чуть позже')
 	else:
-		reply(type, source, u'Гг, придурок')
+		reply(type, source, u'Много хочешь')
 
 register_command_handler(handler_user_del, 'удалить', ['все','фан'], 10, 'удаляет конференцию', 'удалить', ['удалить'])

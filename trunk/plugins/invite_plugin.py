@@ -19,7 +19,7 @@ def handler_send_invite(type, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			timer = (time.time() - invite_timer(source[1]))
-			if timer >= 1200:
+			if timer >= 300:
 				args = body.split()
 				nick = args[0].strip()
 				if nick.count('@') and nick.count('.'):
@@ -51,8 +51,8 @@ def handler_send_invite(type, source, body):
 				else:
 					reply(type, source, u'Я его незнаю!')
 			else:
-				strtimer = timeElapsed(1200 - timer)
-				reply(type, source, u'Приглашения можно отсылать 1 раз в 20 мин. (Осталось: %s)' % (strtimer))
+				strtimer = timeElapsed(300 - timer)
+				reply(type, source, u'Приглашения можно отсылать 1 раз в 5 мин. (Осталось: %s)' % (strtimer))
 		else:
 			reply(type, source, u'Чего нада!?')
 	else:

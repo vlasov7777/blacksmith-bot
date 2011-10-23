@@ -63,7 +63,7 @@ def quiz_new_question():
 	fl = file(QUIZ_FILE)
 	for n in range(line_num + 1):
 		if n == line_num:
-			(question, answer) = string.split(fl.readline().strip(), '|', 1)
+			(question, answer) = fl.readline().strip().split('|', 1)
 			return (unicode(question, 'utf-8'), unicode(answer, 'utf-8'))
 		else:
 			fl.readline()

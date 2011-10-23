@@ -38,7 +38,7 @@ def handler_help_help(type, source, body):
 	reply(type, source, mess)
 
 def handler_command_list(type, source, body):
-	acc100, acc80, acc30, acc20, acc15, acc10 = [], [], [], [], [], []
+	acc100 = acc80 = acc30 = acc20 = acc15 = acc10 = list()
 	cat = (u'все').encode('utf-8')
 	if source[1] in PREFIX:
 		pfx = u' (Командный префикс - "'+PREFIX[source[1]]+'"):'

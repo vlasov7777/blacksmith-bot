@@ -16,7 +16,7 @@ def bomb(type, source, args):
 		if args:
 			nick = args.strip()
 			if user_level(source[0], source[1]) < 15 and nick != source[2]:
-				reply(type, source, u'ты можеш взрывать только в себя')
+				reply(type, source, u'ты можешь взрывать только себя')
 				return
 			if not nick in GROUPCHATS[source[1]] or not GROUPCHATS[source[1]][nick]['ishere']:
 				reply(type, source, u'юзера с таким ником здесь нет')

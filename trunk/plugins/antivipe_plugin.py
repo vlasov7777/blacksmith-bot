@@ -4,7 +4,7 @@
 #  Endless / BlackSmith plugin
 #  antivipe_plugin.py
 
-# Ported from AntiVipe bot: by Avinar (avinar@xmpp.ru)
+# Ported from AntiVipe bot: by Avinar (avinar@xmpp.ru) # ololo?
 # ReCoded: by WitcherGeralt (WitcherGeralt@jabber.ru)
 
 TRUSTED_SERVERS = ['jabber.ru','xmpp.ru','jabbers.ru','xmpps.ru','talkonaut.com','jabber.org','gtalk.com','gmail.com','jabberon.ru','jabbrik.ru']

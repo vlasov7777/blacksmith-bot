@@ -217,12 +217,13 @@ def Dispatch_fail():
 def lytic_crashlog(handler, command = None):
 	DIR, handler, Number, error_body = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), format_exc()
 	ERRORS[Number] = error_body
+	text = str()
 	if JCON.isConnected():
 		if command:
 			error = u'команды "%s" (%s)' % (command, handler)
 		else:
 			error = u'процесса "%s"' % (handler)
-		delivery(u'При выполнении %s --> произошла ошибка!' % (error))
+		text += u'При выполнении %s --> произошла ошибка!' % (error)
 	else:
 		Print('\n\nError: can`t execute "%s"!' % (handler), color2)
 	filename = (DIR+'/error[%s]%s.crash') % (str(INFA['cfw'] + 1), time.strftime('[%H.%M.%S][%d.%m.%Y]', time.localtime()))
@@ -235,9 +236,9 @@ def lytic_crashlog(handler, command = None):
 		crashfile.close()
 		if JCON.isConnected():
 			if BOT_OS == 'nt':
-				delivery(u'Ошибку смотри по команде --> "ошибка %s" (Крэшфайл --> %s)' % (str(Number), filename))
+				delivery(text + u' Ошибку смотри по команде --> "ошибка %s" (Крэшфайл --> %s)' % (str(Number), filename))
 			else:
-				delivery(u'Ошибку смотри по командам --> "ошибка %s", "sh cat %s"' % (str(Number), filename))
+				delivery(text + u' Ошибку смотри по командам --> "ошибка %s", "sh cat %s"' % (str(Number), filename))
 		else:
 			Print('\n\nCrash file --> %s\nError number --> %s' % (filename, str(Number)), color2)
 	except:
@@ -663,9 +664,9 @@ def timeElapsed(or_seconds):
 
 def upkeep():
 	while True:
-		gc.collect()
 		sys.exc_clear()
-		time.sleep(120)
+		gc.collect()
+		time.sleep(60)
 		if MEMORY_LIMIT and memory_usage() >= MEMORY_LIMIT:
 			sys_exit('memory leak')
 
@@ -757,6 +758,7 @@ def delivery(body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
 	INFA['outmsg'] += 1
+	if not INFO["creporter"]: return
 	try:
 		JCON.send(xmpp.Message(BOSS, body, 'chat'))
 	except:
@@ -991,7 +993,6 @@ def MESSAGE_PROCESSING(client, stanza):
 		return
 	rcmd = combody.split()[0].lower()
 	if instance in COMMOFF and rcmd in COMMOFF[instance]:
-##		reply(type, [fromjid, instance, nick], u'команда "%s" здесь отключена' % (rcmd))
 		return
 	cbody = MACROS.expand(combody, [fromjid, instance, nick])
 	if instance in MACROS.macrolist.keys():
@@ -1002,12 +1003,11 @@ def MESSAGE_PROCESSING(client, stanza):
 	if instance in PREFIX and rcmd not in cmds:
 		NotPfx = Prefix_state(body, bot_nick)
 		if NotPfx or ltype == 'chat':
-			if not COMMANDS.has_key(command) and command[:1] in ['!','@','#','.','*']:
+			if not COMMANDS.has_key(command) and command[:1] in ["!", "@", "#", ".", "*", "?", "`"]:
 				command = command[1:]
 		else:
 			command = command_Prefix(instance, command)
 	if instance in COMMOFF and command in COMMOFF[instance]:
-##		reply(type, [fromjid, instance, nick], u'команда "%s" здесь отключена' % (command))
 		return
 	if cbody.count(' '):
 		Parameters = cbody[(cbody.find(' ') + 1):].strip()
@@ -1157,8 +1157,8 @@ def IQ_PROCESSING(client, iq):
 			repl.setTagData('tzo', tzo)
 			repl.setTagData('utc', utc)
 		elif nsType == xmpp.NS_DISCO_INFO:
-			ids == [{'category': 'client', 'type': 'bot', 'name': 'BlackSmith'}]
-			features = [xmpp.NS_DISCO_INFO, xmpp.NS_DISCO_ITEMS, xmpp.NS_MUC, xmpp.NS_URN_TIME, xmpp.NS_PING, xmpp.NS_VERSION, xmpp.NS_PRIVACY, xmpp.NS_ROSTER, xmpp.NS_VCARD, xmpp.NS_DATA, xmpp.NS_LAST, xmpp.NS_COMMANDS, xmpp.NS_TIME, xmpp.NS_MUC_FILTER]
+			ids = [{'category': 'client', 'type': 'bot', 'name': 'BlackSmith'}]
+			features = [xmpp.NS_DISCO_INFO, xmpp.NS_DISCO_ITEMS, xmpp.NS_MUC, xmpp.NS_URN_TIME, xmpp.NS_PING, xmpp.NS_VERSION, xmpp.NS_ROSTER, xmpp.NS_VCARD, xmpp.NS_DATA, xmpp.NS_LAST, xmpp.NS_TIME]
 			info = {'ids': ids, 'features': features}
 			pybr = xmpp.browser.Browser()
 			pybr.PlugIn(JCON)
@@ -1307,17 +1307,15 @@ def main():
 		Print('\n\nError: unable to create chatrooms list file!', color2)
 	Print('\n\nBlackSmith is ready to work!\n\n', color3)
 	INFO['start'] = time.time()
-	threading.Thread(None, upkeep, upkeep, (),).start()
+	threading.Thread(None, upkeep, "upkeeper", (),).start()
 	call_stage2_init()
-	CAN_LIVE = True
-	while CAN_LIVE:
+	while True:
 		try:
 			Dispatch_handler()
 		except Exception, e:
 			Dispatch_fail()
 			INFO['errs'] += 1
 			if INFO['errs'] >= 7:
-				CAN_LIVE = False
 				sys_exit('Fatal exception: %s' % `e`)
 				break
 

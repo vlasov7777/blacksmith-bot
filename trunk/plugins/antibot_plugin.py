@@ -12,13 +12,12 @@ BOTS = 'Jaskier/BlackSmith/AnGeL/ταλιςμαη/talisman/Talisman/Neutron/Ют
 EXCEPT_LIST = 'dynamic/exceptions.txt'
 
 EXCEPTIONS = []
-IDS_ANTIBOT = []
 ANTIBOT_LIST = {}
 ANTIBOT_MESS = []
 
 def check_botname(item):
-	for simbol in BOTS.split('/'):
-		if item.count(simbol):
+	for bot in BOTS.split('/'):
+		if item.count(bot):
 			return True
 	return False
 
@@ -37,7 +36,7 @@ def antibot_leave(conf):
 		elif len(ANTIBOT_LIST[conf]) >= 2:
 			del ANTIBOT_LIST[conf]
 			leave_groupchat(conf, u'Слишком много ботов!')
-			delivery(u'В "%s" было слишком многа ботов и я ушел!' % (conf))
+			delivery(u'В "%s" было слишком много ботов и я ушел!' % (conf))
 		if conf in ANTIBOT_MESS:
 			ANTIBOT_MESS.remove(conf)
 
@@ -47,9 +46,6 @@ def handler_antibot_join(conf, nick, afl, role):
 			conf_nick = conf+'/'+nick
 			iq = xmpp.Iq(to = conf_nick, typ = 'get')
 			INFA['outiq'] += 1
-			ID = 'vers_'+str(INFA['outiq'])
-			IDS_ANTIBOT.append(ID)
-			iq.setID(ID)
 			iq.addChild('query', {}, [], xmpp.NS_VERSION)
 			if conf not in ANTIBOT_LIST:
 				ANTIBOT_LIST[conf] = []
@@ -58,24 +54,21 @@ def handler_antibot_join(conf, nick, afl, role):
 				JCON.SendAndCallForResponse(iq, handler_antibot_version, {'conf': conf, 'jid': jid})
 
 def handler_antibot_version(coze, stanza, conf, jid):
-	ID = stanza.getID()
-	if ID in IDS_ANTIBOT:
-		IDS_ANTIBOT.remove(ID)
-		if stanza:
-			if stanza.getType() == 'result':
-				Props = stanza.getQueryChildren()
-				for Pr in Props:
-					if Pr.getName() == 'name':
-						name = Pr.getData()
-						if check_botname(name) and conf in ANTIBOT_LIST:
-							ANTIBOT_LIST[conf].append(jid)
-							if len(ANTIBOT_LIST[conf]) >= 2:
-								if conf not in ANTIBOT_MESS:
-									ANTIBOT_MESS.append(conf); msg(conf, u'Здесь слишком много ботов! Если за 15 минут лишние не будут удалены - я сваливаю...')
-								try:
-									threading.Timer(900, antibot_leave,(conf,)).start()
-								except:
-									LAST['null'] += 1
+	if stanza:
+		if stanza.getType() == 'result':
+			Props = stanza.getQueryChildren()
+			for Pr in Props:
+				if Pr.getName() == 'name':
+					name = Pr.getData()
+					if check_botname(name) and conf in ANTIBOT_LIST:
+						ANTIBOT_LIST[conf].append(jid)
+						if len(ANTIBOT_LIST[conf]) >= 2:
+							if conf not in ANTIBOT_MESS:
+								ANTIBOT_MESS.append(conf); msg(conf, u'Здесь слишком много ботов! Если в течение 15 минут лишние не будут удалены - я сваливаю...')
+							try:
+								threading.Timer(900, antibot_leave,(conf,)).start()
+							except:
+								pass
 
 def handler_antibot_exceptions(type, source, body):
 	if body:
