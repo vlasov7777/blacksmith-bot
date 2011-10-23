@@ -7,7 +7,7 @@
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 # http://witcher-team.ucoz.ru/
 
-PRFX_LIST = ['!','@','#','.','*']
+PRFX_LIST = ["!", "@", "#", ".", "*", "?", "`"]
 
 def handler_set_prefix(type, source, prefix):
 	if source[1] in GROUPCHATS:
@@ -61,19 +61,19 @@ def handler_admin_join(type, source, body):
 					join_groupchat(conf, handler_botnick(conf))
 				time.sleep(6)
 				if GROUPCHATS.has_key(conf):
-					reply(type, source, u'Я зашёл в -> "%s"' % (conf))
+					reply(type, source, u'Я зашёл в "%s"' % (conf))
 					info = u'Я от %s' % (source[2])
 					if reason:
-						info += '\nReason: %s' % (reason)
+						info += '\nПричина: %s' % (reason)
 					msg(conf, info)
 				else:
-					reply(type, source, u'Не дополз до -> "%s"...' % (conf))
+					reply(type, source, u'Не дополз до "%s"...' % (conf))
 			else:
 				reply(type, source, u'Я итак там! Кончай бухать!')
 		else:
 			reply(type, source, u'Это не конференция и я туда не пойду')
 	else:
-		reply(type, source, u'Ну и что же ты хочеш?')
+		reply(type, source, u'Ну и что же ты хочешь?')
 
 def handler_admin_rejoin(type, source, body):
 	if body:
@@ -182,23 +182,22 @@ def handler_timeup_info(type, source, body):
 def handler_botup_info(type, source, body):
 	if INFO['start']:
 		PID, Now_time = str(BOT_PID), time.time()
-		repl = u'\n*// Статистика работы (Bot PID: %s):\n-//- Рабочая сессия %s' % (PID, timeElapsed(Now_time - RUNTIMES['START']))
+		repl = u'\n*** Статистика работы (Bot PID: %s):\n• Рабочая сессия %s' % (PID, timeElapsed(Now_time - RUNTIMES['START']))
 		if RUNTIMES['REST']:
-			repl += u'\n-//- Последняя сессия %s' % (timeElapsed(Now_time - INFO['start']))
-		repl += u'\n-//- Обработано %s презенсов и %s iq-запросов\n-//- Отправлено %s сообщений и %s iq-запросов' % (str(INFO['prs']), str(INFO['iq']), str(INFA['outmsg']), str(INFA['outiq']))
-		repl += u'\n-//- Произошло %s ошибок и %s Dispatch Errors\n-//- Получено %s сообщений\n-//- Выполнено %s команд' % (str(len(ERRORS.keys())), str(INFO['errs']), str(INFO['msg']), str(INFO['cmd']))
-		repl += u'\n-//- Создано файлов %s\n-//- Прочтений файлов %s\n-//- Записей в файлах %s\n-//- Записей crash логов %s' % (str(INFA['fcr']), str(INFA['fr']), str(INFA['fw']), str(INFA['cfw']))
+			repl += u'\n• Последняя сессия %s' % (timeElapsed(Now_time - INFO['start']))
+		repl += u'\n• Обработано %i презенсов и %i iq-запросов\n• Отправлено %i сообщений и %i iq-запросов' % (INFO['prs'], INFO['iq'], INFA['outmsg'], INFA['outiq'])
+		repl += u'\n• Произошло %i ошибок и %i ошибок диспатчера\n• Получено %i сообщений\n• Выполнено %i команд' % (len(ERRORS.keys()), INFO['errs'], INFO['msg'], INFO['cmd'])
+		repl += u'\n• Создано файлов: %i\n• Прочтений файлов: %i\n• Записей в файлах: %i\n• Записей крэш-логов: %i' % (INFA['fcr'], INFA['fr'], INFA['fw'], INFA['cfw'])
 		memory = memory_usage()
 		if memory:
-			repl += u'\n-//- Потратил %dкб оперативной памяти' % (memory)
-		col, acol = 0, 0
+			repl += u'\n• Использую %.2f МБ оперативной памяти' % (round(memory) / 1024)
+		acol = 0
 		for xthr in threading.enumerate():
-			col += 1
 			if xthr.isAlive():
 				acol += 1
-		repl += u'\n-//- Создано %s тредов, %s(%s) из них активно' % (INFO['thr'], acol, col)
+		repl += u'\n• Создано %i потоков, %i из них активно' % (INFO['thr'], acol)
 		(user, system, atime, itime, jtime,) = os.times()
-		repl += u'\n-//- Потратил %.2f секунд процессора\n-//- + %.2f секунд системного времени\n-//- Итог: %.2f секунд общесистемного времени' % (user, system, (user + system))
+		repl += u'\n• Потратил %.2f секунд процессора, %.2f секунд системы\n• Итог: %.2f секунд общесистемного времени' % (user, system, (user + system))
 	else:
 		repl = u'Кажется, я выключен...'
 	reply(type, source, repl)
@@ -233,15 +232,39 @@ def load_conf_prefix(conf):
 	else:
 		delivery(u'Внимание! Не удалось создать prefix.txt для "%s"!' % (conf))
 
+def crashReport_cfg(mType, source, argv):
+	answer = u"Сделано."
+	if argv.strip() in ["1", "вкл"]:
+		if INFO["creporter"]:
+			answer = u"Уже включено."
+		else:
+			INFO["creporter"] = 1
+	elif argv.strip() in ["0", "выкл"]:
+		if not INFO["creporter"]:
+			answer = u"Не включено..."
+		else:
+			INFO["creporter"] = 0
+	else:
+		answer = "Вы%s подписаны на сообщения об ошибках." % ("" if INFO["creporter"] else " не")
+	write_file("dynamic/creporter.txt", `INFO["creporter"]`)
+	reply(mType, source, answer)
+
+def crashReport_cfg_loader():
+	if check_file(None, "creporter.txt", "1"):
+		INFO["creporter"] = read_file("dynamic/creporter.txt")
+
 register_command_handler(handler_set_prefix, 'префикс', ['админ','все'], 30, 'Установить префикс для команд в конференции (кроме: "хелп", "комлист", "команды", "префикс". - они будут работать и без префикса), без параметров покажет текущий префикс.\nДоступные префиксы: '+', '.join(PRFX_LIST), 'префикс [!/#/./*/удалить/del/дел]', ['префикс !','префикс del'])
 register_command_handler(handler_admin_join, 'джойн', ['суперадмин','все'], 80, 'Вход в определённую комнату, если она запаролена пароль следует указать как второй параметр в фигурных скобках', 'джойн [конфа] [{password}] [причина]', ['джойн Witcher@conference.jabber.ru','джойн Witcher@conference.jabber.ru {supercode47} по просьбе овнера'])
 register_command_handler(handler_admin_rejoin, 'реджойн', ['суперадмин','все'], 80, 'Перезаход в определённую конфу, без параметра перезайдёт в тут где была вызвана команда', 'реджойн [конференция]', ['реджойн','реджойн Witcher@conference.jabber.ru'])
 register_command_handler(handler_admin_leave, 'свал', ['админ','все'], 30, 'Выход из текущей или указанной комнаты', 'свал [конфа] [причина]', ['свал','свал Witcher@conference.jabber.ru мёртвая конфа'])
 register_command_handler(handler_admin_restart, 'рестарт', ['суперадмин','все'], 100, 'Рестарт бота', 'рестарт [причина]', ['рестарт','рестарт обновление'])
 register_command_handler(handler_admin_exit, 'выкл', ['суперадмин','все'], 100, 'Выключение бота', 'выкл [причина]', ['выкл','выкл обновление'])
-register_command_handler(handler_error_stat, 'ошибка', ['суперадмин','все'], 100, 'Без параметров покажет колличество произошедших ошибок, с параметром в виде номера ошибки - покажет ошибку', 'ошибка [№ ошибки]', ['ошибка', 'ошибка 2'])
+register_command_handler(handler_error_stat, 'ошибка', ['суперадмин','все'], 100, 'Без параметров покажет количество произошедших ошибок, с параметром в виде номера ошибки - покажет ошибку', 'ошибка [№ ошибки]', ['ошибка', 'ошибка 2'])
 register_command_handler(handler_timeup_info, 'таймап', ['суперадмин','все'], 20, 'Выдаёт время автономной работы бота + колличество перезагрузок', 'таймап', ['таймап'])
 register_command_handler(handler_botup_info, 'ботап', ['админ','все'], 20, 'Выдаёт полную статистику за время работы бота', 'ботап', ['ботап'])
 register_command_handler(handler_command_stat, 'комстат', ['инфо','все'], 10, 'Выдаёт статистику по использованию команд, без параметров выдаст топ 20 команд', 'космстат [команда]', ['комастат','комстат пинг'])
+register_command_handler(crashReport_cfg, 'крашрепорт', ['админ','все'], 100, 'Включает или выключает сообщения об ошибках.', 'крашрепорт [1/0]', ['крашрепорт','крашрепорт 1'])
 
+
+register_stage0_init(crashReport_cfg_loader)
 register_stage1_init(load_conf_prefix)

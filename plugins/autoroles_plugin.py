@@ -26,9 +26,7 @@ def handler_amoder(type, source, body):
 				else:
 					jid = False
 				if jid:
-					if jid in ADLIST:
-						repl = u'%s мой BOSS, он и без того глобальный амодер' % (item)
-					elif check == '+':
+					if check == '+':
 						if jid in AMODER[source[1]]:
 							repl = u'%s итак в списке амодеров' % (item)
 						elif jid in AKICK[source[1]]:
@@ -49,7 +47,7 @@ def handler_amoder(type, source, body):
 					else:
 						repl = u'инвалид синтакс'
 				else:
-					repl = u'Если %s это ник, то таких юзеров я тут невидел, если же нет то ты просто хрень пишеш' % (nick)
+					repl = u'Если %s это ник, то таких юзеров я тут не видел, если же нет то ты просто хрень пишешь' % (nick)
 			else:
 				repl = u'инвалид синтакс'
 			reply(type, source, repl)
@@ -65,7 +63,7 @@ def handler_amoder(type, source, body):
 			else:
 				reply(type, source, u'В базе амодеров пусто')
 	else:
-		reply(type, source, u'Гг юморист блин')
+		reply(type, source, u'Не понял.')
 
 def handler_akick(type, source, body):
 	if source[1] in GROUPCHATS:
@@ -86,7 +84,7 @@ def handler_akick(type, source, body):
 						repl = u'%s мой BOSS, он глобальный амодер' % (item)
 					elif check == '+':
 						if jid in AKICK[source[1]]:
-							repl = u'%s итак в списке автокика' % (item)
+							repl = u'%s и так в списке автокика' % (item)
 						elif jid in AMODER[source[1]]:
 							repl = u'%s в списке амодеров, прежде чем добавлять в автокик удалите его оттуда' % (item)
 						elif jid in AVSTR[source[1]]:
@@ -142,7 +140,7 @@ def handler_avisitor(type, source, body):
 						repl = u'%s мой BOSS, он глобальный амодер' % (item)
 					elif check == '+':
 						if jid in AVSTR[source[1]]:
-							repl = u'%s итак в списке авизиторов' % (item)
+							repl = u'%s и так в списке авизиторов' % (item)
 						elif jid in AKICK[source[1]]:
 							repl = u'%s в списке автокика, прежде чем добавлять в авизиторы удалите его оттуда' % (item)
 						elif jid in AMODER[source[1]]:

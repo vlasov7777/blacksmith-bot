@@ -14,7 +14,7 @@ WTF_FILE = 'dynamic/wtf.txt'
 
 def handler_wtf_global(type, source, body):
 	if body:
-		args = body.slit('=', 1)
+		args = body.split('=', 1)
 		if len(args) == 2:
 			try:
 				globaldb = eval(read_file(WTF_FILE))

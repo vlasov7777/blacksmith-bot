@@ -11,24 +11,22 @@
 #  Gh0st [b0hdan[at]gmail.com]
 #  WitcherGeralt [WitcherGeralt@rocketmail.com]
 
-def handler_python_eval(type, source, body):
+def handler_python_eval(mType, source, body):
 	try:
 		repl = unicode(eval(unicode(body)))
-	except:
-		exc = sys.exc_info()
-		repl = '%s - %s' % (exc[0].__name__, exc[1])
-	reply(type, source, repl)
+	except Exception, e:
+		repl = `e`
+	reply(mType, source, repl)
 
-def handler_python_exec(type, source, body):
+def handler_python_exec(mType, source, body):
 	if '\n' in body and body[-1] != '\n':
 		body += '\n'
 	repl = 'Operation completed successfully!'
 	try:
 		exec unicode(body) in globals()
-	except:
-		exc = sys.exc_info()
-		repl = '%s - %s' % (exc[0].__name__, exc[1])
-	reply(type, source, repl)
+	except Exception, e:
+		repl = `e`		
+	reply(mType, source, repl)
 
 def handler_python_sh(type, source, body):
 	if BOT_OS == 'posix':
@@ -43,7 +41,7 @@ def handler_python_sh(type, source, body):
 def handler_python_calc(type, source, body):
 	if body:
 		if len(body) <= 24 and not body.count('**'):
-			eQ = re.sub('([0123456789]|[\+\-\/\*\^\.])', '', body)
+			eQ = re.sub("([0123456789]|[\+\-\/\*\^\.])", "", body)
 			if not eQ.strip():
 				try:
 					repl = str(eval(body))

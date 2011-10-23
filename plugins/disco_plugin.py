@@ -9,8 +9,6 @@
 # Modifications:
 #  WitcherGeralt [WitcherGeralt@rocketmail.com]
 
-IDS_DISCO = []
-
 def handler_disco(type, source, body):
 	if body:
 		args = body.split(' ', 2)
@@ -32,49 +30,43 @@ def handler_disco(type, source, body):
 				srch = args[1]
 		iq = xmpp.Iq(to = tojid, typ = 'get')
 		INFA['outiq'] += 1
-		ID = 'disco_'+str(INFA['outiq'])
-		IDS_DISCO.append(ID)
 		iq.addChild('query', {}, [], xmpp.NS_DISCO_ITEMS)
-		iq.setID(ID)
 		JCON.SendAndCallForResponse(iq, handler_disco_ext, {'type': type, 'source': source, 'stop': stop, 'srch': srch, 'tojid': tojid})
 	else:
 		reply(type, source, u'Ну а дальше то чего?')
 
 def handler_disco_ext(coze, stanza, type, source, stop, srch, tojid):
 	repl, dcnt, disco = '', True, []
-	ID = stanza.getID()
-	if ID in IDS_DISCO:
-		IDS_DISCO.remove(ID)
-		if stanza:
-			if stanza.getType() == 'result':
-				try:
-					Props = stanza.getQueryChildren()
-				except:
-					Props = None
-				if Props:
-					for x in Props:
-						att = x.getAttrs()
-						if att.has_key('name'):
-							try:
-								st = re.search('^(.*) \((.*)\)$', att['name']).groups()
-								disco.append([st[0], att['jid'], st[1]])
-								dcnt = False
-							except:
-								if dcnt or tojid.count('@'):
-									if tojid.count('@'):
-										disco.append(att['name'])
-									else:
-										disco.append([att['name'], att['jid']])
-						else:
-							disco.append(att['jid'])
-				if disco:
-					handler_disco_answer(type, source, stop, disco, srch)
-				else:
-					reply(type, source, u'пустое диско')
+	if stanza:
+		if stanza.getType() == 'result':
+			try:
+				Props = stanza.getQueryChildren()
+			except:
+				Props = None
+			if Props:
+				for x in Props:
+					att = x.getAttrs()
+					if att.has_key('name'):
+						try:
+							st = re.search('^(.*) \((.*)\)$', att['name']).groups()
+							disco.append([st[0], att['jid'], st[1]])
+							dcnt = False
+						except:
+							if dcnt or tojid.count('@'):
+								if tojid.count('@'):
+									disco.append(att['name'])
+								else:
+									disco.append([att['name'], att['jid']])
+					else:
+						disco.append(att['jid'])
+			if disco:
+				handler_disco_answer(type, source, stop, disco, srch)
 			else:
-				reply(type, source, u'не могу')
+				reply(type, source, u'пустое диско')
 		else:
-			reply(type, source, u'аблом...')
+			reply(type, source, u'не могу')
+	else:
+		reply(type, source, u'аблом...')
 
 def handler_disco_answer(type, source, stop, disco, srch):
 	if stop != 0:

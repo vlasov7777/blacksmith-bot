@@ -6,33 +6,25 @@
 
 #  Initial Copyright © 2007 Als [Als@exploit.in]
 
-IDS_UPTIME = []
-
 def handler_uptime_server(type, source, server):
 	if not server:
 		server = SERVER
 	idle_iq = xmpp.Iq(to = server, typ = 'get')
 	INFA['outiq'] += 1
-	ID = 'lytic_'+str(INFA['outiq'])
-	IDS_UPTIME.append(ID)
 	idle_iq.addChild('query', {}, [], xmpp.NS_LAST)
-	idle_iq.setID(ID)
 	JCON.SendAndCallForResponse(idle_iq, uptime_server_answer, {'type': type, 'source': source, 'server': server})
 
 def uptime_server_answer(coze, stanza, type, source, server):
-	ID = stanza.getID()
-	if ID in IDS_UPTIME:
-		IDS_UPTIME.remove(ID)
-		if stanza:
-			repl = u'Там нет джаббер сервера, либо он упал, хотя может просто его инфа закрыта...'
-			if stanza.getType() == 'result':
-				Props = stanza.getPayload()
-				if Props:
-					for Pr in Props:
-						sec = Pr.getAttrs()['seconds']
-						if sec and sec != '0':
-							repl = server+'`s uptime is '+timeElapsed(int(sec))
-			reply(type, source, repl)
+	if stanza:
+		repl = u'Там нет джаббер сервера, либо он упал, хотя может просто его инфа закрыта...'
+		if stanza.getType() == 'result':
+			Props = stanza.getPayload()
+			if Props:
+				for Pr in Props:
+					sec = Pr.getAttrs()['seconds']
+					if sec and sec != '0':
+						repl = server+'`s uptime is '+timeElapsed(int(sec))
+		reply(type, source, repl)
 
 def handler_userinfo_idle(type, source, nick):
 	if source[1] in GROUPCHATS:
