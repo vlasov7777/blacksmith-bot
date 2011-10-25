@@ -196,7 +196,7 @@ def handler_botup_info(type, source, body):
 			if xthr.isAlive():
 				acol += 1
 		repl += u'\n• Создано %i потоков, %i из них активно' % (INFO['thr'], acol)
-		(user, system, atime, itime, jtime,) = os.times()
+		(user, system, _, _, _) = os.times()
 		repl += u'\n• Потратил %.2f секунд процессора, %.2f секунд системы\n• Итог: %.2f секунд общесистемного времени' % (user, system, (user + system))
 	else:
 		repl = u'Кажется, я выключен...'
