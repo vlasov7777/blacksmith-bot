@@ -328,172 +328,128 @@ def register_command_handler(instance, command, category = [], access = 0, desc 
 	COMMANDS[command] = {'category': category, 'access': access, 'desc': desc, 'syntax': syntax, 'examples': examples}
 
 ## Call, execute handlers.
-def ThreadError():
-	return (str(sys.exc_info()[1]) == "can't start new thread")
-
-def Try_Thr(Thread, number = 0):
-	if number >= 4:
-		raise RuntimeError, 'Thread try limit!'
+def Try_Thr(Thr, Number = 0):
+	if Number >= 4:
+		raise RuntimeError("exit")
 	try:
-		Thread.start()
+		Thr.start()
+	except threading.ThreadError:
+		Try_Thr(Thr, (Number + 1))
 	except:
-		Try_Thr(Thread, (number + 1))
+		lytic_crashlog(Thr.start)
 
-def Thread_Run(Thread, handler, command = None):
+def Thread_Run(Thr, handler, command = None):
 	try:
-		Thread.start()
-	except:
-		if ThreadError():
+		Thr.start()
+	except threading.ThreadError:
+		if (str(sys.exc_info()[1]) == "can't start new thread"):
 			try:
-				Try_Thr(Thread)
+				Try_Thr(Thr)
 			except RuntimeError:
 				try:
-					Thread.run()
+					Thr.run()
+				except KeyboardInterrupt:
+					raise KeyboardInterrupt("Interrupt (Ctrl+C)")
 				except:
 					lytic_crashlog(handler, command)
 		else:
 			lytic_crashlog(Thread_Run, command)
-
-def execute_message_handler(message_handler, raw, type, source, body):
-	try:
-		message_handler(raw, type, source, body)
 	except:
-		lytic_crashlog(message_handler)
+		lytic_crashlog(Thread_Run, command)
 
-def call_message_handlers(raw, type, source, body):
+def execute_handler(handler_instance, list = (), command = None):
+	try:
+		handler_instance(*list)
+	except (KeyboardInterrupt, SystemExit):
+		pass
+	except:
+		lytic_crashlog(handler_instance, command)
+
+def get_Thr_id(handler):
+	INFO['thr'] += 1
+	return '%s-%d' % (handler.func_name, INFO['thr'])
+
+def call_message_handlers(stanza, typ, source, body):
 	for handler in MESSAGE_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_message_handler, 'inmsg-%d' % (INFO['thr']),(handler, raw, type, source, body,))
-			Thread_Run(Thread, handler)
-
-def execute_outmsg_handler(outgoing_message_handler, target, body, obody):
-	try:
-		outgoing_message_handler(target, body, obody)
-	except:
-		lytic_crashlog(outgoing_message_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (stanza, typ, source, body,),))
+			Thread_Run(Thr, handler)
 
 def call_outgoing_message_handlers(target, body, obody):
 	for handler in OUTGOING_MESSAGE_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_outmsg_handler, 'outmsg-%d' % (INFO['thr']),(handler, target, body, obody,))
-			Thread_Run(Thread, handler)
-
-def execute_join_handler(join_handler, conf, nick, afl, role):
-	try:
-		join_handler(conf, nick, afl, role)
-	except:
-		lytic_crashlog(join_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (target, body, obody,),))
+			Thread_Run(Thr, handler)
 
 def call_join_handlers(conf, nick, afl, role):
 	for handler in JOIN_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_join_handler, 'join-%d' % (INFO['thr']),(handler, conf, nick, afl, role,))
-			Thread_Run(Thread, handler)
-
-def execute_leave_handler(leave_handler, conf, nick, reason, code):
-	try:
-		leave_handler(conf, nick, reason, code)
-	except:
-		lytic_crashlog(leave_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (conf, nick, afl, role,),))
+			Thread_Run(Thr, handler)
 
 def call_leave_handlers(conf, nick, reason, code):
 	for handler in LEAVE_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_leave_handler, 'leave-%d' % (INFO['thr']),(handler, conf, nick, reason, code,))
-			Thread_Run(Thread, handler)
-
-def execute_iq_handler(iq_handler, iq):
-	try:
-		iq_handler(iq)
-	except:
-		lytic_crashlog(iq_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (conf, nick, reason, code,),))
+			Thread_Run(Thr, handler)
 
 def call_iq_handlers(iq):
 	for handler in IQ_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_iq_handler, 'iq-%d' % (INFO['thr']),(handler, iq,))
-			Thread_Run(Thread, handler)
-
-def execute_presence_handler(presence_handler, prs):
-	try:
-		presence_handler(prs)
-	except:
-		lytic_crashlog(presence_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (iq,),))
+			Thread_Run(Thr, handler)
 
 def call_presence_handlers(prs):
 	for handler in PRESENCE_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_presence_handler, 'prs-%d' % (INFO['thr']),(handler, prs,))
-			Thread_Run(Thread, handler)
-
-def execut_stage_init(stage_handler, conf = None):
-	try:
-		if conf:
-			stage_handler(conf)
-		else:
-			stage_handler()
-	except:
-		lytic_crashlog(stage_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (prs,),))
+			Thread_Run(Thr, handler)
 
 def call_stage0_init():
 	for handler in STAGE0_INIT:
-		execut_stage_init(handler)
+		execute_handler(handler)
 
 def call_stage1_init(conf):
 	for handler in STAGE1_INIT:
-		execut_stage_init(handler, conf)
+		execute_handler(handler, (conf,))
 
 def call_stage2_init():
 	for handler in STAGE2_INIT:
-		execut_stage_init(handler)
+		execute_handler(handler)
 
 def call_stage3_init():
 	for handler in STAGE3_INIT:
-		execut_stage_init(handler)
+		execute_handler(handler)
 
-def execute_command_handler(commnad_handler, command, type, source, body):
-	try:
-		commnad_handler(type, source, body)
-	except:
-		lytic_crashlog(commnad_handler, command)
-
-def call_command_handlers(command, type, source, body, callee):
+def call_command_handlers(command, typ, source, body, callee):
 	real_access = MACROS.get_access(callee, source[1])
 	if real_access <= 0:
 		real_access = COMMANDS[command]['access']
 	if COMMAND_HANDLERS.has_key(command):
 		if has_access(source[0], real_access, source[1]):
+			handler = COMMAND_HANDLERS[command]
 			with smph:
-				handler = COMMAND_HANDLERS[command]
-				INFO['thr'] += 1
-				Thread = threading.Thread(None, execute_command_handler, 'command-%d' % (INFO['thr']),(handler, command, type, source, body,))
-				Thread_Run(Thread, handler, command)
+				Thr = threading.Thread(target = execute_handler, args = (handler, (typ, source, body), command,))
+				Thread_Run(Thr, handler)
 			COMMSTAT[command]['col'] += 1
 			jid = handler_jid(source[0])
 			if jid not in COMMSTAT[command]['users']:
 				COMMSTAT[command]['users'].append(jid)
 		else:
-			reply(type, source, u'недостаточный доступ')
+			reply(typ, source, u'недостаточный доступ.')
 
 ## Plugins loader.
 def load_plugins():
 	Print('\n\nLOADING PLUGINS:', color4)
 	ltc, tal, Npl = [], [], []
 	for Plugin in os.listdir(PLUGIN_DIR):
-		Ext = Plugin[-3:].lower()
-		if Ext == '.py':
+		if Plugin.endswith('.py'):
 			filename = '%s/%s' % (PLUGIN_DIR, Plugin)
 			try:
 				data = file(filename).read(20)
 			except:
-				data = '# |-| levaya shnyaga |-|'
-			Plug = Plugin.split('_pl')
+				data = str()
+			Plug = Plugin.split('_plugin')
 			if data.count('lytic'):
 				try:
 					execfile(filename, globals()); ltc.append(Plug[0])
@@ -628,10 +584,9 @@ def Prefix_state(combody, bot_nick):
 
 def check_number(number):
 	try:
-		int(number)
+		return number.isdigit()
 	except:
 		return False
-	return True
 
 def replace_all(retxt, list, data = False):
 	for x in list:
@@ -748,11 +703,11 @@ def handler_rebody(target, body, ltype):
 	col, all = 0, str(len(body) / PRIV_MSG_LIMIT + 1)
 	while len(body) > PRIV_MSG_LIMIT:
 		col = col + 1
-		text = '[%d/%s] %s[...]' % (col, all, body[:PRIV_MSG_LIMIT])
+		text = u'[%d/%s] %s[...]' % (col, all, body[:PRIV_MSG_LIMIT])
 		JCON.send(xmpp.Message(target, text.strip(), ltype))
 		body = body[PRIV_MSG_LIMIT:]
 		time.sleep(2)
-	return '[%d/%s] %s' % ((col + 1), all, body)
+	return u'[%d/%s] %s' % ((col + 1), all, body)
 
 def delivery(body):
 	if not isinstance(body, unicode):
@@ -804,7 +759,6 @@ def change_bot_status(conf, text, status):
 def handler_iq_send(conf, item_name, item, afrls, afrl, rsn = None):
 	stanza = xmpp.Iq(to = conf, typ = 'set')
 	INFA['outiq'] += 1
-	stanza.setID('lytic_%d' % (INFA['outiq']))
 	query = xmpp.Node('query')
 	query.setNamespace(xmpp.NS_MUC_ADMIN)
 	afl_role = query.addChild('item', {item_name: item, afrls: afrl})
@@ -1307,7 +1261,7 @@ def main():
 		Print('\n\nError: unable to create chatrooms list file!', color2)
 	Print('\n\nBlackSmith is ready to work!\n\n', color3)
 	INFO['start'] = time.time()
-	threading.Thread(None, upkeep, "upkeeper", (),).start()
+	
 	call_stage2_init()
 	while True:
 		try:
