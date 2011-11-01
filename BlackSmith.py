@@ -905,11 +905,9 @@ def MESSAGE_PROCESSING(client, stanza):
 	bot_nick, nick = handler_botnick(instance), fromjid.getResource()
 	if bot_nick == nick:
 		return
-	body = stanza.getBody()
+	body = stanza.getBody() or ""
 	if body:
 		body = body.strip()
-	if not body:
-		return
 	if instance not in GROUPCHATS and instance not in ADLIST:
 		if not instance.count('@conf'):
 			if instance in RSTR['BAN'] or RSTR['VN'] == 'off':

@@ -3,7 +3,7 @@
 Caps = 'http://witcher-team.ucoz.ru/'
 BOT_VER = 1
 CORE_MODE = 42
-BOT_REV = 64
+BOT_REV = 75
 
 if os.access('.svn/entries', os.R_OK):
 	try:
