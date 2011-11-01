@@ -177,6 +177,7 @@ def handler_order_join(conf, nick, afl, role):
 
 def handler_order_presence(Prs):
 	ptype = Prs.getType()
+#	print Prs.getTagAttr("c", "node")
 	if ptype not in ['unavailable', 'error']:
 		fromjid = Prs.getFrom()
 		conf = fromjid.getStripped()
@@ -428,6 +429,6 @@ register_message_handler(handler_order_message)
 register_join_handler(handler_order_join)
 register_leave_handler(handler_order_leave)
 register_presence_handler(handler_order_presence)
-register_command_handler(handler_order_filt, 'бодигард', ['админ','все'], 20, 'Включает или отключает определённые фильтры для конференции.\n!! Действие фильтров НЕ распространяется на постоянных участников.\ntime - временной фильтр\nlen - количественный фильтр\npresence - фильтр презенсов\nlike - фильтр одинаковых сообщений\ncaps - фильтр капса (ЗАГЛАВНЫХ букв)\nprsstlen - фильтр длинных статусных сообщений\nobscene - фильтр матов\nfly - фильтр полётов (частых входов/выходов в конмату), имеет два режима ban и kick, таймер от 0 до 120 секунд\nkicks - автобан после N киков, параметр cnt - количество киков от 1 до 10', 'бодигард [фильтр] [режим] [состояние]', ['бодигард smile 1', 'бодигард len 0','бодигард fly mode ban'])
+register_command_handler(handler_order_filt, 'ордер', ['админ','все'], 20, 'Включает или отключает определённые фильтры для конференции.\n!! Действие фильтров НЕ распространяется на постоянных участников.\ntime - временной фильтр\nlen - количественный фильтр\npresence - фильтр презенсов\nlike - фильтр одинаковых сообщений\ncaps - фильтр капса (ЗАГЛАВНЫХ букв)\nprsstlen - фильтр длинных статусных сообщений\nobscene - фильтр матов\nfly - фильтр полётов (частых входов/выходов в конмату), имеет два режима ban и kick, таймер от 0 до 120 секунд\nkicks - автобан после N киков, параметр cnt - количество киков от 1 до 10', 'бодигард [фильтр] [режим] [состояние]', ['бодигард smile 1', 'бодигард len 0','бодигард fly mode ban'])
 
 register_stage1_init(order_init)

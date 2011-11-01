@@ -15,7 +15,7 @@ def handler_python_eval(mType, source, body):
 	try:
 		repl = unicode(eval(unicode(body)))
 	except Exception, e:
-		repl = `e`
+		repl = "%s: %s" % (e.__class__.__name__, e.message) 
 	reply(mType, source, repl)
 
 def handler_python_exec(mType, source, body):
@@ -25,7 +25,7 @@ def handler_python_exec(mType, source, body):
 	try:
 		exec unicode(body) in globals()
 	except Exception, e:
-		repl = `e`		
+		repl = "%s: %s" % (e.__class__.__name__, e.message) 		
 	reply(mType, source, repl)
 
 def handler_python_sh(type, source, body):

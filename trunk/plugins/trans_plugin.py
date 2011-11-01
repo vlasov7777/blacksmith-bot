@@ -1,95 +1,99 @@
 # |-|-| lytic bot |-|-|
-# -*- coding: utf-8 -*-
+# /* coding: utf8 */
+# BlackSmith Bot Plugin
+# © simpleApps Unofficial.
 
-#  BlackSmith plugin
-#  trans_plugin.py
+Langs = {'en': u'Английский',
+			'ja': u'Японский', 
+			'ru': u'Русский', 
+			'auto': u'Авто', 
+			'sq': u'Албанский', 
+			'ar': u'Арабский', 
+			'af': u'Африкаанс', 
+			'be': u'Белорусский', 
+			'bg': u'Болгарский', 
+			'cy': u'Валлийский', 
+			'hu': u'Венгерский', 
+			'vi': u'Вьетнамский', 
+			'gl': u'Галисийский', 
+			'nl': u'Голландский', 
+			'el': u'Греческий', 
+			'da': u'Датский', 
+			'iw': u'Иврит', 
+			'yi': u'Идиш', 
+			'id': u'Индонезийский', 
+			'ga': u'Ирландский', 
+			'is': u'Исландский', 
+			'es': u'Испанский', 
+			'it': u'Итальянский', 
+			'ca': u'Каталанский', 
+			'zh-CN': u'Китайский', 
+			'ko': u'Корейский', 
+			'lv': u'Латышский', 
+			'lt': u'Литовский', 
+			'mk': u'Македонский', 
+			'ms': u'Малайский', 
+			'mt': u'мальтийский', 
+			'de': u'Немецкий', 
+			'no': u'Норвежский', 
+			'fa': u'Персидский', 
+			'pl': u'Польский', 
+			'pt': u'Португальский', 
+			'ro': u'Румынский', 
+		 	'sr': u'Сербский', 
+		 	'sk': u'Словацкий', 
+		 	'sl': u'Словенский',
+		 	'sw': u'Суахили', 
+		 	'tl': u'Тагальский', 
+		 	'th': u'Тайский', 
+		 	'tr': u'Турецкий', 
+		 	'uk': u'Украинский', 
+		 	'fi': u'Финский', 
+		 	'fr': u'Французский', 
+		 	'hi': u'Хинди', 
+		 	'hr': u'Хорватский', 
+		 	'cs': u'Чешский', 
+		 	'sv': u'Шведский', 
+		 	'et': u'Эстонский'}
 
-# Initial © Gigabyte
-# Modifications © simpleApps.
-
-LANGS = {'ky': u'Русский', u'en': u'английский', u'ja': u'японский', u'ru': u'русский', u'auto': u'Определить язык', u'sq': u'албанский', u'ar': u'арабский', u'af': u'африкаанс', u'be': u'белорусский', u'bg': u'болгарский', u'cy': u'валлийский', u'hu': u'венгерский', u'vi': u'вьетнамский', u'gl': u'галисийский', u'nl': u'голландский', u'el': u'греческий', u'da': u'датский', u'iw': u'иврит', u'yi': u'идиш', u'id': u'индонезийский', u'ga': u'ирландский', u'is': u'исландский', u'es': u'испанский', u'it': u'итальянский', u'ca': u'каталанский', u'zh-CN': u'китайский', u'ko': u'корейский', u'lv': u'латышский', u'lt': u'литовский', u'mk': u'македонский', u'ms': u'малайский', u'mt': u'мальтийский', u'de': u'немецкий', u'no': u'норвежский', u'fa': u'персидский', u'pl': u'польский', u'pt': u'португальский', u'ro': u'румынский', u'ru': u'русский', u'sr': u'сербский', u'sk': u'словацкий', u'sl': u'словенский', u'sw': u'суахили', u'tl': u'тагальский', u'th': u'тайский', u'tr': u'турецкий', u'uk': u'украинский', u'fi': u'финский', u'fr': u'французский', u'hi': u'хинди', u'hr': u'хорватский', u'cs': u'чешский', u'sv': u'шведский', u'et': u'эстонский'}
-RULANG = {'ky': u'Русский', 'bg': u'Русский', 'ru': u'Русский', 'uk': u'Русский'}
-
+import re
 from urllib2 import quote
 
-def uHTML(text):
-	from HTMLParser import HTMLParser 
-	text = text.replace("<br>", "\n").replace("</br>", "\n").replace("<br />", "\n")
-	text = HTMLParser().unescape(text)
-	del HTMLParser
-	return text
+uagent = "Opera/9.60 (J2ME/MIDP; Opera Mini/4.2.13337/724; U; ru)"
 
-def gTrans(type, source, Params):
-	if Params:
-		body = Params.split(None, 2)
-		if LANGS.has_key(body[0]) and LANGS.has_key(body[1]) and len(body) >= 3:
-			(fl, tl, text) = body
-			if fl == 'auto':
-				if tl == 'auto':
-					reply(type, source, u'Читай помощь по команде!')
-					return
-			else:
-				answer = gDetectLang(text)
-				if not LANGS.has_key(answer):
-					reply(type, source, answer)
-					return
-				else:
-					fl = answer
-			answer = gTransParse(text, fl, tl)
-			if answer != u'Аблом!':
-				answer = uHTML(answer) 
-			reply(type, source, answer)
-		else:
-			reply(type, source, u'Читай помощь по команде!')
-	else:
-		reply(type, source, u'Не понимаю, чего ты хочешь.')
+def parse(code):
+	match = re.search('class="t0">', code)
+	end = code[match.end():]
+	return end[:re.search("</div>", end).start()]
 
-def gDetectLang(text):
+def gTrans(fLang, tLang, text):
+	url = "http://translate.google.ru/m?hl=ru&sl=%(fLang)s&tl=%(tLang)s&ie=UTF-8&prev=_m&q=%(text)s"
+	text = quote(text.encode('utf-8'))
 	try:
-		req = urlopen('http://ajax.googleapis.com/ajax/services/language/detect?v=1.0&q='+quote(text.encode('utf-8')))
-	except:
-		return
-	answer = simplejson.load(req)
-	if answer['responseStatus'] != 200:
-		return '%s: %s' % (unicode(answer['responseStatus']), answer['responseDetails'])
-	elif answer['responseData']:
-		return answer['responseData']['language']
-	return u'неизвестная ошибка.'
+		return parse(read_url(url % vars(), uagent))
+	except Exception, e:
+		return "%s: %s" % (e.__class__.__name__, e.message)
 
-
-def gAutoTrans(type, source, text):
+def gAutoTrans(mType, source, text):
 	if text:
-		aw = gDetectLang(text)
-		if aw:
-			if RULANG.has_key(aw):
-				answer = gTransParse(text, '', 'en')
-			else:
-				answer = gTransParse(text, '', 'ru')
-			if answer == '400: could not reliably detect source language':
-				answer = u'Ошибка! Невозможно определить язык!'
-			else:
-				answer = uHTML(answer)
-			if RULANG.has_key(aw):
-				repl = u'Источник: %s\n%s' % (LANGS[aw], answer)
-			else:
-				repl = u'Источник: %s\n%s' % (aw, answer)
+		repl = gTrans("auto", "ru", text)
+		if text == repl:
+			repl = u"Перевод %s => %s:\n%s" % ("auto", "en", gTrans("auto", "en", text))
 		else:
-			repl = "Exception."
-		reply(type, source, repl)
+			repl = u"Перевод %s => %s:\n%s" % ("auto", "ru", repl)
 	else:
-		reply(type, source, u'а дальше?')
+		repl = u"Недостаточно параметров."
+	reply(mType, source, repl)
 
-def gTransParse(text, from_lang, to_lang):
-	try:
-		req = urlopen('http://ajax.googleapis.com/ajax/services/language/translate?v=1.0&q=%s&langpair=%s%s' % (quote(text.encode('utf-8')), from_lang+'%7C', to_lang))
-	except:
-		return
-	answer = simplejson.load(req)
-	if answer['responseStatus'] != 200:
-		return '%s: %s' % (unicode(answer['responseStatus']), answer['responseDetails'])
-	elif answer['responseData']:
-		return answer['responseData']['translatedText']
-	return u'неизвестная ошибка.'
+def gTransHandler(mType, source, args):
+	if args and len(args.split()) > 2:
+		(fLang, tLang, text) = args.split(None, 2)
+		reply(mType, source, u"Перевод %s => %s:\n%s" % (fLang, tLang, gTrans(fLang, tLang, text)))
+	else:
+		answer = u"\nДоступные языки:\n"
+		for a, b in enumerate(sorted([x + u" — " + y for x, y in Langs.iteritems()])):
+			answer += u"%i. %s.\n" % (a + 1, b)
+		reply(mType, source, answer.encode("utf-8"))
 
-register_command_handler(gTrans, 'перевод', ['инфо','все'], 10, 'Переводчик с последней ревизии талисмана, респект als!\nПеревод с одного языка в другой. Используется Google Translate. Доступные для перевода языки:\n'+', '.join(sorted([x.encode('utf-8')+': '+y.encode('utf-8') for x,y in LANGS.iteritems()])), 'перевод <исходный_язык> <нужный_язык> <фраза>', ['перевод en ru hello', 'перевод ru en привет'])
-register_command_handler(gAutoTrans, '!', ['инфо','все'], 10, 'Модификация переводчика,\nАвтор модификации: Gigabyte\nПеревод с одного языка в другой с автовыбором, традиционная моя модификация. Используется Google Translate. Доступные для перевода языки:\n'+', '.join(sorted([x.encode('utf-8')+': '+y.encode('utf-8') for x,y in LANGS.iteritems()])), '! <фраза>', ['! hello', '! привет'])
+register_command_handler(gTransHandler, 'перевод', ['инфо','все'], 10, 'Переводчик.\nПеревод с одного языка на другой. Используется Google Translate.', 'перевод <исходный_язык> <нужный_язык> <текст>', ['перевод en ru hello world', 'перевод ru en привет, мир'])
+register_command_handler(gAutoTrans, '!', ['инфо','все'], 10, 'Перевод с одного языка на другой с автоопределением. Используется Google Translate.', '! <текст>', ['! hello', '! привет'])
