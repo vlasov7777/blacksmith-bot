@@ -2,8 +2,12 @@
 # Conference Encoder.
 # © WitcherGeralt, modifications by simpleApps
 
-from string import digits, ascii_letters
-ascii_tab = tuple(digits + ascii_letters + "." + "@" + "/")
+from string import digits
+from string import ascii_letters
+
+
+__exceptions = "-/.@_"
+ascii_tab = tuple(digits + ascii_letters + __exceptions)
 
 def chkFile(filename):
 	if filename.count("/") > 1:
@@ -33,4 +37,4 @@ def nameEncode(filename):
 	del b16encode
 	return encodedName
 	
-del digits, ascii_letters
+del digits, ascii_letters, __exceptions

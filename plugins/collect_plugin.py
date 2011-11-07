@@ -166,7 +166,7 @@ def handler_amsg_blacklist(type, source, body):
 						write_file(BLACK_LIST, str(AMSGBL))
 						repl = u'удалил %s из чёрного списка' % (jid)
 					else:
-						repl = u'этого жида итак там нет'
+						repl = u'этого жида и так там нет'
 				else:
 					repl = u'инвалид синтакс'
 			else:
