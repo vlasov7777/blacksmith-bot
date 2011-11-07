@@ -81,14 +81,14 @@ def handler_antibot_exceptions(type, source, body):
 					if conf not in EXCEPTIONS:
 						EXCEPTIONS.append(conf)
 						write_file(EXCEPT_LIST, str(EXCEPTIONS))
-						repl = u'добавил %s в список исключений' % (conf)
+						repl = u'добавил "%s" в список исключений.' % (conf)
 					else:
-						repl = u'эта конференция итак там'
+						repl = u'эта конференция и так там!'
 				elif check == '-':
 					if conf in EXCEPTIONS:
 						EXCEPTIONS.remove(conf)
 						write_file(EXCEPT_LIST, str(EXCEPTIONS))
-						repl = u'удалил %s из списка исключений' % (conf)
+						repl = u'удалил "%s" из списка исключений.' % (conf)
 					else:
 						repl = u'этой конференции итак там нет'
 				else:
@@ -105,7 +105,7 @@ def handler_antibot_exceptions(type, source, body):
 		if col != 0:
 			repl = u'\nСписок исключений "антибота":'+list
 		else:
-			repl = u'Список исключений пуст'
+			repl = u'Список исключений пуст.'
 	reply(type, source, repl)
 
 def antibot_exceptions_init():

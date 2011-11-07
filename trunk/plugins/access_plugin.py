@@ -29,7 +29,7 @@ def handler_superadmin_logout(type, source, body):
 		del GLOBACCESS[jid]
 		reply(type, source, u'Ну ладно, дело твоё...')
 	else:
-		reply(type, source, u'Пшел вон, ты итак не админ!')
+		reply(type, source, u'Пшел вон, ты и так не админ!')
 
 def handler_view_access(type, source, body):
 	if not body:
@@ -50,9 +50,9 @@ def handler_view_access(type, source, body):
 				levdesc = ''
 			reply(type, source, level+levdesc)
 		else:
-			reply(type, source, u'тут таких нету')
+			reply(type, source, u'тут таких нет')
 	else:
-		reply(type, source, u'ты не в чате мудило!')
+		reply(type, source, u'ты не в чате!')
 
 def handler_set_access(type, source, Params):
 	if source[1] in GROUPCHATS:
