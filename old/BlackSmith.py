@@ -14,7 +14,7 @@
 
 #  By WitcherGeralt, based on Talisman by Als (Neutron by Gh0st)
 
-################ import modules ################################################################
+# import modules
 
 from __future__ import with_statement
 
@@ -30,7 +30,7 @@ from enconf import *
 
 import xmpp, macros, simplejson, re, string, random, urllib, urllib2
 
-################ Statistics cache ##############################################################
+# Statistics cache
 
 INFO = {'start': 0, 'msg': 0, 'prs': 0, 'iq': 0, 'cmd': 0, 'thr': 0, 'errs': 0}
 INFA = {'outmsg': 0, 'outiq': 0, 'fr': 0, 'fw': 0, 'fcr': 0, 'cfw': 0}
@@ -39,7 +39,7 @@ STOP = {'mto': 0, 'jids': {}}
 DCNT = {'col': 0, 'Yes!': True}
 LAST = {'time': 0, 'null': 0, 'cmd': 'start'}
 
-################ friendly handlers #############################################################
+# friendly handlers
 
 COLORS_ENABLED = xmpp.debug.colors_enabled
 
@@ -84,7 +84,7 @@ def Exit(text, exit, slp):
 	else:
 		os.execl(sys.executable, sys.executable, os.path.abspath(sys.argv[0]))
 
-################ Configuration Items ###########################################################
+# Configuration items
 
 GENERAL_CONFIG_FILE = 'static/source.py'
 GLOBACCESS_FILE = 'dynamic/access.txt'
@@ -129,7 +129,7 @@ if BOT_OS == 'nt':
 DEFAULT_NICK = DEFAULT_NICK[:16].replace(chr(32), chr(95))
 MEMORY_LIMIT = (24576 if MEMORY_LIMIT and MEMORY_LIMIT <= 24576 else MEMORY_LIMIT)
 
-################ lists handlers ################################################################
+# lists handlers
 
 MESSAGE_HANDLERS = []
 OUTGOING_MESSAGE_HANDLERS = []
@@ -144,7 +144,7 @@ STAGE1_INIT = []
 STAGE2_INIT = []
 STAGE3_INIT = []
 
-################ lists & client & others #######################################################
+# lists & client & others
 
 MACROS = macros.Macros()
 ONLINE = False
@@ -170,7 +170,7 @@ UNAVALABLE = []
 
 wsmph, smph = threading.Semaphore(), threading.Semaphore(60)
 
-################ file work handlers ############################################################
+# file handlers
 
 def check_file(conf = None, file = None, data = "{}"):
 	if conf:
@@ -187,7 +187,7 @@ def initialize_file(filename, data = "{}"):
 	try:
 		folder = os.path.dirname(filename)
 		if folder and not os.path.exists(folder):
-			os.mkdirs(folder, 0755)
+			os.makedirs(folder, 0755)
 		with open(filename, 'w') as fp:
 			INFA['fcr'] += 1
 			fp.write(data)
@@ -208,7 +208,7 @@ def write_file(filename, data, otp = 'w'):
 			INFA['fw'] += 1
 			fp.write(data)
 
-################ lytic crashlog ################################################################
+# lytic crashlog
 
 def Dispatch_fail():
 	crashfile = open('__main__.crash', 'a')
@@ -249,7 +249,7 @@ def lytic_crashlog(handler, command = None):
 			(body, color) = retry_body(error_body, color2)
 			Print(body, color)
 
-################ list handlers #################################################################
+# list handlers
 
 def register_message_handler(instance):
 	name = instance.func_name
@@ -328,162 +328,121 @@ def register_command_handler(instance, command, category = [], access = 0, desc 
 	COMMAND_HANDLERS[command] = instance
 	COMMANDS[command] = {'category': category, 'access': access, 'desc': desc, 'syntax': syntax, 'examples': examples}
 
-################ call & execut handlers ########################################################
+# call & execut handlers
 
-def ThreadError():
-	return (str(sys.exc_info()[1]) == "can't start new thread")
-
-def Try_Thr(Thread, number = 0):
-	if number >= 4:
-		raise RuntimeError, 'Thread try limit!'
+def Try_Thr(Thr, Number = 0):
+	if Number >= 4:
+		raise RuntimeError("exit")
 	try:
-		Thread.start()
+		Thr.start()
+	except threading.ThreadError:
+		Try_Thr(Thr, (Number + 1))
 	except:
-		Try_Thr(Thread, (number + 1))
+		lytic_crashlog(Thr.start)
 
-def Thread_Run(Thread, handler, command = None):
+def Thread_Run(Thr, handler, command = None):
 	try:
-		Thread.start()
-	except:
-		if ThreadError():
+		Thr.start()
+	except threading.ThreadError:
+		if (str(sys.exc_info()[1]) == "can't start new thread"):
 			try:
-				Try_Thr(Thread)
+				Try_Thr(Thr)
 			except RuntimeError:
 				try:
-					Thread.run()
+					Thr.run()
+				except KeyboardInterrupt:
+					raise KeyboardInterrupt("Interrupt (Ctrl+C)")
 				except:
 					lytic_crashlog(handler, command)
 		else:
 			lytic_crashlog(Thread_Run, command)
-
-def execute_message_handler(message_handler, raw, type, source, body):
-	try:
-		message_handler(raw, type, source, body)
 	except:
-		lytic_crashlog(message_handler)
+		lytic_crashlog(Thread_Run, command)
 
-def call_message_handlers(raw, type, source, body):
+def execute_handler(handler_instance, list = (), command = None):
+	try:
+		handler_instance(*list)
+	except KeyboardInterrupt:
+		pass
+	except SystemExit:
+		pass
+	except:
+		lytic_crashlog(handler_instance, command)
+
+def get_Thr_id(handler):
+	INFO['thr'] += 1
+	return '%s-%d' % (handler.func_name, INFO['thr'])
+
+def call_message_handlers(stanza, typ, source, body):
 	for handler in MESSAGE_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_message_handler, 'inmsg-%d' % (INFO['thr']),(handler, raw, type, source, body,))
-			Thread_Run(Thread, handler)
-
-def execute_outmsg_handler(outgoing_message_handler, target, body, obody):
-	try:
-		outgoing_message_handler(target, body, obody)
-	except:
-		lytic_crashlog(outgoing_message_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (stanza, typ, source, body,),))
+			Thread_Run(Thr, handler)
 
 def call_outgoing_message_handlers(target, body, obody):
 	for handler in OUTGOING_MESSAGE_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_outmsg_handler, 'outmsg-%d' % (INFO['thr']),(handler, target, body, obody,))
-			Thread_Run(Thread, handler)
-
-def execute_join_handler(join_handler, conf, nick, afl, role):
-	try:
-		join_handler(conf, nick, afl, role)
-	except:
-		lytic_crashlog(join_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (target, body, obody,),))
+			Thread_Run(Thr, handler)
 
 def call_join_handlers(conf, nick, afl, role):
 	for handler in JOIN_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_join_handler, 'join-%d' % (INFO['thr']),(handler, conf, nick, afl, role,))
-			Thread_Run(Thread, handler)
-
-def execute_leave_handler(leave_handler, conf, nick, reason, code):
-	try:
-		leave_handler(conf, nick, reason, code)
-	except:
-		lytic_crashlog(leave_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (conf, nick, afl, role,),))
+			Thread_Run(Thr, handler)
 
 def call_leave_handlers(conf, nick, reason, code):
 	for handler in LEAVE_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_leave_handler, 'leave-%d' % (INFO['thr']),(handler, conf, nick, reason, code,))
-			Thread_Run(Thread, handler)
-
-def execute_iq_handler(iq_handler, iq):
-	try:
-		iq_handler(iq)
-	except:
-		lytic_crashlog(iq_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (conf, nick, reason, code,),))
+			Thread_Run(Thr, handler)
 
 def call_iq_handlers(iq):
 	for handler in IQ_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_iq_handler, 'iq-%d' % (INFO['thr']),(handler, iq,))
-			Thread_Run(Thread, handler)
-
-def execute_presence_handler(presence_handler, prs):
-	try:
-		presence_handler(prs)
-	except:
-		lytic_crashlog(presence_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (iq,),))
+			Thread_Run(Thr, handler)
 
 def call_presence_handlers(prs):
 	for handler in PRESENCE_HANDLERS:
 		with smph:
-			INFO['thr'] += 1
-			Thread = threading.Thread(None, execute_presence_handler, 'prs-%d' % (INFO['thr']),(handler, prs,))
-			Thread_Run(Thread, handler)
-
-def execut_stage_init(stage_handler, conf = None):
-	try:
-		if conf:
-			stage_handler(conf)
-		else:
-			stage_handler()
-	except:
-		lytic_crashlog(stage_handler)
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (prs,),))
+			Thread_Run(Thr, handler)
 
 def call_stage0_init():
 	for handler in STAGE0_INIT:
-		execut_stage_init(handler)
+		execute_handler(handler)
 
 def call_stage1_init(conf):
 	for handler in STAGE1_INIT:
-		execut_stage_init(handler, conf)
+		execute_handler(handler, (conf,))
 
 def call_stage2_init():
 	for handler in STAGE2_INIT:
-		execut_stage_init(handler)
+		execute_handler(handler)
 
 def call_stage3_init():
 	for handler in STAGE3_INIT:
-		execut_stage_init(handler)
+		execute_handler(handler)
 
-def execute_command_handler(commnad_handler, command, type, source, body):
-	try:
-		commnad_handler(type, source, body)
-	except:
-		lytic_crashlog(commnad_handler, command)
-
-def call_command_handlers(command, type, source, body, callee):
+def call_command_handlers(command, typ, source, body, callee):
 	real_access = MACROS.get_access(callee, source[1])
 	if real_access <= 0:
 		real_access = COMMANDS[command]['access']
 	if COMMAND_HANDLERS.has_key(command):
 		if has_access(source[0], real_access, source[1]):
+			handler = COMMAND_HANDLERS[command]
 			with smph:
-				handler = COMMAND_HANDLERS[command]
-				INFO['thr'] += 1
-				Thread = threading.Thread(None, execute_command_handler, 'command-%d' % (INFO['thr']),(handler, command, type, source, body,))
-				Thread_Run(Thread, handler, command)
+				Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (typ, source, body), command,))
+				Thread_Run(Thr, handler)
 			COMMSTAT[command]['col'] += 1
 			jid = handler_jid(source[0])
 			if jid not in COMMSTAT[command]['users']:
 				COMMSTAT[command]['users'].append(jid)
 		else:
-			reply(type, source, u'недостаточный доступ')
+			reply(typ, source, u'недостаточный доступ.')
 
-################ load pugins ###################################################################
+# load pugins
 
 def load_plugins():
 	Print('\n\nLOADING PLUGINS:', color4)
@@ -521,7 +480,7 @@ def load_plugins():
 	else:
 		Print('\n\nThere are not unloadable plugins!', color3)
 
-################ other handlers ################################################################
+# other handlers
 
 def load_roster_config():
 	if initialize_file(ROSTER_FILE, str(RSTR)):
@@ -675,7 +634,7 @@ def upkeep():
 	if MEMORY_LIMIT and memory_usage() >= MEMORY_LIMIT:
 		sys_exit('memory leak')
 
-################ access handlers ###############################################################
+# access handlers
 
 def load_access_levels():
 	if initialize_file(GLOBACCESS_FILE):
@@ -720,7 +679,7 @@ def has_access(source, level, conf):
 		return True
 	return False
 
-################ join/leave & message send handlers ############################################
+# join/leave & message send handlers
 
 def send_join_presece(conf, nick, code = None):
 	Presence = xmpp.protocol.Presence('%s/%s' % (conf, nick))
@@ -807,7 +766,7 @@ def change_bot_status(conf, text, status):
 	Presence.setTag('c', namespace = xmpp.NS_CAPS, attrs = {'node': Caps, 'ver': CapsVer})
 	JCON.send(Presence)
 
-################ role/afl iq handlers ##########################################################
+# role iq handlers
 
 def handler_iq_send(conf, item_name, item, afrls, afrl, rsn = None):
 	stanza = xmpp.Iq(to = conf, typ = 'set')
@@ -854,7 +813,7 @@ def handler_participant(conf, nick, reason):
 def handler_moder(conf, nick, reason):
 	handler_iq_send(conf, 'nick', nick, 'role', 'moderator', reason)
 
-################ message handler & others ######################################################
+# message handler & others
 
 def roster_check(instance, body):
 	if instance not in ANSWER:
@@ -1031,7 +990,7 @@ def MESSAGE_PROCESSING(client, stanza):
 	else:
 		call_message_handlers(stanza, type, [fromjid, instance, nick], body)
 
-################ presence handler & others #####################################################
+# presence handler & others
 
 def status_code_change(items, conf, nick):
 	for item in items:
@@ -1152,7 +1111,7 @@ def PRESENCE_PROCESSING(client, Prs):
 		if GROUPCHATS.has_key(conf):
 			call_presence_handlers(Prs)
 
-################ iq handler ####################################################################
+# iq handler
 
 def IQ_PROCESSING(client, stanza):
 	fromjid = stanza.getFrom()
@@ -1218,7 +1177,7 @@ def IQ_PROCESSING(client, stanza):
 			raise xmpp.NodeProcessed
 	call_iq_handlers(stanza)
 
-################ starting actions & lytic restart ##############################################
+# starting actions & lytic restart
 
 def starting_actions():
 	load_access_levels()
@@ -1266,7 +1225,7 @@ def sys_exit(exit_reason = 'SUICIDE'):
 		call_stage3_init()
 	Exit('\n\nRESTARTING...\n\nPress Ctrl+C to exit', 0, 30)
 
-################ Bot starting ##################################################################
+# lytic start
 
 def lytic():
 	Print('\n\n--> BOT STARTED\n\n\nChecking PID...', color4)
@@ -1354,15 +1313,14 @@ def lytic():
 	INFO['start'] = time.time()
 	upkeep()
 	call_stage2_init()
-	CAN_LIVE = True
-	while CAN_LIVE:
+	while True:
 		try:
 			Dispatch_handler()
 		except:
 			Dispatch_fail()
 			INFO['errs'] += 1
 			if INFO['errs'] >= 7:
-				CAN_LIVE = False
+				break
 	sys_exit('Dispatch Errors')
 
 if __name__ == "__main__":
@@ -1377,4 +1335,4 @@ if __name__ == "__main__":
 			lytic_crashlog(lytic)
 		try_sleep(30)
 
-### end ########################################################################################
+# The End is Near =>

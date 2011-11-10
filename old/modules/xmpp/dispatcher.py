@@ -300,7 +300,7 @@ class Dispatcher(PlugIn):
 		if session._expected.has_key(ID):
 			user=0
 			if type(session._expected[ID])==type(()):
-				cb,args=session._expected[ID]
+				cb,args=session._expected.pop(ID)
 				session.DEBUG("Expected stanza arrived. Callback %s(%s) found!"%(cb,args),'ok')
 				try: cb(session,stanza,**args)
 				except Exception, typ:
