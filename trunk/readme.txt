@@ -15,27 +15,27 @@
 
 |-| =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= |-|
 
-Что это? - это бот BlackSmith [Neutron/Talisman/Jaskier]
-Зачем он тебе сдался? - это один из лучших ботов на оси Neutron (ИМХО)
+BlackSmith - это многофункциональный бот для jabber-конференций, написаный на Python.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+Бот создан командой «Witcher».
+
+Сейчас развитие осуществляет команда «simpleApps». 
 
 Как установить:
 
-!)  Необходимо иметь интерпритатор python не ниже версии 2.5.2 (Python 3 isn`t suppoted!)
+ Необходимо иметь интерпретатор python не ниже версии 2.5.2 (Python 3 версии не поддерживается.)
 
-1)  Редактируйте sourse.py (BlackSmith/static)
+1)  Редактируйте source.py (BlackSmith/static)
         (предварительно переименуйте s.ru or s.en)
-2)  Запусти BlackSmith.py или starter.py
+2)  Запустите BlackSmith.py или launcher.py
         (под стартером выключение невозможно)
 3)  Из ростера с жида администратора командуйте "джойн chat[at]conference.tld"
 
--> И вауаля! Бот обслуживает вашу конференцию!
+Обратиться по поводу бота можно к mrDoctorWho в simpleapps@conference.jabber.ru
 
-Обратиться по поводу бота можно к WitcherGeralt в Witcher@conference.jabber.ru
-
-By WitcherGeralt (WitcherGeralt@jabber.ru)
-for http://witcher-team.ucoz.ru/
-
-P.S. --->
+P.S.
 
 В разработке и тестировании непосредственно учавствовали:
 

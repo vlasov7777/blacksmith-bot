@@ -1,0 +1,11 @@
+{
+u"handler_stanza": {
+u"syntax": u'''станза [payload]''',
+
+u"cmd": u'''станза''',
+
+u"examples": [u'''станза <iq type...'''],
+
+u"desc": u'''топка'''
+}
+}
