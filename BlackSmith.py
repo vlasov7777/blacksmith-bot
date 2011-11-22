@@ -8,10 +8,11 @@
 #    Als [Als@exploit.in]
 #    Evgen [meb81@mail.ru]
 #    dimichxp [dimichxp@gmail.com]
-#    mrDoctorWhо [mrdoctorwho@gmail.com]
 #    Boris Kotov [admin@avoozl.ru]
 #    Mike Mintz [mikemintz@gmail.com]
 
+#  This program distributed under Apache 2.0 license.
+#  See license.txt for more details.
 #  © WitcherGeralt, based on Talisman by Als (Neutron by Gh0st)
 #  The new bot life © simpleApps.
 
@@ -24,8 +25,10 @@ import gc, os, re, sys, time, random, threading
 ## Set "sys.path".
 if not (hasattr(sys, "argv") and sys.argv and sys.argv[0]):
 	sys.argv = [__file__]
+	
 os.chdir(os.path.dirname(sys.argv[0]))
-sys.path.append("modules")
+
+sys.path.insert(1, "library.zip")
 
 from enconf import *
 import xmpp, macros, simplejson
@@ -84,7 +87,7 @@ GLOBACCESS_FILE = 'dynamic/access.txt'
 GROUPCHATS_FILE = 'dynamic/chats.txt'
 QUESTIONS_FILE = 'static/veron.txt'
 ROSTER_FILE = 'dynamic/roster.txt'
-PLUGIN_DIR = 'plugins'
+PLUGIN_DIR = 'extensions'
 PID_FILE = 'PID.txt'
 
 BOT_OS, BOT_PID = os.name, os.getpid()
@@ -320,12 +323,21 @@ def register_stage3_init(instance):
 			STAGE3_INIT.remove(handler)
 	STAGE3_INIT.append(instance)
 
+## Old plugins compability.
 def register_command_handler(instance, command, category = [], access = 0, desc = None, syntax = None, examples = []):
 	command = command.decode('utf-8')
 	if not COMMSTAT.has_key(command):
 		COMMSTAT[command] = {'col': 0, 'users': []}
 	COMMAND_HANDLERS[command] = instance
 	COMMANDS[command] = {'category': category, 'access': access, 'desc': desc, 'syntax': syntax, 'examples': examples}
+
+## New command handler.
+def command_handler(instance, access = 0, plug = "default"):
+	command = eval(read_file("help/%s" % plug).decode('utf-8'))[instance.func_name]["cmd"]
+	if not COMMSTAT.has_key(command):
+		COMMSTAT[command] = {'col': 0, 'users': []}
+	COMMAND_HANDLERS[command] = instance
+	COMMANDS[command] = {'plug': plug, 'access': access}
 
 ## Call, execute handlers.
 def Try_Thr(Thr, Number = 0):
@@ -449,16 +461,18 @@ def load_plugins():
 				data = file(filename).read(20)
 			except:
 				data = str()
-			Plug = Plugin.split('_plugin')
-			if data.count('lytic'):
+			Plug = Plugin.split('.')
+			if data.count("# BS mark.1"):
 				try:
 					execfile(filename, globals()); ltc.append(Plug[0])
 				except:
+					print_exc()
 					Npl.append(Plug[0])
 			elif data.count('talis'):
 				try:
 					execfile(filename, globals()); tal.append(Plug[0])
 				except:
+					print_exc()
 					Npl.append(Plug[0])
 			else:
 				Npl.append(Plug[0])
@@ -496,7 +510,7 @@ def read_pipe(command):
 		if BOT_OS == 'nt':
 			data = data.decode('cp866')
 	except:
-		data = '(error)'
+		data = '(...)'
 	return data
 
 read_link = lambda link: urlopen(link).read()
