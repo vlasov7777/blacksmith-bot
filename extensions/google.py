@@ -8,7 +8,6 @@
 # http://jabbrik.ru
 
 from urllib import urlencode
-noBanSymbols = u"«—»qwertyuiop[]\|asdfghjkl;':\"zxcvbnm,./ \n\t\r\n`~1234567890-=+_)(*&^%$/\\йцукенгшщзхъфывапролджэячсмитьбю.<>,ё"#u"qwertyuiop[]asdfghjkl;'zxcvbnm,.Ю`йцукенгшщзхъфывапролджэячсмитьбю.ёQWERTYUIOP{}ASDFGHJKL:\"ZXCVBNM<>Б~ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ,Ёйцукенгшщзхъфывапролджэячсмитьбю.ёqwertyuiop[]asdfghjkl;'zxcvbnm,.ю`ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ,ЁQWERTYUIOP{}ASDFGHJKL:\"ZXCVBNM<>б~»"
 #'
 
 def uHTML(text):
@@ -17,13 +16,7 @@ def uHTML(text):
 	text = HTMLParser().unescape(text)
 	del HTMLParser
 	return text
-
-def checkForBadSymbols(text):
-	for x in text:
-		if x.lower() not in noBanSymbols:
-			return True
-	return False
-
+	
 def google(type, source, body):
 	if body:
 		try:
@@ -32,10 +25,7 @@ def google(type, source, body):
 			noh_title = uHTML(replace_all(list[0]['title'], {'<b>': u'«', '</b>': u'»'}))
 			content = uHTML(replace_all(list[0]['content'], {'<b>': u'«', '</b>': u'»'}))
 			text = '%s%s\n%s' % (noh_title, content, list[0]['unescapedUrl'])
-			if not checkForBadSymbols(text):
-				reply(type, source, text)
-			else:
-				reply(type, source, u"I can't use arabic symbols :(")
+			reply(type, source, text)
 		except:
 			reply(type, source, u'Текст "%s" - не найден!' % (body))
 	else:
