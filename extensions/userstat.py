@@ -57,10 +57,7 @@ def handler_userstat(Prs):
 		USERSTAT[conf]['col'] += 1
 		if USERSTAT[conf]['col'] >= 16:
 			USERSTAT[conf]['col'] = 0
-			try:
-				write_file('dynamic/%s/userstat.txt' % (conf), str(USERSTAT[conf]['jids']))
-			except MemoryError:
-				upkeep()
+			write_file('dynamic/%s/userstat.txt' % (conf), str(USERSTAT[conf]['jids']))
 
 def handler_check_userstat(type, source, body):
 	if source[1] in GROUPCHATS:

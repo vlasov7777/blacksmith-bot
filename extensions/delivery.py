@@ -1,7 +1,7 @@
 #===istalismanplugin===
 # /* coding: utf-8 */
 # BlackSmith Bot Plugin
-# Other bots copability: True
+# Other bots compability: True
 # © simpleApps Unofficial.
 
 def msgDelivery(client, msg):

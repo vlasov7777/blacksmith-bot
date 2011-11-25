@@ -108,11 +108,18 @@ def handler_antibot_exceptions(type, source, body):
 			repl = u'Список исключений пуст.'
 	reply(type, source, repl)
 
+def exceptions_cleanup():
+	for x in EXCEPTIONS:
+		if not GROUPCHATS.get(x):
+			EXCEPTIONS.remove(x)
+	write_file(EXCEPT_LIST + "_", `EXCEPTIONS`)
+
 def antibot_exceptions_init():
 	if initialize_file(EXCEPT_LIST, '[]'):
 		globals()['EXCEPTIONS'] = eval(read_file(EXCEPT_LIST))
 	else:
 		Print('\n\nError: can`t create antibot exceptions file!', color2)
+##	exceptions_cleanup()
 
 register_leave_handler(handler_antibot_leave)
 register_join_handler(handler_antibot_join)

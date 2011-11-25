@@ -8,7 +8,7 @@ Langs = {'en': u'Английский',
 			'ru': u'Русский',
 			'auto': u'Авто',
 			'sq': u'Албанский',
-			'ar': u'Арабский',
+#			'ar': u'Арабский',
 			'af': u'Африкаанс',
 			'be': u'Белорусский',
 			'bg': u'Болгарский',
@@ -91,6 +91,9 @@ def gAutoTrans(mType, source, text):
 def gTransHandler(mType, source, args):
 	if args and len(args.split()) > 2:
 		(fLang, tLang, text) = args.split(None, 2)
+		if tLang == "ar":
+			reply(mType, source, u"I'm want to LIVE!")
+			return
 		reply(mType, source, u"Перевод %s => %s:\n%s" % (fLang, tLang, gTrans(fLang, tLang, text)))
 	else:
 		answer = u"\nДоступные языки:\n"

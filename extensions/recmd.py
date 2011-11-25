@@ -62,11 +62,11 @@ def handler_reinit_command(type, source, body):
 									else:
 										reply(type, source, u'нельзя более 12ти символов!')
 								else:
-									reply(type, source, u'она итак была переименована!')
+									reply(type, source, u'она и так была переименована!')
 							else:
 								reply(type, source, u'мне это кажется, или ты хернёй сейчас страдаешь?')
 						else:
-							reply(type, source, u'помоему ты меня троллишь :lol:')
+							reply(type, source, u'по-моему ты меня троллишь :lol:')
 					else:
 						reply(type, source, u'нет такой команды')
 				else:

@@ -12,7 +12,7 @@ BOLTUN_FILE = 'dynamic/boltun.txt'
 
 FLOOD = {}
 FRAZA_BOT = {}
-FRAZA_RANDOM = ['What the fuck!?', 'How are you?']
+FRAZA_RANDOM = ['WTF?', 'How are you?', 'What the beatiful day!']
 FRAZA_USER = {}
 FRAZA_ALL = {}
 
