@@ -52,7 +52,7 @@ def handler_clean(type, source, body):
 			CHAT_CACHE[source[1]] = {'1': '', '2': ''}
 			CHAT_DIRTY[source[1]] = True
 		else:
-			reply(type, source, u'итак чищу!')
+			reply(type, source, u'и так чищу!')
 	else:
 		reply(type, source, u'сам свой ростер чисть!')
 
@@ -90,7 +90,7 @@ def last_chat_cache(type, source, body):
 		reply(type, source, list)
 
 def handler_test(type, source, body):
-	testfr = [u'Чё нада?', u'А! Чё!? Где? фууу, нах так пугать!', u'Провален, твой IQ = 90!', u'Пассед', u'Ща те такой тест устрою!', u'- Тест на Дибида выключен, ты опоздал', u'Во ***! Нах разбудил! Мне снилась прекрасная Isida...', u'Сейчас, сейчас! Протестим твою репу на удароустойчивость!']
+	testfr = [u'Чё нада?', u'А! Чё? Где? фууу, нах так пугать!', u'Провален, твой IQ = 90!', u'Пассед', u'Ща те такой тест устрою!', u'- Тест на Дибида выключен, ты опоздал', u'Во ***! Нах разбудил! Мне снилась прекрасная Isida...', u'Сейчас, сейчас! Протестим твою репу на удароустойчивость!']
 	reply(type, source, (random.choice(testfr))+(' (Bot PID: %s)' % str(BOT_PID)))
 
 def handler_admin_message(type, source, body):
@@ -112,9 +112,9 @@ def handler_admin_message(type, source, body):
 			else:
 				reply(type, source, u'Ээ нет, это вообще не жид!')
 		else:
-			reply(type, source, u'А что слать то?')
+			reply(type, source, u'А что слать-то?')
 	else:
-		reply(type, source, u'ты чёто тупиш')
+		reply(type, source, u'ты чё-то тупишь')
 
 def handler_admin_say(type, source, body):
 	if body:
@@ -159,7 +159,7 @@ def handler_amsg_blacklist(type, source, body):
 						write_file(BLACK_LIST, str(AMSGBL))
 						repl = u'добавил %s в чёрный список' % (jid)
 					else:
-						repl = u'этот жид итак там'
+						repl = u'этот жид и так там'
 				elif check == '-':
 					if jid in AMSGBL:
 						AMSGBL.remove(jid)

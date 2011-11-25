@@ -10,8 +10,6 @@
 #  Als [Als@exploit.in]
 #  WitcherGeralt [WitcherGeralt@rocketmail.com]
 
-VERSIDS = []
-
 def handler_version(type, source, nick):
 	if source[1] in GROUPCHATS:
 		if nick:
@@ -26,18 +24,12 @@ def handler_version(type, source, nick):
 			recipient = source[0]
 		iq = xmpp.Iq(to = recipient, typ = 'get')
 		INFA['outiq'] += 1
-		ID = 'vers_'+str(INFA['outiq'])
-		VERSIDS.append(ID)
 		iq.addChild('query', {}, [], xmpp.NS_VERSION)
-		iq.setID(ID)
 		JCON.SendAndCallForResponse(iq, handler_version_answer, {'type': type, 'source': source})
 	else:
 		reply(type, source, u'только в чате')
 
 def handler_version_answer(coze, stanza, type, source):
-	ID = stanza.getID()
-	if ID in VERSIDS:
-		VERSIDS.remove(ID)
 		if stanza:
 			if stanza.getType() == 'result':
 				name = '[no name]'

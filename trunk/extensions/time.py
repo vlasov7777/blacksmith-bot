@@ -7,8 +7,6 @@
 #  Initial Copyright © 2007 Als <Als@exploit.in>
 #  Modifications Copyright © 2007 dimichxp <dimichxp@gmail.com>
 
-IDS_TIME = []
-
 def handler_gettime_xep_disco(type, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
@@ -35,18 +33,12 @@ def handler_gettime_xep_disco(type, source, body):
 					return
 		iq = xmpp.Iq(to = jid, typ = 'get')
 		INFA['outiq'] += 1
-		id = 'time_'+str(INFA['outiq'])
-		IDS_TIME.append(id)
 		iq.addChild('query', {}, [], xmpp.NS_DISCO_INFO)
-		iq.setID(id)
 		JCON.SendAndCallForResponse(iq, handler_gettime_xep_disco_answer, {'type': type, 'source': source, 'body': body, 'jid': jid})
 	else:
 		reply(type, source, u'Только в чате!')
 
 def handler_gettime_xep_disco_answer(coze, res, type, source, body, jid):
-	id = res.getID()
-	if id in IDS_TIME:
-		IDS_TIME.remove(id)
 		if res:
 			if res.getType() == 'result':
 				res = res.getQueryChildren()
@@ -84,16 +76,10 @@ def gettime_xep0090(type, source, jid, body = None):
 		nick = ''
 	time_iq = xmpp.Iq(to = jid, typ = 'get')
 	INFA['outiq'] += 1
-	id = 'time_'+str(INFA['outiq'])
-	IDS_TIME.append(id)
 	time_iq.addChild('query', {}, [], xmpp.NS_TIME)
-	time_iq.setID(id)
 	JCON.SendAndCallForResponse(time_iq, gettime_xep0090_answer, {'type': type, 'source': source, 'nick': nick})
 
 def gettime_xep0090_answer(coze, res, nick, type, source):
-	id = res.getID()
-	if id in IDS_TIME:
-		IDS_TIME.remove(id)
 		if res:
 			if res.getType() == 'error':
 				if nick:
@@ -119,16 +105,10 @@ def gettime_xep0202(type, source, jid, body = None):
 		nick = ''
 	time_iq = xmpp.Iq(to = jid, typ = 'get')
 	INFA['outiq'] += 1
-	id = 'time_'+str(INFA['outiq'])
-	IDS_TIME.append(id)
 	time_iq.addChild('time', {}, [], 'urn:xmpp:time')
-	time_iq.setID(id)
 	JCON.SendAndCallForResponse(time_iq, gettime_xep0202_answer, {'type': type, 'source': source, 'nick': nick})
 
 def gettime_xep0202_answer(coze, res, nick, type, source):
-	id = res.getID()
-	if id in IDS_TIME:
-		IDS_TIME.remove(id)
 		if res:
 			if res.getType() == 'error':
 				if nick:

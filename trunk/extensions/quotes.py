@@ -61,7 +61,7 @@ def bashAbyss(type, source, args):
 			message = q1[od.end():]
 			message = message[:re.search('</div>',message).start()]
 			reply(type,source, uHTML(message.decode('cp1251')))
-		except Exception, E:
+		except Exception, e:
 			reply(type,source, `e`)
 
 def jabber_quotes(type, source, body):

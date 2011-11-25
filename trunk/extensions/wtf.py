@@ -25,9 +25,9 @@ def handler_wtf_global(type, source, body):
 				if globaldb.has_key(key):
 					del globaldb[key]
 					write_file(WTF_FILE, str(globaldb))
-					reply(type, source, u'"%s" -> прибил нафиг!' % (key))
+					reply(type, source, u'"%s" прибил нафиг!' % (key))
 				else:
-					reply(type, source, u'"%s" -> итак нет в базе!' % (key))
+					reply(type, source, u'"%s" и так нет в базе!' % (key))
 			else:
 				globaldb[key] = value+' (from '+source[2]+')'
 				write_file(WTF_FILE, str(globaldb))
@@ -57,15 +57,15 @@ def handler_wtf_lokal(type, source, body):
 						if localdb.has_key(key):
 							del localdb[key]
 							write_file(base, str(localdb))
-							reply(type, source, u'"%s" -> прибил нафиг!' % (key))
+							reply(type, source, u'"%s" прибил нафиг!' % (key))
 						else:
-							reply(type, source, u'"%s" -> итак нет в базе!' % (key))
+							reply(type, source, u'"%s" итак нет в базе!' % (key))
 					else:
 						localdb[key] = value+' (from '+source[2]+')'
 						write_file(base, str(localdb))
 						reply(type, source, u'Теперь буду занть что такое -> "%s"' % (key))
 				else:
-					reply(type, source, u'"%s" -> уже есть в глобальной базе!' % (key))
+					reply(type, source, u'"%s" уже есть в глобальной базе!' % (key))
 			else:
 				reply(type, source, u'Ты определённо что-то забыл!')
 		else:

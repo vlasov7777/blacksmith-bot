@@ -11,8 +11,6 @@
 #  Evgen [meb81@mail.ru]
 #  WitcherGeralt [WitcherGeralt@rocketmail.com]
 
-VCARD_IDS = []
-
 def handler_get_vcard(type, source, nick):
 	if nick:
 		if source[1] in GROUPCHATS:
@@ -29,16 +27,10 @@ def handler_get_vcard(type, source, nick):
 		recipient = source[0]
 	vcard_iq = xmpp.Iq(to = recipient, typ = 'get')
 	INFA['outiq'] += 1
-	ID = 'vcard_'+str(INFA['outiq'])
-	VCARD_IDS.append(ID)
 	vcard_iq.addChild('vCard', {}, [], 'vcard-temp')
-	vcard_iq.setID(ID)
 	JCON.SendAndCallForResponse(vcard_iq, handler_vcard_answer, {'type': type, 'source': source, 'nick': nick})
 
 def handler_vcard_answer(coze, stanza, type, source, nick):
-	ID = stanza.getID()
-	if ID in VCARD_IDS:
-		VCARD_IDS.remove(ID)
 		if stanza:
 			if stanza.getType() == 'result':
 				MASS = stanza.getChildren()

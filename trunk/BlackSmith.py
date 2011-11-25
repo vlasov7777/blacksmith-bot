@@ -752,6 +752,7 @@ def msg(target, body):
 def reply(ltype, source, body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
+	
 	if ltype == 'public':
 		body = '%s: %s' % (source[2], body)
 		msg(source[1], body)
