@@ -737,6 +737,8 @@ def msg(target, body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
 	obody = body
+	if checkForBadSymbols(body):
+		body = "I can't use arabic symbols :("
 	if GROUPCHATS.has_key(target):
 		ltype = 'groupchat'
 		if len(body) > CHAT_MSG_LIMIT:
@@ -749,10 +751,22 @@ def msg(target, body):
 	INFA['outmsg'] += 1
 	call_outgoing_message_handlers(target, body, obody)
 
+noBanSymbols = u"@©!?«—»qwertyuiop[]\|asdfghjkl;':\"zxcvbnm,./ \n\t\r\n`~1234567890-=+_)(*&^%$/\\йцукенгшщзхъфывапролджэячсмитьбю.<>,ё"
+#"
+def checkForBadSymbols(text):
+	for x in text:
+		if x.lower() not in noBanSymbols:
+#			print x.lower()
+			return True
+	return False
+
 def reply(ltype, source, body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
-	
+	if checkForBadSymbols(body):
+		body = u"I can't use arabic symbols :("
+	if checkForBadSymbols(source[2]):
+		source[2] = "Guy with arabic symbols"
 	if ltype == 'public':
 		body = '%s: %s' % (source[2], body)
 		msg(source[1], body)
