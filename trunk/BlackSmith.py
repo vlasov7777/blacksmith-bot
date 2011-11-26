@@ -215,6 +215,7 @@ def write_file(name, data, mode = "w"):
 def Dispatch_fail():
 	crashfile = open('__main__.crash', 'a')
 	print_exc(limit = None, file = crashfile)
+	print "\n\n#-# JCON.Iter() Error!"
 	crashfile.close()
 
 def lytic_crashlog(handler, command = None):
@@ -733,12 +734,36 @@ def delivery(body):
 	except:
 		write_file('delivery.txt', body, 'a')
 
+## We are so sorry for blocking arabic.
+def detectSymbols(symbol, uName):
+##	print u"%s: %s" % (uName(unicode(symbol)), symbol)
+	try:
+		name = uName(unicode(symbol))
+		return name.count("ARABIC") or name.count("ZERO")
+	except:
+		print_exc()
+		print symbol
+		return True
+
+def checkArabic(text):
+	from unicodedata import name as uName
+	arabic = False
+	text = text.replace("\n", "").replace("\r", "")
+	for x in text:
+		if detectSymbols(x, uName):
+			arabic = True
+			break
+	del uName
+	return arabic
+
 def msg(target, body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
 	obody = body
-	if checkForBadSymbols(body):
-		body = "I can't use arabic symbols :("
+	jid = str(target).split("/")[0]
+	if jid.endswith("xmpp.ru") or jid.endswith("jabber.ru"):
+		if checkArabic(body):
+			body = "Unavailable symbols in text"
 	if GROUPCHATS.has_key(target):
 		ltype = 'groupchat'
 		if len(body) > CHAT_MSG_LIMIT:
@@ -750,23 +775,15 @@ def msg(target, body):
 	JCON.send(xmpp.Message(target, body.strip(), ltype))
 	INFA['outmsg'] += 1
 	call_outgoing_message_handlers(target, body, obody)
-
-noBanSymbols = u"@©!?«—»qwertyuiop[]\|asdfghjkl;':\"zxcvbnm,./ \n\t\r\n`~1234567890-=+_)(*&^%$/\\йцукенгшщзхъфывапролджэячсмитьбю.<>,ё"
-#"
-def checkForBadSymbols(text):
-	for x in text:
-		if x.lower() not in noBanSymbols:
-#			print x.lower()
-			return True
-	return False
-
+		
 def reply(ltype, source, body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
-	if checkForBadSymbols(body):
-		body = u"I can't use arabic symbols :("
-	if checkForBadSymbols(source[2]):
-		source[2] = "Guy with arabic symbols"
+	if source[1].endswith("jabber.ru") or source[1].endswith("xmpp.ru"):
+		if checkArabic(body):
+			body = "Unavailable symbols in text"
+		if checkArabic(source[2]):
+			source[2] = "ArabicGuy"
 	if ltype == 'public':
 		body = '%s: %s' % (source[2], body)
 		msg(source[1], body)
