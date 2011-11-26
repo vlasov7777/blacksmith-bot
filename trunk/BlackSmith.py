@@ -330,8 +330,8 @@ def register_command_handler(instance, command, category = [], access = 0, desc 
 	if not COMMSTAT.has_key(command):
 		COMMSTAT[command] = {'col': 0, 'users': []}
 	COMMAND_HANDLERS[command] = instance
-	COMMANDS[command] = {'category': category, 'access': access, 'desc': desc, 'syntax': syntax, 'examples': examples}
-
+	COMMANDS[command] = {'access': access, 'desc': desc.decode('utf-8'), 'syntax': syntax.decode('utf-8'), 'examples': [ex.decode('utf-8') for ex in examples]}
+	
 ## New command handler.
 def command_handler(instance, access = 0, plug = "default"):
 	command = eval(read_file("help/%s" % plug).decode('utf-8'))[instance.func_name]["cmd"]
@@ -541,7 +541,6 @@ def handler_botnick(conf):
 	return DEFAULT_NICK
 
 def handler_jid(instance):
-##	if isinstance(instance, types.InstanceType):
 	instance = unicode(instance)
 	List = instance.split('/', 1)
 	chat = List[0].lower()
@@ -736,13 +735,15 @@ def delivery(body):
 
 ## We are so sorry for blocking arabic.
 def detectSymbols(symbol, uName):
-##	print u"%s: %s" % (uName(unicode(symbol)), symbol)
+##	print u"%s: %s, %s" % (uName(unicode(symbol)), symbol, `ord(symbol)`)
+	if symbol.isalpha() or symbol == chr(9):
+		return False
 	try:
 		name = uName(unicode(symbol))
-		return name.count("ARABIC") or name.count("ZERO")
+		return name.count("ARABIC") or name.count("WIDTH NO-BREAK")
 	except:
-		print_exc()
-		print symbol
+##		print_exc()
+##		print "'%s'"%symbol
 		return True
 
 def checkArabic(text):

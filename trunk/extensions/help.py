@@ -23,10 +23,13 @@ def command_help(type, source, body):
 		command = body.lower()
 		if len(command) <= 24:
 			if command in COMMANDS:
-				inst = COMMAND_HANDLERS[command].func_name
-				plug = COMMANDS[command]['plug']
 				try:
-					fr = eval(read_file("help/%s" % plug).decode("utf-8"))[inst]
+					if COMMANDS[command].has_key('desc'):
+						fr = COMMANDS[command]
+					else:
+						plug = COMMANDS[command]['plug']
+						inst = COMMAND_HANDLERS[command].func_name
+						fr = eval(read_file("help/%s" % plug).decode("utf-8"))[inst]
 					mess = fr['desc']
 					mess += u'\nИспользование: '+fr['syntax']+u'\nПримеры:'
 					for example in fr['examples']:
