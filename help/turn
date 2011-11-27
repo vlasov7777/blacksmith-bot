@@ -1,5 +1,5 @@
 {
-u"handler_turn_last": {
+u"command_turn": {
 u"syntax": u'''турн''',
 
 u"cmd": u'''турн''',

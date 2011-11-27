@@ -735,8 +735,8 @@ def delivery(body):
 
 ## We are so sorry for blocking arabic.
 def detectSymbols(symbol, uName):
-##	print u"%s: %s, %s" % (uName(unicode(symbol)), symbol, `ord(symbol)`)
-	if symbol.isalpha() or symbol == chr(9):
+##	print u"%s: %s, %s, %s" % (uName(unicode(symbol)), symbol, str(ord(symbol)), str(symbol.isalpha()))
+	if symbol in [chr(9), chr(10), chr(13)]:
 		return False
 	try:
 		name = uName(unicode(symbol))
