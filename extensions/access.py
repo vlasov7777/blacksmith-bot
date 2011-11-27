@@ -18,9 +18,13 @@ def handler_superadmin_login(type, source, body):
 		if jid not in ADLIST:
 			ADLIST.append(jid)
 		GLOBACCESS[jid] = 100
+		msg(BOSS, u"\"%s\" из \"%s\" получил доступ 100 по команде \"логин\"." %\
+			(handler_jid(source[0]), source[1]))
 		reply(type, source, u'Стопудов! Ты верняк BOSS')
 	else:
 		reply(type, source, u'Пшёл вон, я хз кто ты!')
+		msg(BOSS, u"\"%s\" из \"%s\" пытается получить доступ 100 по команде \"логин\"." %\
+			(handler_jid(source[0]), source[1]))
 
 def handler_superadmin_logout(type, source, body):
 	jid = handler_jid(source[0])
