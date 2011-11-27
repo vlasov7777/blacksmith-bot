@@ -20,7 +20,7 @@ def joke(type, source, parameters):
 	reply(type ,source, u"Анекдот: %s" % uHTML(text.decode("cp1251")))
 
 
-def bashorg(type, source, parameters):
+def bashOrg(type, source, parameters):
 	if parameters.strip()=='':
 		target = urlopen('http://bash.org.ru/random').read()
 	else:
@@ -38,7 +38,7 @@ def bashorg(type, source, parameters):
 		reply(type,source, `e`)
 
 
-def ithappens(type, source, parameters):
+def itHappens(type, source, parameters):
 	main = urlopen("http://ithappens.ru/random").read()
 	od = re.search("<h3>#", main)
 	id = main[od.end():]
@@ -64,7 +64,7 @@ def bashAbyss(type, source, args):
 		except Exception, e:
 			reply(type,source, `e`)
 
-def jabber_quotes(type, source, body):
+def jQuotes(type, source, body):
 	if body:
 		body = body.lower()
 	if body in [u'ранд', 'rand']:
@@ -76,14 +76,14 @@ def jabber_quotes(type, source, body):
 	try:
 		list = read_link(link).split('<blockquote>')
 		list.pop(0)
-		quote = random.choice(list).split('</blockquote>')[0]
+		quote = random.choice(list).split('</blockquote>')[0].decode('cp1251')
 		quote = uHTML(quote)
 		quote = quote.replace('\n\n\n', '\n\n')
-		reply(type, source, 'Quote:\n%s' % unicode(quote, 'windows-1251'))
+		reply(type, source, quote)
 	except Exception, e:
 		reply(type, source, `e`)
 
-def pyorg(type, source, body):
+def pyOrg(type, source, body):
 	try:
 		data = re_search(read_link('http://python.org/'), '<h2 class="news">', '</div>')
 		data, repl = strip_tags.sub('', uHTML(data)), "\n"
@@ -103,10 +103,10 @@ def afor(type, source, body):
 		reply(type, source, `e`)
 
 
-command_handler(jabber_quotes, 10, "quotes")
-command_handler(pyorg, 10, "quotes")
-command_handler(bashorg, 0, "quotes")
-command_handler(ithappens, 10, "quotes")
+command_handler(jQuotes, 10, "quotes")
+command_handler(pyOrg, 10, "quotes")
+command_handler(bashOrg, 0, "quotes")
+command_handler(itHappens, 10, "quotes")
 command_handler(joke, 10, "quotes")
 command_handler(bashAbyss, 0, "quotes")
 command_handler(afor, 10, "quotes")
