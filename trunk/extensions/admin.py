@@ -18,15 +18,15 @@ def handler_set_prefix(type, source, prefix):
 					write_file('dynamic/%s/prefix.txt' % (source[1]), "'none'")
 					reply(type, source, u'Теперь нет префикса!')
 				else:
-					reply(type, source, u'Итак нет префикса!')
+					reply(type, source, u'И так нет префикса!')
 			elif prefix in PRFX_LIST:
 				PREFIX[source[1]] = prefix
 				write_file('dynamic/%s/prefix.txt' % (source[1]), '"%s"' % (prefix))
-				reply(type, source, u'Знак "%s" отныне является здесь префиксом' % (prefix))
+				reply(type, source, u'Знак "%s" отныне является здесь префиксом.' % (prefix))
 			else:
 				reply(type, source, u'Недоступный префикс! Доступные: '+', '.join(PRFX_LIST))
 		elif source[1] in PREFIX:
-			reply(type, source, u'Знак "%s" является префиксом здесь' % (PREFIX[source[1]]))
+			reply(type, source, u'Знак "%s" является префиксом здесь.' % (PREFIX[source[1]]))
 		else:
 			reply(type, source, u'Префикс не установлен!')
 	else:
@@ -183,13 +183,15 @@ def handler_timeup_info(type, source, body):
 
 def handler_botup_info(type, source, body):
 	if INFO['start']:
-		PID, Now_time = str(BOT_PID), time.time()
+		PID, Now_time, cService = str(BOT_PID), time.time(), len(GROUPCHATS.keys())
 		repl = u'\n*** Статистика работы (Bot PID: %s):\n• Рабочая сессия %s' % (PID, timeElapsed(Now_time - RUNTIMES['START']))
 		if RUNTIMES['REST']:
 			repl += u'\n• Последняя сессия %s' % (timeElapsed(Now_time - INFO['start']))
 		repl += u'\n• Обработано %i презенсов и %i iq-запросов\n• Отправлено %i сообщений и %i iq-запросов' % (INFO['prs'], INFO['iq'], INFA['outmsg'], INFA['outiq'])
 		repl += u'\n• Произошло %i ошибок и %i ошибок диспатчера\n• Получено %i сообщений\n• Выполнено %i команд' % (len(ERRORS.keys()), INFO['errs'], INFO['msg'], INFO['cmd'])
 		repl += u'\n• Создано файлов: %i\n• Прочтений файлов: %i\n• Записей в файлах: %i\n• Записей крэш-логов: %i' % (INFA['fcr'], INFA['fr'], INFA['fw'], INFA['cfw'])
+		if len(GROUPCHATS.keys()):
+			repl += u"\n• Обслуживаю %d %s" % (cService, ("конференций" if (cService > 4) or `cService`.endswith("0") else (u"конференции" if (cService < 5) else u"конференцию")))
 		memory = memory_usage()
 		if memory:
 			repl += u'\n• Использую %.2f МБ оперативной памяти' % (round(memory) / 1024)

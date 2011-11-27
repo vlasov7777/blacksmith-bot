@@ -1,6 +1,6 @@
 # coding: utf-8
 # BlackSmith plugin upgrader
-# (c) simpleApps and WitcherGeralt
+# (c) simpleApps and WitcherTeam owners.
 # Distributed under Apache 2.0 license on 2011 year.
 
 import sys, os, re
