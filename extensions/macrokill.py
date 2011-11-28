@@ -49,6 +49,15 @@ def handler_conflist(type, source, body):
 	else:
 		reply(type, source, u'А меня нет ни в одной конверенции!')
 
+def command_chatlist(mType, source, args):
+	cList = u"\nСписок конференций, в которых"\
+		" сидит бот (всего %d штук):\n" % len(GROUPCHATS.keys())
+	for x, y in enumerate(GROUPCHATS.keys()):
+		cList += u"%d. %s\n" % (x + 1, y)
+	if mType == "public":
+		reply(mType, source, u"Смотри в привате.") 
+	reply("private", source, cList)	
+
 def handler_visitors(type, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
@@ -124,4 +133,5 @@ def handler_topic(type, source, body):
 command_handler(handler_set_botnick, 30, "macrokill")
 command_handler(handler_visitors, 20, "macrokill")
 command_handler(handler_conflist, 20, "macrokill")
+command_handler(command_chatlist, 20, "macrokill")
 command_handler(handler_topic, 20, "macrokill")

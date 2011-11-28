@@ -10,7 +10,7 @@ def punycode(domain):
 		return domain
 
 def chkForDomain(domain, func):
-	iterations = int() - 1
+	iterations = - 1
 	host = domain
 	for x in domain.split("."):
 		if not x.isdigit():
@@ -45,7 +45,7 @@ def command_dns(mType, source, argv):
 
 def command_chkServer(mType, source, argv):
 	if argv:
-		argv = argv.strip().split()
+		argv = argv.split()
 		addr, port, answer = str(), str(), u"что?"
 		if len(argv) > 1:
 			addr, port = argv
@@ -57,7 +57,11 @@ def command_chkServer(mType, source, argv):
 		from socket import socket, AF_INET, SOCK_STREAM
 		sock = socket(AF_INET, SOCK_STREAM)
 		sock.settimeout(5)
-		port = int(port)
+		if port.isdigit():
+			port = int(port)
+		else:
+			reply(mType, source, answer)
+			return
 		try:
 			sock.connect((addr,port))
 			answer = u"Порт %d на \"%s\" открыт." % (port, addr)
