@@ -49,4 +49,15 @@ u"desc": u'''Выдаёт список конференций где сидит 
 By WitcherGeralt
 http://witcher-team.ucoz.ru/'''
 }
+,
+
+u"command_chatlist": {
+u"syntax": u'''чатлист''',
+
+u"cmd": u'''чатлист''',
+
+u"examples": [u'''чатлист'''],
+
+u"desc": u'''Выдаёт список конференций где сидит бот'''
+}
 }
