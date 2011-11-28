@@ -3,6 +3,12 @@
 # (c) simpleApps CodingTeam, 2011
 # This program distributed under Apache 2.0 license.
 
+def punycode(domain):
+	try:
+		return domain.encode("idna")
+	except:
+		return domain
+
 def chkForDomain(domain, func):
 	iterations = int() - 1
 	host = domain
@@ -15,6 +21,8 @@ def chkForDomain(domain, func):
 
 def getHost(argv):
 	if argv:
+		if not chkUnicode(argv): 
+			argv = punycode(argv)
 		from socket import gethostbyname
 		dns = chkForDomain(argv.strip(), gethostbyname)
 		del gethostbyname
