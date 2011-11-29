@@ -68,8 +68,8 @@ def handler_set_access(type, source, Params):
 					access = splitdata[1].strip()
 				elif len(splitdata) == 1:
 					access = '0'
-				if check_number(access):
-					if  item.count('@') and item.count('.'):
+				if check_number(access):#any([check_number(x) for x in access.split("-")]):
+					if item.count('@') and item.count('.'):
 						jidto = item
 					elif item in GROUPCHATS[source[1]]:
 						jidto = handler_jid(source[1]+'/'+item)
@@ -110,7 +110,7 @@ def handler_set_access(type, source, Params):
 					else:
 						reply(type, source, u'Это не жид, да и никого с таким ником я не знаю!')
 				else:
-					reply(type, source, u'Доступ что ты пытаешся дать не является числом!')
+					reply(type, source, u'Доступ, что ты пытаешься дать, не является числом!')
 			else:
 				reply(type, source, u'перебор параметров')
 		else:

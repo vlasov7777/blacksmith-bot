@@ -598,7 +598,7 @@ def Prefix_state(combody, bot_nick):
 
 def check_number(number):
 	try:
-		return number.isdigit()
+		return int(number)
 	except:
 		return False
 
