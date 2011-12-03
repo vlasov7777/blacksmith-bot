@@ -50,13 +50,16 @@ def handler_conflist(type, source, body):
 		reply(type, source, u'А меня нет ни в одной конверенции!')
 
 def command_chatlist(mType, source, args):
-	cList = u"\nСписок конференций, в которых"\
-		" сидит бот (всего %d штук):\n" % len(GROUPCHATS.keys())
-	for x, y in enumerate(GROUPCHATS.keys()):
-		cList += u"%d. %s\n" % (x + 1, y)
-	if mType == "public":
-		reply(mType, source, u"Смотри в привате.") 
-	reply("private", source, cList)	
+	if not args:
+		cList = u"\nСписок конференций, в которых"\
+			" сидит бот (всего %d штук):\n" % len(GROUPCHATS.keys())
+		for x, y in enumerate(GROUPCHATS.keys()):
+			cList += u"%d. %s\n" % (x + 1, y)
+		if mType == "public":
+			reply(mType, source, u"Смотри в привате.") 
+		reply("private", source, cList)
+	elif args.strip() == "количество":
+		reply(mType, source, u"Количество обслуживаемых конференций: %d." % len(GROUPCHATS.keys()))
 
 def handler_visitors(type, source, body):
 	if source[1] in GROUPCHATS:
@@ -114,9 +117,9 @@ def handler_visitors(type, source, body):
 			if usrcol != 0:
 				if type == 'public':
 					reply(type, source, u'глянь в приват')
-				reply('private', source, (u'Здесь было %s юзеров:' % str(usrcol))+userlist+(u'\n+ ещё %s досихпор здесь' % str(col)))
+				reply('private', source, (u'Здесь было %s юзеров:' % str(usrcol))+userlist+(u'\n+ ещё %s до сих пор здесь' % str(col)))
 			else:
-				reply(type, source, u'При мне никто ещё не выходил, все кто был досихпор здесь!')
+				reply(type, source, u'При мне никто ещё не выходил, все, кто был, - до сих пор здесь!')
 	else:
 		reply(type, source, u'Я хз кто был у тебя в ростере :D')
 

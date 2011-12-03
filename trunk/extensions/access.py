@@ -68,7 +68,7 @@ def handler_set_access(type, source, Params):
 					access = splitdata[1].strip()
 				elif len(splitdata) == 1:
 					access = '0'
-				if check_number(access):#any([check_number(x) for x in access.split("-")]):
+				if check_number(access):
 					if item.count('@') and item.count('.'):
 						jidto = item
 					elif item in GROUPCHATS[source[1]]:
@@ -149,7 +149,7 @@ def handler_set_access_glob(type, source, Params):
 						change_global_access(jid)
 						reply(type, source, u'Снял доступ c "%s"' % (item))
 					else:
-						reply(type, source, u'У "%s" итак нет глобального доступа!' % (item))
+						reply(type, source, u'У "%s" и так нет глобального доступа!' % (item))
 			else:
 				reply(type, source, u'Это не жид да и никого с таким ником я незнаю!')
 		else:
