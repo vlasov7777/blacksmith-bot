@@ -52,7 +52,7 @@ def handler_conflist(type, source, body):
 def command_chatlist(mType, source, args):
 	if not args:
 		cList = u"\nСписок конференций, в которых"\
-			" сидит бот (всего %d штук):\n" % len(GROUPCHATS.keys())
+			u" сидит бот (всего %d штук):\n" % len(GROUPCHATS.keys())
 		for x, y in enumerate(GROUPCHATS.keys()):
 			cList += u"%d. %s\n" % (x + 1, y)
 		if mType == "public":
