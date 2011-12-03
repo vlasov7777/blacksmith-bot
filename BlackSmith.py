@@ -334,7 +334,12 @@ def register_command_handler(instance, command, category = [], access = 0, desc 
 	
 ## New command handler.
 def command_handler(instance, access = 0, plug = "default"):
-	command = eval(read_file("help/%s" % plug).decode('utf-8'))[instance.func_name]["cmd"]
+	try:
+		command = eval(read_file("help/%s" % plug).decode('utf-8'))[instance.func_name]["cmd"]
+	except:
+		print_exc()
+		Print("Plugin %s has no help." % plug, color2)
+		command = "command%d" % len(COMMANDS.keys())
 	if not COMMSTAT.has_key(command):
 		COMMSTAT[command] = {'col': 0, 'users': []}
 	COMMAND_HANDLERS[command] = instance
@@ -505,14 +510,24 @@ def load_quests():
 
 def read_pipe(command):
 	try:
-		pipe = os.popen(command)
-		data = pipe.read()
+		if BOT_OS == "posix":
+			pipe = os.popen("sh -c \"%s\" 2>&1" % command.encode("utf8"))
+			out = pipe.read()
+		elif BOT_OS == "nt":
+			pipe = os.popen("%s" % command.encode("cp1251"))
+			out = pipe.read().decode("cp866")
 		pipe.close()
-		if BOT_OS == 'nt':
-			data = data.decode('cp866')
 	except:
-		data = '(...)'
-	return data
+		out = returnExc()
+	return out
+
+def returnExc():
+	exc = sys.exc_info()
+	if any(exc):
+		error = "\n%s: %s " % (exc[0].__name__, exc[1])
+	else:
+		error = `None`
+	return error
 
 read_link = lambda link: urlopen(link).read()
 
@@ -551,7 +566,10 @@ def handler_jid(instance):
 
 def save_conflist(conf, nick = None, code = None):
 	if initialize_file(GROUPCHATS_FILE):
-		list = eval(read_file(GROUPCHATS_FILE))
+		try:
+			list = eval(read_file(GROUPCHATS_FILE))
+		except:
+			list = {}
 		if conf not in list:
 			list[conf] = {'nick': nick, 'code': code}
 		elif nick and conf and code:
@@ -611,6 +629,15 @@ def that_day():
 	return int(time.strftime('%Y%m%d', time.gmtime()))
 
 Elist = [' %s' % (x) for x in [u'0 мес', u'0 дн', u'0 час', u'0 мин', u'0 сек']]
+
+def formatWord(Numb, ls):
+	ls = "{2}/{0}/{1}/{1}/{1}/{2}/{2}/{2}/{2}/{2}/{2}/{2}/{2}/{2}".format(*ls)
+	ls = ls.split(chr(47))
+	if Numb in xrange(15):
+		x = ls[Numb]
+	else:
+		x = ls[int(str(Numb)[-1])]
+	return x
 
 def timeElapsed(or_seconds):
 	minutes, seconds = divmod(or_seconds, 60)
@@ -734,28 +761,31 @@ def delivery(body):
 		write_file('delivery.txt', body, 'a')
 
 ## We are so sorry for blocking arabic.
-def detectSymbols(symbol, uName):
-##	print u"%s: %s, %s, %s" % (uName(unicode(symbol)), symbol, str(ord(symbol)), str(symbol.isalpha()))
+from unicodedata import name as uName
+def detectSymbols(symbol):
+#	print u"%s: %s, %s, %s" % (uName(unicode(symbol)), symbol, str(ord(symbol)), str(symbol.isalpha()))
 	if symbol in [chr(9), chr(10), chr(13)]:
 		return False
 	try:
 		name = uName(unicode(symbol))
 		return name.count("ARABIC") or name.count("WIDTH NO-BREAK")
 	except:
-##		print_exc()
-##		print "'%s'"%symbol
+#		print "'%s'" % symbol
 		return True
 
 def checkArabic(text):
-	from unicodedata import name as uName
 	arabic = False
-	text = text.replace("\n", "").replace("\r", "")
 	for x in text:
-		if detectSymbols(x, uName):
+		if detectSymbols(x):
 			arabic = True
 			break
-	del uName
 	return arabic
+
+def replaceArabic(text):
+	for x in text:
+		if detectSymbols(x):
+			text = text.replace(x, u"*")
+	return u"%s\n\n*** Text contains unavailable symbols." % text
 
 def msg(target, body):
 	if not isinstance(body, unicode):
@@ -764,7 +794,7 @@ def msg(target, body):
 	jid = str(target).split("/")[0]
 	if jid.endswith("xmpp.ru") or jid.endswith("jabber.ru"):
 		if checkArabic(body):
-			body = "Unavailable symbols in text"
+			body = replaceArabic(body)
 	if GROUPCHATS.has_key(target):
 		ltype = 'groupchat'
 		if len(body) > CHAT_MSG_LIMIT:
@@ -780,11 +810,6 @@ def msg(target, body):
 def reply(ltype, source, body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
-	if source[1].endswith("jabber.ru") or source[1].endswith("xmpp.ru"):
-		if checkArabic(body):
-			body = "Unavailable symbols in text"
-		if checkArabic(source[2]):
-			source[2] = "ArabicGuy"
 	if ltype == 'public':
 		body = '%s: %s' % (source[2], body)
 		msg(source[1], body)
@@ -1205,7 +1230,7 @@ def lytic_restart():
 
 def Dispatch_handler():
 	try:
-		JCON.Process(8)
+		JCON.Process(ParseTimeout)
 	except xmpp.Conflict:
 		Print('\n\nError: XMPP Conflict!', color2)
 		call_stage3_init()
@@ -1284,38 +1309,45 @@ def main():
 	JCON.sendInitPresence()
 	Print('\n\nYahoo! I am online!', color3)
 	if initialize_file(GROUPCHATS_FILE):
-		CONFS = eval(read_file(GROUPCHATS_FILE))
-		Print('\n\nThere are %d rooms in list:' % len(CONFS), color4)
-		for conf in CONFS:
-			list = ['Joined %s' % (conf), 'Joined conference!', 'Can`t join %s' % (conf), 'Unable conference!']
-			if chkUnicode(conf):
-				Number = 0
-			else:
-				Number = 1
-			BOT_NICKS[conf] = CONFS[conf]['nick']
-			try:
-				muc = join_groupchat(conf, handler_botnick(conf), CONFS[conf]['code'])
-			except:
-				muc = True
-			if not muc:
-				state, color =  list[Number], color3
-			else:
-				state, color =  list[Number + 2], color2
-			Print(state, color)
+		try:
+			CONFS = eval(read_file(GROUPCHATS_FILE))
+		except:
+			CONFS = {}
+			lytic_crashlog(read_file)
+			Print("\nChatrooms file are corrupted! Load failed.", color2)
+		if len(CONFS): 
+			Print('\n\nThere are %d rooms in list:' % len(CONFS), color4)
+			for conf in CONFS:
+				list = ['Joined %s' % (conf), 'Joined conference!', 'Can`t join %s' % (conf), 'Unable conference!']
+				if chkUnicode(conf):
+					Number = 0
+				else:
+					Number = 1
+				BOT_NICKS[conf] = CONFS[conf]['nick']
+				try:
+					muc = join_groupchat(conf, handler_botnick(conf), CONFS[conf]['code'])
+				except:
+					muc = True
+				if not muc:
+					state, color =  list[Number], color3
+				else:
+					state, color =  list[Number + 2], color2
+				Print(state, color)
 	else:
 		Print('\n\nError: unable to create chatrooms list file!', color2)
 	Print('\n\nBlackSmith is ready to work!\n\n', color3)
 	INFO['start'] = time.time()
 	
 	call_stage2_init()
+	globals()["ParseTimeout"] = (len(GROUPCHATS.keys())+1) * 6
 	while True:
 		try:
 			Dispatch_handler()
-		except Exception, e:
+		except Exception:
 			Dispatch_fail()
 			INFO['errs'] += 1
 			if INFO['errs'] >= 7:
-				sys_exit('Fatal exception: %s' % `e`)
+				sys_exit('Fatal exception: %s' % returnExc())
 				break
 
 if __name__ == "__main__":

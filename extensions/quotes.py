@@ -4,6 +4,8 @@
 
 strip_tags = re.compile(r'<[^<>]+>')
 
+uagent = "Opera/9.60 (J2ME/MIDP; Opera Mini/4.2.13337/724; U; ru)"
+
 def uHTML(text):
 	from HTMLParser import HTMLParser
 	text = text.replace("<br>", "\n").replace("</br>", "\n").replace("<br />", "\n")
@@ -21,7 +23,7 @@ def joke(type, source, parameters):
 
 
 def bashOrg(type, source, parameters):
-	if parameters.strip()=='':
+	if not parameters:
 		target = urlopen('http://bash.org.ru/random').read()
 	else:
 		target = urlopen('http://bash.org.ru/quote/'+parameters.strip()).read()
@@ -34,8 +36,8 @@ def bashOrg(type, source, parameters):
 		od = re.search(r'<div class="q">.*?<div class="vote">.*?</div>.*?<div>(.*?)</div>.*?</div>', target, re.DOTALL)
 		message = b1+od.group(1)
 		reply(type,source, uHTML(message.decode('cp1251')))
-	except Exception, e:
-		reply(type,source, `e`)
+	except Exception:
+		reply(type, source, returnExc())
 
 
 def itHappens(type, source, parameters):
@@ -50,57 +52,59 @@ def itHappens(type, source, parameters):
 
 
 def bashAbyss(type, source, args):
-	if not args:
-		target = urlopen('http://bash.org.ru/abysstop').read()
-		try:
-			id=`random.randrange(1, 25)`
-			od = re.search('<b>'+id+':',target)
-			q1 = target[od.end():]
-			q1 = q1[:re.search('\n</div>',q1).start()]
-			od = re.search('<div>',q1)
-			message = q1[od.end():]
-			message = message[:re.search('</div>',message).start()]
-			reply(type,source, uHTML(message.decode('cp1251')))
-		except Exception, e:
-			reply(type,source, `e`)
+	try:
+		target = read_url('http://bash.org.ru/abysstop', uagent)
+		id=`random.randrange(1, 25)`
+		od = re.search('<b>'+id+':',target)
+		q1 = target[od.end():]
+		q1 = q1[:re.search('\n</div>',q1).start()]
+		od = re.search('<div>',q1)
+		message = q1[od.end():]
+		message = message[:re.search('</div>',message).start()]	         
+		reply(type,source, uHTML(message.decode('cp1251')))
+	except:
+		reply(type,source, returnExc())
 
 def jQuotes(type, source, body):
 	if body:
 		body = body.lower()
-	if body in [u'ранд', 'rand']:
+	if body in (u'ранд', 'rand'):
 		link = 'http://jabber-quotes.ru/random'
-	elif body in [u'топ20', 'top20']:
+	elif body in (u'топ20', 'top20'):
 		link = 'http://jabber-quotes.ru/up'
 	else:
 		link = 'http://jabber-quotes.ru/'
 	try:
-		list = read_link(link).split('<blockquote>')
-		list.pop(0)
-		quote = random.choice(list).split('</blockquote>')[0].decode('cp1251')
+		List = read_link(link).split('<blockquote>')
+		List.pop(0)
+		quote = random.choice(List).split('</blockquote>')[0].decode('cp1251')
 		quote = uHTML(quote)
 		quote = quote.replace('\n\n\n', '\n\n')
 		reply(type, source, quote)
-	except Exception, e:
-		reply(type, source, `e`)
+	except Exception:
+		import traceback
+		reply(type, source, `traceback.format_exc()`)
 
 def pyOrg(type, source, body):
 	try:
-		data = re_search(read_link('http://python.org/'), '<h2 class="news">', '</div>')
+		data = re_search(read_link('http://python.org/'), 
+			'<h2 class="news">', '</div>')
 		data, repl = strip_tags.sub('', uHTML(data)), "\n"
 		for line in data.splitlines():
 			if line.strip():
 				repl += '%s\n' % (line)
 		reply(type, source, repl.decode('koi8-r'))
-	except Exception, e:
-		reply(type, source, `e`)
+	except Exception:
+		reply(type, source, returnExc())
 
 def afor(type, source, body):
 	try:
-		data = re_search(read_url('http://skio.ru/quotes/humour_quotes.php', 'Mozilla/5.0'), '<form id="qForm" method="post"><div align="center">', '</div>')
+		data = re_search(read_url('http://skio.ru/quotes/humour_quotes.php',
+			 uagent), '<form id="qForm" method="post"><div align="center">', '</div>')
 		data = strip_tags.sub('', uHTML(data))
 		reply(type, source, data.decode('cp1251'))
-	except Exception, e:
-		reply(type, source, `e`)
+	except Exception:
+		reply(type, source, returnExc())
 
 
 command_handler(jQuotes, 10, "quotes")

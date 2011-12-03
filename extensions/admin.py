@@ -69,7 +69,7 @@ def handler_admin_join(type, source, body):
 				else:
 					reply(type, source, u'Не дополз до "%s"...' % (conf))
 			else:
-				reply(type, source, u'Я итак там! Кончай бухать!')
+				reply(type, source, u'Я и так там! Кончай бухать!')
 		else:
 			reply(type, source, u'Это не конференция и я туда не пойду')
 	else:
@@ -123,7 +123,7 @@ def handler_admin_leave(type, source, body):
 			if conf != source[1]:
 				reply(type, source, u'Я ушёл из -> "%s"' % (conf))
 		else:
-			reply(type, source, u'Меня итак там нет!')
+			reply(type, source, u'Меня и так там нет!')
 	else:
 		reply(type, source, u'Чё!? Выкуси!')
 
@@ -191,7 +191,7 @@ def handler_botup_info(type, source, body):
 		repl += u'\n• Произошло %i ошибок и %i ошибок диспатчера\n• Получено %i сообщений\n• Выполнено %i команд' % (len(ERRORS.keys()), INFO['errs'], INFO['msg'], INFO['cmd'])
 		repl += u'\n• Создано файлов: %i\n• Прочтений файлов: %i\n• Записей в файлах: %i\n• Записей крэш-логов: %i' % (INFA['fcr'], INFA['fr'], INFA['fw'], INFA['cfw'])
 		if len(GROUPCHATS.keys()):
-			repl += u"\n• Обслуживаю %d %s" % (cService, ("конференций" if (cService > 4) or `cService`.endswith("0") else (u"конференции" if (cService < 5) else u"конференцию")))
+			repl += u"\n• Обслуживаю %d конференц%s" % (cService, formatWord(cService, (u"ию", u"ии", "ий")))
 		memory = memory_usage()
 		if memory:
 			repl += u'\n• Использую %.2f МБ оперативной памяти' % (round(memory) / 1024)

@@ -40,13 +40,13 @@ def command_dns(mType, source, argv):
 	try:
 		reply(mType, source, getHost(argv))
 	except:
-		exc = sys.exc_info()
-		reply(mType, source, '%s - %s' % (exc[0].__name__, exc[1]))
+		reply(mType, source, returnExc())
 
 def command_chkServer(mType, source, argv):
+	answer = u"что?"	
 	if argv:
 		argv = argv.split()
-		addr, port, answer = str(), str(), u"что?"
+		addr, port = str(), str()
 		if len(argv) > 1:
 			addr, port = argv
 		elif argv[0].count(":"):
