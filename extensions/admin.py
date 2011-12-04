@@ -135,7 +135,7 @@ def handler_admin_restart(type, source, reason):
 		msg(conf, status)
 	time.sleep(6)
 	send_unavailable(status)
-	call_stage3_init()
+	call_stage_init(3)
 	Exit('\n\nRESTARTING...', 0, 5)
 
 def handler_admin_exit(type, source, reason):
@@ -146,7 +146,7 @@ def handler_admin_exit(type, source, reason):
 		msg(conf, status)
 	time.sleep(6)
 	send_unavailable(status)
-	call_stage3_init()
+	call_stage_init(3)
 	try: os.kill(os.getppid(), 9)
 	except: pass
 	Exit('\n\n--> BOT STOPPED', 1, 10)
