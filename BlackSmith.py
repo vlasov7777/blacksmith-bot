@@ -423,21 +423,12 @@ def call_presence_handlers(prs):
 			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (prs,),))
 			Thread_Run(Thr, handler)
 
-def call_stage0_init():
-	for handler in STAGE0_INIT:
-		execute_handler(handler)
-
-def call_stage1_init(conf):
-	for handler in STAGE1_INIT:
-		execute_handler(handler, (conf,))
-
-def call_stage2_init():
-	for handler in STAGE2_INIT:
-		execute_handler(handler)
-
-def call_stage3_init():
-	for handler in STAGE3_INIT:
-		execute_handler(handler)
+def call_stage_init(num, conf = None):
+	for handler in eval("STAGE%d_INIT" % num):
+		if conf:
+			execute_handler(handler, (conf,))
+		else:
+			execute_handler(handler)
 
 def call_command_handlers(command, typ, source, body, callee):
 	real_access = MACROS.get_access(callee, source[1])
@@ -622,7 +613,7 @@ def check_number(number):
 
 def replace_all(retxt, list, data = False):
 	for x in list:
-		retxt = retxt.replace(x, data if data != False else list[x])
+		retxt = retxt.replace(x, data if data else list[x])
 	return retxt
 
 def that_day():
@@ -723,7 +714,7 @@ def send_join_presece(conf, nick, code = None):
 	JCON.send(Presence)
 
 def join_groupchat(conf, nick, code = None):
-	call_stage1_init(conf)
+	call_stage_init(1, conf)
 	if conf not in GROUPCHATS:
 		GROUPCHATS[conf] = {}
 	if conf not in STATUS:
@@ -754,7 +745,7 @@ def delivery(body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
 	INFA['outmsg'] += 1
-	if not INFO["creporter"]: return
+	if not INFO.get("creporter"): return
 	try:
 		JCON.send(xmpp.Message(BOSS, body, 'chat'))
 	except:
@@ -817,7 +808,7 @@ def reply(ltype, source, body):
 		msg(source[0], body)
 
 def send_unavailable(status):
-	Presence = xmpp.Presence(typ = 'unavailable')
+	Presence = xmpp.Presence(None, 'unavailable')
 	Presence.setStatus(status)
 	JCON.send(Presence)
 
@@ -1057,13 +1048,15 @@ def error_join_timer(conf):
 def roster_subscribe(jid):
 	if jid in ADLIST:
 		JCON.Roster.Authorize(jid)
+		JCON.Roster.Subscribe(jid)
 		JCON.Roster.setItem(jid, jid, ['ADMINS'])
 	elif RSTR['VN'] == 'off':
 		JCON.Roster.Unauthorize(jid)
 		if jid in JCON.Roster.getItems():
 			JCON.Roster.delItem(jid)
-	elif jid not in RSTR['BAN'] and RSTR['VN'] in ['iq', 'on']:
+	elif not RSTR['BAN'].get(jid) and RSTR['VN'] in ['iq', 'on']:
 		JCON.Roster.Authorize(jid)
+		JCON.Roster.Subscribe(jid)
 		JCON.Roster.setItem(jid, jid, ['USERS'])
 
 def PRESENCE_PROCESSING(client, Prs):
@@ -1221,7 +1214,7 @@ def lytic_restart():
 	if DCNT['Yes!'] and DCNT['col'] >= 3:
 		DCNT['Yes!'] = False
 		Print('\n\nDISCONNECTED', color2)
-		call_stage3_init()
+		call_stage_init(3)
 		Exit('\n\nRESTARTING...', 0, 30)
 	try:
 		threading.Timer(3, col_minus).start()
@@ -1233,7 +1226,7 @@ def Dispatch_handler():
 		JCON.Process(ParseTimeout)
 	except xmpp.Conflict:
 		Print('\n\nError: XMPP Conflict!', color2)
-		call_stage3_init()
+		call_stage_init(3)
 		os._exit(0)
 	except xmpp.StreamError:
 		pass
@@ -1247,7 +1240,7 @@ def sys_exit(exit_reason = 'SUICIDE'):
 	if JCON.isConnected():
 		send_unavailable(exit_reason)
 	if (time.time() - INFO['start']) >= 30:
-		call_stage3_init()
+		call_stage_init(3)
 	Exit('\n\nRESTARTING...\n\nPress Ctrl+C to exit', 0, 30)
 
 ## Main.
@@ -1275,13 +1268,11 @@ def main():
 	Print('\nBot`s PID: %d' % (BOT_PID), color4)
 	write_file(PID_FILE, str(CACHE))
 	globals()['RUNTIMES'] = {'START': CACHE['START'], 'REST': CACHE['REST']}
-	globals()['JCON'] = xmpp.Client(server = HOST, port = PORT, debug = [])
+	globals()['JCON'] = xmpp.Client(HOST, PORT, [])
 	starting_actions()
 	Print('\n\nConnecting...', color4)
-	if SECURE:
-		CONNECT = JCON.connect(server = (SERVER, PORT), use_srv = False)
-	else:
-		CONNECT = JCON.connect(server = (SERVER, PORT), secure = 0, use_srv = True)
+	useSRV = not SECURE
+	CONNECT = JCON.connect((SERVER, PORT), None, SECURE, useSRV)
 	if CONNECT:
 		if SECURE and CONNECT != 'tls':
 			Print('\nWarning: unable to estabilish secure connection - TLS failed!', color2)
@@ -1299,14 +1290,13 @@ def main():
 			Print('Auth is OK', color3)
 	else:
 		Exit('\nAuth error!!!\nError: %s %s' % (`JCON.lastErr`, `JCON.lastErrCode`), 0, 12)
-	JCON.getRoster()
-	call_stage0_init()
+	call_stage_init(0)
+	JCON.sendInitPresence()
 	JCON.RegisterHandler('message', MESSAGE_PROCESSING)
 	JCON.RegisterHandler('presence', PRESENCE_PROCESSING)
 	JCON.RegisterHandler('iq', IQ_PROCESSING)
 	JCON.RegisterDisconnectHandler(lytic_restart)
 	JCON.UnregisterDisconnectHandler(JCON.DisconnectHandler)
-	JCON.sendInitPresence()
 	Print('\n\nYahoo! I am online!', color3)
 	if initialize_file(GROUPCHATS_FILE):
 		try:
@@ -1318,27 +1308,17 @@ def main():
 		if len(CONFS): 
 			Print('\n\nThere are %d rooms in list:' % len(CONFS), color4)
 			for conf in CONFS:
-				list = ['Joined %s' % (conf), 'Joined conference!', 'Can`t join %s' % (conf), 'Unable conference!']
-				if chkUnicode(conf):
-					Number = 0
-				else:
-					Number = 1
 				BOT_NICKS[conf] = CONFS[conf]['nick']
 				try:
 					muc = join_groupchat(conf, handler_botnick(conf), CONFS[conf]['code'])
+					Print(u"Joined in %(conf)s" % vars(), color3)
 				except:
-					muc = True
-				if not muc:
-					state, color =  list[Number], color3
-				else:
-					state, color =  list[Number + 2], color2
-				Print(state, color)
+					Print(u"Failed join in %(conf)s" % vars(), color2)
 	else:
 		Print('\n\nError: unable to create chatrooms list file!', color2)
 	Print('\n\nBlackSmith is ready to work!\n\n', color3)
 	INFO['start'] = time.time()
-	
-	call_stage2_init()
+	call_stage_init(2)
 	globals()["ParseTimeout"] = (len(GROUPCHATS.keys())+1) * 6
 	while True:
 		try:
