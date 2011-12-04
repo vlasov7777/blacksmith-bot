@@ -613,7 +613,7 @@ def check_number(number):
 
 def replace_all(retxt, list, data = False):
 	for x in list:
-		retxt = retxt.replace(x, data if data else list[x])
+		retxt = retxt.replace(x, data if data != False else list[x])
 	return retxt
 
 def that_day():
