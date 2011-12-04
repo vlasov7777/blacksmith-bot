@@ -8,51 +8,41 @@
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 # http://witcher-team.ucoz.ru/
 
-AFLRLS_REPLS = u'Вытащил %s из бани!/Забанил %s навеке >:D/Отобрал аффиляцию у %s, как конфетку у ребёнка :D/Теперь %s у нас в составе!/Оо! %s теперь крутой.../Нифига себе, как %s высоко забрался!/Хаха! %s отхватил пендюль!/Заткнул %s пасть старым потником!/Дал %s участника./Теперь %s модер.'.split('/')
-
-IDS_ADMIN_IQ = []
-
-def handler_IQ_SendAndCall(type, source, repl, conf, item_name, item, afrls, afrl, nick, rsn = None):
+def handler_IQ_SendAndCall(type, source, conf, item_name, item, afrls, afrl, nick, rsn = None):
 	stanza = xmpp.Iq(to = conf, typ = 'set')
 	INFA['outiq'] += 1
-	ID = 'lytic_%d' % (INFA['outiq'])
-	IDS_ADMIN_IQ.append(ID)
-	stanza.setID(ID)
 	query = xmpp.Node('query')
 	query.setNamespace(xmpp.NS_MUC_ADMIN)
 	afl_role = query.addChild('item', {item_name: item, afrls: afrl})
 	if rsn:
 		afl_role.setTagData('reason', rsn)
 	stanza.addChild(node = query)
-	JCON.SendAndCallForResponse(stanza, handler_afrls_answer, {'type': type, 'source': source, 'nick': nick, 'repl': repl})
+	JCON.SendAndCallForResponse(stanza, handler_afrls_answer, {'type': type, 'source': source})
 
-def handler_afrls_answer(coze, stanza, type, source, nick, repl):
-	 ID = stanza.getID()
-	 if ID in IDS_ADMIN_IQ:
-		IDS_ADMIN_IQ.remove(ID)
-		if stanza.getType() == 'result':
-			reply(type, source, repl % (nick))
-		else:
-			reply(type, source, u'Так нельзя!')
+def handler_afrls_answer(coze, stanza, type, source):
+	if stanza.getType() == 'result':
+		reply(type, source, u"Сделано.")
+	else:
+		reply(type, source, u"Запрещено. Тип: %s." % stanza.getType())
 
 def handler_ban2(type, source, conf, jid, nick, reason):
-	handler_IQ_SendAndCall(type, source, AFLRLS_REPLS[1], conf, 'jid', jid, 'affiliation', 'outcast', nick, reason)
+	handler_IQ_SendAndCall(type, source, conf, 'jid', jid, 'affiliation', 'outcast', nick, reason)
 def handler_none2(type, source, conf, jid, nick, reason):
-	handler_IQ_SendAndCall(type, source, AFLRLS_REPLS[2], conf, 'jid', jid, 'affiliation', 'none', nick, reason)
+	handler_IQ_SendAndCall(type, source, conf, 'jid', jid, 'affiliation', 'none', nick, reason)
 def handler_member2(type, source, conf, jid, nick, reason):
-	handler_IQ_SendAndCall(type, source, AFLRLS_REPLS[3], conf, 'jid', jid, 'affiliation', 'member', nick, reason)
+	handler_IQ_SendAndCall(type, source, conf, 'jid', jid, 'affiliation', 'member', nick, reason)
 def handler_admin2(type, source, conf, jid, nick, reason):
-	handler_IQ_SendAndCall(type, source, AFLRLS_REPLS[4], conf, 'jid', jid, 'affiliation', 'admin', nick, reason)
+	handler_IQ_SendAndCall(type, source, conf, 'jid', jid, 'affiliation', 'admin', nick, reason)
 def handler_owner2(type, source, conf, jid, nick, reason):
-	handler_IQ_SendAndCall(type, source, AFLRLS_REPLS[5], conf, 'jid', jid, 'affiliation', 'owner', nick, reason)
+	handler_IQ_SendAndCall(type, source, conf, 'jid', jid, 'affiliation', 'owner', nick, reason)
 def handler_kick2(type, source, conf, nick, reason):
-	handler_IQ_SendAndCall(type, source, AFLRLS_REPLS[6], conf, 'nick', nick, 'role', 'none', nick, reason)
+	handler_IQ_SendAndCall(type, source, conf, 'nick', nick, 'role', 'none', nick, reason)
 def handler_visitor2(type, source, conf, nick, reason):
-	handler_IQ_SendAndCall(type, source, AFLRLS_REPLS[7], conf, 'nick', nick, 'role', 'visitor', nick, reason)
+	handler_IQ_SendAndCall(type, source, conf, 'nick', nick, 'role', 'visitor', nick, reason)
 def handler_participant2(type, source, conf, nick, reason):
-	handler_IQ_SendAndCall(type, source, AFLRLS_REPLS[8], conf, 'nick', nick, 'role', 'participant', nick, reason)
+	handler_IQ_SendAndCall(type, source, conf, 'nick', nick, 'role', 'participant', nick, reason)
 def handler_moder2(type, source, conf, nick, reason):
-	handler_IQ_SendAndCall(type, source, AFLRLS_REPLS[9], conf, 'nick', nick, 'role', 'moderator', nick, reason)
+	handler_IQ_SendAndCall(type, source, conf, 'nick', nick, 'role', 'moderator', nick, reason)
 
 def command_kick(type, source, body):
 	if source[1] in GROUPCHATS:

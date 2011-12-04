@@ -23,7 +23,7 @@ def alarmConfig(mType, source, text):
 			else:
 				answer = u"Такая напоминалка уже есть. Номер: %i." % ALARM_LIST[jid].index(data)
 		elif args[0] == "-":
-			if all([args[1].isdigit(), len(ALARM_LIST[jid]) > (int(args[1]) - 1), int(args[1]) > 0]):
+			if args[1].isdigit() and len(ALARM_LIST.get(jid, "")) > (int(args[1]) - 1) and int(args[1]) > 0:
 				ALARM_LIST[jid].remove(ALARM_LIST[jid][int(args[1]) - 1])
 				answer = u"Удалил запись под номером %s." % args[1]
 			else:
