@@ -1221,9 +1221,9 @@ def lytic_restart():
 	except:
 		pass
 
-def Dispatch_handler():
+def Dispatch_handler(Timeout = 8):
 	try:
-		JCON.Process(ParseTimeout)
+		JCON.Process(Timeout)
 	except xmpp.Conflict:
 		Print('\n\nError: XMPP Conflict!', color2)
 		call_stage_init(3)
@@ -1319,10 +1319,10 @@ def main():
 	Print('\n\nBlackSmith is ready to work!\n\n', color3)
 	INFO['start'] = time.time()
 	call_stage_init(2)
-	globals()["ParseTimeout"] = (len(GROUPCHATS.keys())+1) * 6
+	Timeout = ((len(GROUPCHATS.keys())+1) / 6) + 1
 	while True:
 		try:
-			Dispatch_handler()
+			Dispatch_handler(Timeout)
 		except Exception:
 			Dispatch_fail()
 			INFO['errs'] += 1
