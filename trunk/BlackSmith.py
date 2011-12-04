@@ -502,7 +502,7 @@ def load_quests():
 def read_pipe(command):
 	try:
 		if BOT_OS == "posix":
-			pipe = os.popen("sh -c \"%s\" 2>&1" % command.encode("utf8"))
+			pipe = os.popen(command.encode("utf8"))
 			out = pipe.read()
 		elif BOT_OS == "nt":
 			pipe = os.popen("%s" % command.encode("cp1251"))
