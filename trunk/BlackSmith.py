@@ -381,7 +381,9 @@ def execute_handler(handler_instance, list = (), command = None):
 	except (KeyboardInterrupt, SystemExit):
 		pass
 	except:
-		lytic_crashlog(handler_instance, command)
+		import traceback
+		traceback.print_exc()
+#		lytic_crashlog(handler_instance, command)
 
 def get_Thr_id(handler):
 	INFO['thr'] += 1
