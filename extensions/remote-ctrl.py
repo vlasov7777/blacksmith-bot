@@ -40,7 +40,8 @@ def handler_remote_control(type, source, body):
 						Parameters = ''
 					if len(Parameters) <= 96:
 						if COMMANDS.has_key(command):
-							call_command_handlers(command, msgtype, [source[0], conf, source[2]], Parameters, command)
+							handler = COMMAND_HANDLERS[command]
+							execute_handler(handler, (msgtype, [source[0], conf, source[2]], Parameters), command,)
 						else:
 							reply(type, source, u'нет такой команды')
 					else:

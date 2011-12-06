@@ -67,7 +67,7 @@ def handler_command_timer(type, source, body):
 								if COMMAND_HANDLERS.has_key(command):
 									NUM = len(TIMERS['tmrs']) + 1
 									handler = COMMAND_HANDLERS[command]
-									TIMERS['tmrs'][NUM] = threading.Timer(timer, execute_command_handler,(handler, command, type, source, Params))
+									TIMERS['tmrs'][NUM] = threading.Timer(timer, execute_handler, (handler, (type, source, Params), command,))
 									try:
 										TIMERS['tmrs'][NUM].start()
 									except:
@@ -76,7 +76,7 @@ def handler_command_timer(type, source, body):
 										try:
 											del TIMERS['tmrs'][NUM]
 										except:
-											LAST['null'] += 1
+											pass
 										reply(type, source, u'Ошибка! Не удалось создать таймер!')
 									else:
 										TIMERS['col'] += 1
