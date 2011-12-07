@@ -35,7 +35,7 @@ def command_jc_search(typ, source, body):
 		if jc:
 			answer = str()
 			for x,y in enumerate(jc):
-				answer += "\n%d. %s" % (x + 1, y))
+				answer += "\n%d. %s" % (x + 1, y)
 			answer = decodeHTML(answer)
 		else:
 			answer = u'Ничего не найдено...'
