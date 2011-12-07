@@ -24,7 +24,7 @@ def handler_REGJID(User, Server, codename):
 			Auth = False
 		return [Auth, REG]
 	finally:
-		if cl.isConnected(cl):
+		if cl.isConnected():
 			try:
 				cl.disconnect()
 			except:

@@ -8,7 +8,20 @@
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 
 from urllib import urlencode
-def handler_jc(typ, source, body):
+compile_st = re.compile("<[^<>]+?>")
+
+def uHTML(text):
+	from HTMLParser import HTMLParser
+	text = text.replace("<br>", "\n ").replace("</br>", "\n").replace("<br />", "\n")
+	text = HTMLParser().unescape(text)
+	del HTMLParser
+	return text
+
+def decodeHTML(data):
+	data = compile_st.sub("", data)
+	return uHTML(data.strip())
+
+def command_jc_search(typ, source, body):
 	if body:
 		cName = body.lower()
 		if cName.count('@conf'):
@@ -18,20 +31,16 @@ def handler_jc(typ, source, body):
 	try:
 		cName = urlencode({"search": cName})
 		data = read_url("http://jc.jabber.ru/search.html?%s" % (cName), 'Mozilla/5.0')
-		compile_ = re.compile('<font color="blue">(.+?)</font></a><br>\n(.+?)<br><font color="gray">(.+?)</font>')
-		list = compile_.findall(data)
-		if list:
-			answer = "\n"
-			Var = 0
-			for JID, Name, Desc in list:
-				body = uHTML("%s\n%s\n%s" % (JID, Name, Desc))
-				body = replace_all(body, {"<b>": "", "&copy;": u"©", "</b>": "", "\r": ""})
-				Var += 1
-				answer += '%d) %s\n\n' % (Var, body.strip())
+		jc = re.compile("<li>((?:.|\s)+?)</li>", 16).findall(data)
+		if jc:
+			answer = str()
+			for x,y in enumerate(jc):
+				answer += "\n%d. %s" % (x + 1, y))
+			answer = decodeHTML(answer)
 		else:
 			answer = u'Ничего не найдено...'
 	except:
 		answer = u'Сервис недоступен.'
 	reply(typ, source, answer)
 
-command_handler(handler_jc, 10, "raiting")
+command_handler(command_jc_search, 10, "raiting")
