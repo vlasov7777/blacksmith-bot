@@ -1,5 +1,5 @@
 {
-u"handler_jc": {
+u"command_jc_search": {
 u"syntax": u'''рейтинг [конфа]''',
 
 u"cmd": u'''рейтинг''',

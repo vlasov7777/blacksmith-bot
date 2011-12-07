@@ -17,8 +17,7 @@ def handler_private_command(type, source, body):
 			Parameters = ''
 		if len(Parameters) <= 96:
 			if COMMANDS.has_key(command):
-				handler = COMMAND_HANDLERS[command]
-				execute_handler(handler, ("private", source, Parameters), command,)
+				call_command_handlers(command, 'private', source, Parameters, command)
 			else:
 				reply(type, source, u'нет такой команды')
 		else:

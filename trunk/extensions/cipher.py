@@ -22,7 +22,7 @@ def handler_shifr(type, source, body):
 			except:
 				reply(type, source, u'что-то сломалось...')
 		else:
-			reply(type, source, u'слово должно содержать от 2 до 10 букв')
+			reply(type, source, u'слово должно содержать от 4 до 10 букв')
 	else:
 		reply(type, source, u'а что расшифровать-то?')
 
