@@ -215,7 +215,7 @@ def write_file(name, data, mode = "w"):
 def Dispatch_fail():
 	crashfile = open('__main__.crash', 'a')
 	print_exc(limit = None, file = crashfile)
-	print "\n\n#-# JCON.Iter() Error!"
+	print "\n\n#-# Dispatch Error!"
 	crashfile.close()
 
 def lytic_crashlog(handler, command = None):
@@ -230,7 +230,7 @@ def lytic_crashlog(handler, command = None):
 		text += u'При выполнении %s --> произошла ошибка!' % (error)
 	else:
 		Print('\n\nError: can`t execute "%s"!' % (handler), color2)
-	filename = (DIR+'/error[%s]%s.crash') % (str(INFA['cfw'] + 1), time.strftime('[%H.%M.%S][%d.%m.%Y]', time.localtime()))
+	filename = (DIR+'/error[%s]%s.crash') % (str(INFA['cfw'] + 1), time.strftime('[%H.%M.%S][%d.%m.%Y]'))
 	try:
 		if not os.path.exists(DIR):
 			os.mkdir(DIR, 0755)
@@ -339,7 +339,7 @@ def command_handler(instance, access = 0, plug = "default"):
 	except:
 		print_exc()
 		Print("Plugin %s has no help." % plug, color2)
-		command = "command%d" % len(COMMANDS.keys())
+		command = instance.func_name
 	if not COMMSTAT.has_key(command):
 		COMMSTAT[command] = {'col': 0, 'users': []}
 	COMMAND_HANDLERS[command] = instance
@@ -381,9 +381,7 @@ def execute_handler(handler_instance, list = (), command = None):
 	except (KeyboardInterrupt, SystemExit):
 		pass
 	except:
-		import traceback
-		traceback.print_exc()
-#		lytic_crashlog(handler_instance, command)
+		lytic_crashlog(handler_instance, command)
 
 def get_Thr_id(handler):
 	INFO['thr'] += 1
@@ -655,7 +653,7 @@ def upkeep():
 	while True:
 		sys.exc_clear()
 		gc.collect()
-		time.sleep(60)
+		try_sleep(60)
 		if MEMORY_LIMIT and memory_usage() >= MEMORY_LIMIT:
 			sys_exit('memory leak')
 
@@ -1273,8 +1271,10 @@ def main():
 	globals()['JCON'] = xmpp.Client(HOST, PORT, [])
 	starting_actions()
 	Print('\n\nConnecting...', color4)
-	useSRV = not SECURE
-	CONNECT = JCON.connect((SERVER, PORT), None, SECURE, useSRV)
+	if SECURE:
+		CONNECT = JCON.connect((SERVER, PORT), None, None, False)
+	else:
+		CONNECT = JCON.connect((SERVER, PORT), None, False, True)
 	if CONNECT:
 		if SECURE and CONNECT != 'tls':
 			Print('\nWarning: unable to estabilish secure connection - TLS failed!', color2)
@@ -1291,7 +1291,7 @@ def main():
 		else:
 			Print('Auth is OK', color3)
 	else:
-		Exit('\nAuth error!!!\nError: %s %s' % (`JCON.lastErr`, `JCON.lastErrCode`), 0, 12)
+		Exit('\nAuth Error: %s %s\nMaybe, incorrect jid or password?' % (`JCON.lastErr`, `JCON.lastErrCode`), 0, 12)
 	call_stage_init(0)
 	JCON.sendInitPresence()
 	JCON.RegisterHandler('message', MESSAGE_PROCESSING)
@@ -1306,7 +1306,7 @@ def main():
 		except:
 			CONFS = {}
 			lytic_crashlog(read_file)
-			Print("\nChatrooms file are corrupted! Load failed.", color2)
+			Print("\nChatrooms file corrupted! Load failed.", color2)
 		if len(CONFS): 
 			Print('\n\nThere are %d rooms in list:' % len(CONFS), color4)
 			for conf in CONFS:
