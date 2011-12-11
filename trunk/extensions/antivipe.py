@@ -21,7 +21,7 @@ def findServer(jid):
 def handler_antivipe_presence(Prs):
 	status, type = Prs.getStatusCode(), Prs.getType()
 	if type == 'unavailable' and status == '303':
-		conf = (Prs.getFrom()).getStripped()
+		conf = Prs.getFrom().getStripped()
 		nick = Prs.getNick()
 		afl = Prs.getAffiliation()
 		role = Prs.getRole()
