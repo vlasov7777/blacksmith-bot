@@ -14,7 +14,6 @@ def uHTML(text):
 	return text
 
 def joke(type, source, parameters):
-	from xml.dom import minidom
 	target = urlopen("http://anekdot.odessa.ua/rand-anekdot.php").read()
 	od = re.search(">", target)
 	text = target[od.end():]
@@ -23,19 +22,20 @@ def joke(type, source, parameters):
 
 
 def bashOrg(type, source, parameters):
-	if not parameters:
-		target = urlopen('http://bash.org.ru/random').read()
+	if parameters.isdigit():
+		link = 'http://bash.org.ru/quote/'+parameters
 	else:
-		target = urlopen('http://bash.org.ru/quote/'+parameters.strip()).read()
+		link = 'http://bash.org.ru/random'
+	data = read_url(link)
 	try:
-		od = re.search('<div class="vote">',target)
-		b1 = target[od.end():]
-		b1 = b1[:re.search('</a>',b1).start()]
-		b1 = strip_tags.sub('', b1.replace('\n', '').replace(chr(9), ""))
-		b1 = 'http://bash.org.ru/quote/'+b1+'\n'
-		od = re.search(r'<div class="q">.*?<div class="vote">.*?</div>.*?<div>(.*?)</div>.*?</div>', target, re.DOTALL)
-		message = b1+od.group(1)
-		reply(type,source, uHTML(message.decode('cp1251')))
+		comp = re.compile('<span id="v\d+?" class="rating">(\d+?)</span>(?:.|\s)+?<a href="/quote/\d+?" class="id">#(\d+?)</a>\s*?</div>\s+?<div class="text">((?:.|\s)+?)</div>', 16)
+		data = comp.search(data)
+		if data:
+			rate, id, data = data.groups()
+			answer = uHTML(u"Цитата: #%s (Рейтинг: %s)\n%s" % (id, rate, data.decode('cp1251')))
+		else:
+			answer = u"Ошибка."
+		reply(type, source, answer)
 	except Exception:
 		reply(type, source, returnExc())
 
@@ -82,8 +82,7 @@ def jQuotes(type, source, body):
 		quote = quote.replace('\n\n\n', '\n\n')
 		reply(type, source, quote)
 	except Exception:
-		import traceback
-		reply(type, source, `traceback.format_exc()`)
+		reply(type, source, returnExc())
 
 def pyOrg(type, source, body):
 	try:

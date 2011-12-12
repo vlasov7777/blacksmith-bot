@@ -338,10 +338,13 @@ def command_handler(instance, access = 0, plug = "default"):
 		command = eval(read_file("help/%s" % plug).decode('utf-8'))[instance.func_name]["cmd"]
 	except:
 		print_exc()
-		Print("Plugin %s has no help." % plug, color2)
+		Print("\nPlugin \"%s\" has no help." % plug, color2)
 		command = instance.func_name
-	if not COMMSTAT.has_key(command):
+	if not COMMSTAT.get(command):
 		COMMSTAT[command] = {'col': 0, 'users': []}
+	if COMMANDS.get(command) or COMMAND_HANDLERS.get(command):
+		Print("\nCommands in \"%s\" and \"%s\" are repeated." % (plug, COMMANDS[command].get("plug")), color2)
+		command = instance.func_name
 	COMMAND_HANDLERS[command] = instance
 	COMMANDS[command] = {'plug': plug, 'access': access}
 

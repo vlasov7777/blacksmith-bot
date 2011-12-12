@@ -38,4 +38,3 @@ def handler_commands(type, source, body):
 		reply(type, source, u'чего хочешь то?')
 
 command_handler(handler_commands, 20, "commands")
-command_handler(handler_commands, 20, "commands")
