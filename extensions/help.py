@@ -95,7 +95,7 @@ def command_comlist(type, source, body):
 
 def command_commands(type, source, body):
 	answer = u"\nСписок команд в категории \"все\" (всего %d штук):\n\n%s." % (len(COMMANDS.keys()), ", ".join(sorted(COMMANDS.keys())))
-	if len(COMMOFF.get(source[1], 0)):
+	if len(COMMOFF.get(source[1], [])):
 		answer += u"\n\nСледующие команды здесь отключены: \n%s." % ", ".join(sorted(COMMOFF.get(source[1], [])))
 	answer += u"\n\n*** Чтобы узнать доступ к определённой команде, напишите \"комдоступ [команда]\"."
 	if PREFIX.get(source[1]):
