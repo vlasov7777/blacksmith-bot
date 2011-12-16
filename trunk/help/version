@@ -1,5 +1,5 @@
 {
-u"handler_version": {
+u"command_getVersion": {
 u"syntax": u'''версия [ник\сервер]''',
 
 u"cmd": u'''версия''',
