@@ -10,45 +10,39 @@
 #  Als [Als@exploit.in]
 #  WitcherGeralt [WitcherGeralt@rocketmail.com]
 
-def handler_version(type, source, nick):
-	if source[1] in GROUPCHATS:
-		if nick:
-			if nick in GROUPCHATS[source[1]]:
-				if not GROUPCHATS[source[1]][nick]['ishere']:
-					reply(type, source, u'его нет здесь')
+def command_getVersion(mType, source, args):
+	if args:
+		if GROUPCHATS.get(source[1]):
+			if args in GROUPCHATS[source[1]]:
+				target = "%s/%s" % (source[1], args.lstrip())
+				if not GROUPCHATS[source[1]][args]['ishere']:
+					reply(mType, source, "Его здесь нет")
 					return
-				recipient = source[1]+'/'+nick
 			else:
-				recipient = nick
+				target = args
 		else:
-			recipient = source[0]
-		iq = xmpp.Iq(to = recipient, typ = 'get')
-		INFA['outiq'] += 1
-		iq.addChild('query', {}, [], xmpp.NS_VERSION)
-		JCON.SendAndCallForResponse(iq, handler_version_answer, {'type': type, 'source': source})
+			reply(mType, source, u"Только для конференций")
+			return
 	else:
-		reply(type, source, u'только в чате')
+		target = source[0]
+	iq = xmpp.Iq(to = target, typ = "get")
+	iq.addChild("query", {}, [], xmpp.NS_VERSION)
+	JCON.SendAndCallForResponse(iq, answer_version, {"mType": mType, "source": source})
 
-def handler_version_answer(coze, stanza, type, source):
-		if stanza:
-			if stanza.getType() == 'result':
-				name = '[no name]'
-				ver = '[no ver]'
-				os = '[no os]'
-				Props = stanza.getQueryChildren()
-				for Prop in Props:
-					Pname = Prop.getName()
-					if Pname == 'name':
-						name = Prop.getData()
-					elif Pname == 'version':
-						ver = Prop.getData()
-					elif Pname == 'os':
-						os = Prop.getData()
-				repl = "\nName: %s\nVer.: %s\nOS: %s" % (name, ver, os)
-			else:
-				repl = u'он зашифровался'
-		else:
-			repl = u'нету такого'
-		reply(type, source, repl)
+def answer_version(coze, stanza, mType, source):
+	if xmpp.isResultNode(stanza):
+		Name, Ver, Os = "[None]", "[None]", "[None]"
+		for x in stanza.getQueryChildren():
+			xname = x.getName()
+			if xname == "name":
+				Name = x.getData()
+			elif xname == "version":
+				Ver = x.getData()
+			elif xname == "os":
+				Os = x.getData()
+		answer = "\nName: %s\nVer.: %s\nOS: %s" % (Name, Ver, Os)
+	else:
+		answer = u"Нет ответа."
+	reply(mType, source, answer)
 
-command_handler(handler_version, 10, "version")
+command_handler(command_getVersion, 10, "version")

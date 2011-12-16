@@ -1057,7 +1057,7 @@ def roster_subscribe(jid):
 		JCON.Roster.Unauthorize(jid)
 		if jid in JCON.Roster.getItems():
 			JCON.Roster.delItem(jid)
-	elif not RSTR['BAN'].get(jid) and RSTR['VN'] in ['iq', 'on']:
+	elif not jid in RSTR['BAN'] and RSTR['VN'] in ['iq', 'on']:
 		JCON.Roster.Authorize(jid)
 		JCON.Roster.Subscribe(jid)
 		JCON.Roster.setItem(jid, jid, ['USERS'])

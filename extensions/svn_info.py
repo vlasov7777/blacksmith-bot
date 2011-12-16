@@ -7,7 +7,12 @@
 # Coded by: WitcherGeralt [WitcherGeralt@rocketmail.com]
 # http://witcher-team.ucoz.ru/
 
-BLACK_TAGS = {'<br>': '', '&nbsp;&nbsp;&nbsp;&nbsp;': '\t', '&lt;': '<', '&gt;': '>', '<b>': u'«', '</b>': u'»', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ', '&amp;': '&'}
+def uHTML(text):
+	from HTMLParser import HTMLParser
+	text = text.replace("<br>", "\n").replace("</br>", "\n").replace("<br />", "\n")
+	text = HTMLParser().unescape(text)
+	del HTMLParser
+	return text
 
 def blacksmith_svn(type, source, body):
 	if body:
@@ -53,12 +58,13 @@ def blacksmith_svn(type, source, body):
 				elif revision == -200:
 					repl = u'Нет инфы о такой ревизии...'
 				else:
-					repl = '\n'+replace_all(unicode(re_search(read_link('http://blacksmith-bot.googlecode.com/svn/tags/%s' % (rlist[revision])), '<div>', '</div>'), 'windows-1251'), BLACK_TAGS)
+					repl = '\n'+uHTML(unicode(re_search(read_link('http://blacksmith-bot.googlecode.com/svn/tags/%s' % (rlist[revision])), '<div>', '</div>'), 'windows-1251'))
 			except:
+				print_exc()
 				repl = u'Аблом, не достучался до репозитория.'
 			reply(type, source, repl)
 		elif req in [u'обновление', 'update'] and has_access(source[0], 100, source[1]):
-			reply(type, source, u'%s\nПеред перезагрузкой обязательно проверьте совместимость (не изменился ли конфинг и т.п.) по команде "свн инфо".' % read_pipe("svn up"))
+			reply(type, source, u'%s\nПеред перезагрузкой обязательно проверьте совместимость (не изменился ли конфиг и т.п.) по команде "свн инфо".' % read_pipe("svn up"))
 		else:
 			reply(type, source, u'что?')
 	else:

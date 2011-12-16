@@ -8,8 +8,6 @@
 # http://jabbrik.ru
 
 from urllib import urlencode
-#'
-
 def uHTML(text):
 	from HTMLParser import HTMLParser
 	text = text.replace("<br>", "\n").replace("</br>", "\n").replace("<br />", "\n")

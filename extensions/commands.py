@@ -25,7 +25,8 @@ def handler_commands(type, source, body):
 							if COMMANDS.has_key(command):
 								if cmd != list[0]:
 									time.sleep(2)
-								call_command_handlers(command, type, source, Parameters, command)
+								with wsmph:
+									call_command_handlers(command, type, source, Parameters, command)
 							else:
 								reply(type, source, u'нет такой команды!')
 						else:
