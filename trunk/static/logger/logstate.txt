@@ -1,0 +1,12 @@
+# -*- coding: utf-8 -*-
+
+# Конфигурация logger Plugin
+
+# Папка для хранения логов конференций
+gLogDir	  	= 'logs'
+
+# Режим логирования по умолчанию ('on' - вкл, 'off' - выкл, False - полное выключение)
+logEnabled 	= 'on'
+
+# Тема логгера (см. папку "static/logger/themes" для просмотра доступных тем)
+LoggerTheme	= "LunnaCat"

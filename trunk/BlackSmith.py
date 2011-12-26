@@ -380,10 +380,11 @@ def Thread_Run(Thr, handler, command = None):
 
 def execute_handler(handler_instance, list = (), command = None):
 	try:
+		handler_instance(*list[:4])
+	except TypeError:
 		handler_instance(*list)
-	except (KeyboardInterrupt, SystemExit):
-		pass
-	except:
+	except (KeyboardInterrupt, SystemExit): pass
+	except Exception:
 		lytic_crashlog(handler_instance, command)
 
 def get_Thr_id(handler):
@@ -402,10 +403,10 @@ def call_outgoing_message_handlers(target, body, obody):
 			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (target, body, obody,),))
 			Thread_Run(Thr, handler)
 
-def call_join_handlers(conf, nick, afl, role):
+def call_join_handlers(conf, nick, afl, role, status = None, text = None):
 	for handler in JOIN_HANDLERS:
 		with smph:
-			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (conf, nick, afl, role,),))
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (conf, nick, afl, role, status, text,),))
 			Thread_Run(Thr, handler)
 
 def call_leave_handlers(conf, nick, reason, code):
@@ -1129,13 +1130,13 @@ def PRESENCE_PROCESSING(client, Prs):
 			else:
 				full_jid = unicode(full_jid)
 				jid = full_jid.split("/", 1)[0].lower()
-			if nick in GROUPCHATS[conf] and GROUPCHATS[conf][nick]['jid'] == jid and GROUPCHATS[conf][nick]['ishere']:
-				pass
-			else:
+			if not (nick in GROUPCHATS[conf] and GROUPCHATS[conf][nick]['jid'] == jid and GROUPCHATS[conf][nick]['ishere']):
 				GROUPCHATS[conf][nick] = {'full_jid': full_jid, 'jid': jid, 'join_date': [that_day(), time.gmtime()], 'idle': time.time(), 'joined': time.time(), 'ishere': True}
 				afl = Prs.getAffiliation()
+				status = Prs.getShow()
+				text = Prs.getStatus()
 				role = Prs.getRole()
-				call_join_handlers(conf, nick, afl, role)
+				call_join_handlers(conf, nick, afl, role, status, text)
 		elif Ptype == 'error':
 			ecode = Prs.getErrorCode()
 			if ecode:
