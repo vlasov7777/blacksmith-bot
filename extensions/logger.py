@@ -263,13 +263,14 @@ def logSetState(mType, source, argv):
 				if len(argv) > 1:
 					if	has_access(source[0], 100, source[1]):
 						if argv[1] in logThemes.keys():
-							if argv[1] != read_file("%s/.theme/name.txt" % gLogDir):
-								logConfig["theme"] = argv[1]
-								write_file(u"dynamic/logger_cfg.txt", str(logConfig))
-								logThemeCopier(argv[1])
-								reply(mType, source, u"Установил тему «%s». Она вступит в силу немедленно." % argv[1])
-							else:
-								reply(mType, source, u"Тема «%s» уже используется плагином." % argv[1])
+							if os.path.exists("%s/.theme/name.txt" % gLogDir):
+								if argv[1] == read_file("%s/.theme/name.txt" % gLogDir):
+									reply(mType, source, u"Тема «%s» уже используется плагином." % argv[1])
+									return
+							logConfig["theme"] = argv[1]
+							write_file(u"dynamic/logger_cfg.txt", str(logConfig))
+							logThemeCopier(argv[1])
+							reply(mType, source, u"Установил тему «%s». Она вступит в силу немедленно." % argv[1])
 						else:
 							reply(mType, source, u"Нет такой темы :(.")
 					else:
