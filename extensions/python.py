@@ -2,62 +2,50 @@
 # coding: utf-8
 
 #  BlackSmith plugin
-#  python_plugin.py
+#  Python Plugin
+#  Idea (c) Unknown Author
+#  Code (c) simpleApps, 2011
 
-# Author:
-#  Mike Mintz [mikemintz@gmail.com]
-# Modifications:
-#  Als [Als@exploit.in]
-#  Gh0st [b0hdan[at]gmail.com]
-#  WitcherGeralt [WitcherGeralt@rocketmail.com]
+def pyEval(mType, source, code):
+	try: result = unicode(eval(code))
+	except Exception: result = returnExc()
+	reply(mType, source, result)
 
-def handler_python_eval(mType, source, body):
-	try:
-		repl = unicode(eval(unicode(body)))
-	except:
-		exc = sys.exc_info()
-		repl = '%s - %s' % (exc[0].__name__, exc[1])
-	reply(mType, source, repl)
+def pyExec(mType, source, code):
+	result = u"Done."
+	try: exec(unicode(code + "\n"), globals())
+	except Exception: result = returnExc()
+	reply(mType, source, result)
 
-def handler_python_exec(mType, source, body):
-	if '\n' in body and body[-1] != '\n':
-		body += '\n'
-	repl = 'Operation completed successfully!'
-	try:
-		exec(unicode(body), globals())
-	except:
-		exc = sys.exc_info()
-		repl = '%s - %s' % (exc[0].__name__, exc[1])
-	reply(mType, source, repl)
+## PyShell is a name of one our project...
+def pyShell(mType, source, cmd):
+	if os.name == "posix":
+		cmd = "sh -c \"%s\" 2>&1" % (cmd.encode("utf"))
+	elif os.name == "nt":
+		cmd = cmd.encode("cp1251")
+	shell = os.popen(cmd)
+	result = shell.read(); shell.close()
+	if os.name == "nt": result = result.decode("cp866")
+	if not result: result = "Done."
+	reply(mType, source, result)
 
-def handler_python_sh(type, source, body):
-	if BOT_OS == 'posix':
-		command = 'sh -c "%s" 2>&1' % (body.encode('utf-8'))
-	else:
-		command =  body.encode("cp1251")
-	retval = read_pipe(command)
-	if retval in ['', None]:
-		retval = u'Cделано!'
-	reply(type, source, retval)
-
-def handler_python_calc(type, source, body):
-	if body:
-		if len(body) <= 24 and not body.count('**'):
-			eQ = re.sub("([0123456789]|[\+\-\/\*\^\.])", "", body)
-			if not eQ.strip():
-				try:
-					repl = str(eval(body))
-				except:
-					repl = u'Купи калькулятор и сам эту херь считай!'
-			else:
-				repl = u'Хрень ты какую-то пишешь! Отвали нафиг!'
+def pyCalc(mType, source, expression):
+	if expression and len(expression) <= 24 and not expression.count("**"):
+		reg = re.sub("([0-9]|[\+\-\(\/\*\)\%\^\.])", "", expression)
+		if reg:
+			result = "Недопустимо."
 		else:
-			repl = u'Неее, я явно слишком туп для этого...'
+			try:
+				result = eval(expression)
+			except ZeroDivisionError:
+				result = unichr(8734)
+			except Exception:
+				result = "An exception found."
 	else:
-		repl = u'Умножаем твой IQ на 10 и получаем 20 :lol:'
-	reply(type, source, repl)
+		result = `None`
+	reply(mType, source, str(result))
 
-command_handler(handler_python_eval, 100, "python")
-command_handler(handler_python_exec, 100, "python")
-command_handler(handler_python_sh, 100, "python")
-command_handler(handler_python_calc, 10, "python")
+command_handler(pyEval, 100, "python")
+command_handler(pyExec, 100, "python")
+command_handler(pyShell, 100, "python")
+command_handler(pyCalc, 10, "python")
