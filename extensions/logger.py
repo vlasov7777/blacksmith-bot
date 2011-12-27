@@ -70,7 +70,7 @@ def DateTimeReplacer(time):
 
 def logHeader(logFile, chat, times):
 	if not chkUnicode(chat):
-		source = source.encode("utf-8")
+		chat = chat.encode("utf-8")
 	date = DateTimeReplacer(time.strftime("%A, %B %d, %Y", times))
 	if os.path.exists("%s/.theme/pattern.html" % gLogDir):
 		pattern = read_file("%s/.theme/pattern.html" % gLogDir)
@@ -124,21 +124,29 @@ def logFileWorker(chat, (year, month, day, hour, minute, second, weekday, yearda
 def regexUrl(matchobj):
 	return "<a href=\"%s\">%s</a>" % ((matchobj.group(0),) * 2)
 
-def logWrite(body, nick, chat):
+def logWrite(body, nick = 0, chat = 0, source = 0, subject = 0):
 	(year, month, day, hour, minute, second, weekday, yearday) = time.localtime()[:8]
 	body = body.replace('&', '&amp;').replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
 	body = re.sub("(https|http|ftp|svn)(\:\/\/[^\s<]+)", regexUrl, body).replace("\n", "<br/>")
+	jid = None
+	if source:
+		chat, nick = source[1:]
+		jid = handler_jid(source[0])
 	body, nick = body.encode("utf-8"), nick.encode("utf-8")
 	timestamp = "%.2i:%.2i:%.2i" % (hour, minute, second)
 	logFile = logFileWorker(chat, (year, month, day, hour, minute, second, weekday, yearday))
 	if logFile:
 		if not nick:
-			logFile.write(u'<span class="topic">%s</span><br />\n' % body)
+			if subject:
+				logFile.write(u'<span class="topic">%s</span><br />\n' % body)
+			else:
+				logFile.write('<span class="status"><a id="t%s" href="#t%s">[%s]</a></span> ' % (timestamp, timestamp, timestamp))
+				logFile.write(u'<span class="status">*** %s</span><br />\n' % (body))
 		elif body[:3].lower() == "/me":
 			nickColor = "nick%d" % coloredNick(chat, nick)
-			logFile.write('<span class="%s"><a id="t%s" href="#t%s">[%s]</a>*%s %s</span><br />\n' % (nickColor, timestamp, timestamp, timestamp, nick, body[3:]))
+			logFile.write('<span class="%s"><a id="t%s" href="#t%s">[%s]</a> *%s %s</span><br />\n' % (nickColor, timestamp, timestamp, timestamp, nick, body[3:]))
 		elif nick in ("leave", "join", "status", "kick", "ban", "nick", "role"):
-			logFile.write('<span class="%s"><a id="t%s" href="#t%s">[%s]</a></span>' % (nick, timestamp, timestamp, timestamp))
+			logFile.write('<span class="%s"><a id="t%s" href="#t%s">[%s]</a></span> ' % (nick, timestamp, timestamp, timestamp))
 			logFile.write(u'<span class="%s">%s</span><br />\n' % (nick, body))
 		else:
 			nickColor = "nick%d" % coloredNick(chat, nick)
@@ -159,8 +167,9 @@ def coloredNick(chat, nick):
 		coloredNick(chat, nick)
 
 def logWriteMessage(raw, mType, source, body):
+###	print raw.getStatusCode() - a new xmpppy feature
 	if source[1] in logConfig["chats"] and mType == "public":
-		logWrite(body, source[2], source[1])
+		logWrite(body, 0, 0, source, raw.getSubject())
 
 def logWriteJoined(chat, nick, afl, role, status, text):
 	if chat in logConfig["chats"]:
@@ -177,7 +186,7 @@ def logWriteLeave(chat, nick, reason, code):
 				if reason:
 					logWrite(u"*** %s выгнали из конференции (%s)" % (nick, reason), "kick", chat)
 				else:
-					logWrite(u"*** %s выгнали из конференции" % nick, "userkick", chat)
+					logWrite(u"*** %s выгнали из конференции" % nick, "kick", chat)
 			elif code == "301":
 				if reason:
 					logWrite(u"*** %s запретили входить в данную конференцию (%s)" % (nick, reason), "ban", chat)
@@ -199,6 +208,7 @@ def logWritePresence(Prs):
 			scode = Prs.getStatusCode()
 			if scode == '303':
 				logWrite(u'*** %s меняет ник на %s' % (nick, Prs.getNick()), "nick", chat)
+				return
 		else:
 			afl = logAfl.get(Prs.getAffiliation(), "")
 			role = logRole.get(Prs.getRole(), "")
@@ -209,7 +219,7 @@ def logWritePresence(Prs):
 			if text:
 				log += " (%(text)s)"
 			if reason:
-				log += " (%(reason)s)"
+				log += " (Причина: %(reason)s)"
 			logWrite(log % vars(), ("role" if reason else "status"), chat)
 
 

@@ -7,7 +7,7 @@
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 # http://witcher-team.ucoz.ru/
 
-CRCMDS = [u'пинг', u'тест', u'сказать', u'чисть', u'анекдот', u'ботап', u'фоменко', u'рейтинг']
+CRCMDS = [u'пинг', u'тест', u'сказать', u'чисть', u'анекдот', u'ботап', u'фоменко', u'рейтинг', 'днс', 'порт']
 
 CRON = {'col': 0, 'tmrs': {}}
 
@@ -82,7 +82,7 @@ def handler_cron_command(type, source, body):
 								reply(type, source, bust)
 							else:
 								command = args[2].strip().lower()
-								if command in CRCMDS or jid == (BOSS or BOSS.lower()):
+								if command in CRCMDS or jid in ADLIST: # BOSS?
 									if len(args) >= 4:
 										Params = body[((body.lower()).find(command) + (len(command) + 1)):].strip()
 									else:
