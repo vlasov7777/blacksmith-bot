@@ -71,7 +71,7 @@ def handler_reinit_command(type, source, body):
 						reply(type, source, u'нет такой команды')
 				else:
 					reply(type, source, u'мало аргументов!')
-			elif rcmd in [u'внорму', 'buckup']:
+			elif rcmd in [u'внорму', 'backup']:
 				if command in RECMDS['access']:
 					COMMANDS[command]['access'] = RECMDS['access'][command]
 					del RECMDS['access'][command]

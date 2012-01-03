@@ -99,7 +99,7 @@ def logFileWorker(chat, (year, month, day, hour, minute, second, weekday, yearda
 	if not os.path.exists(logDir):
 		try: os.makedirs(logDir)
 		except: return False
-	if logFileNames.get(chat):
+	if logFileNames.has_key(chat):
 		xfile = logFileNames[chat]
 		if xfile != logFileName:
 			if os.path.exists(xfile):
@@ -157,7 +157,7 @@ def coloredNick(chat, nick):
 		logNicks[chat] = {}
 	if logNicks[chat].get(nick):
 		return logNicks[chat].get(nick)
-	num = random.randrange(1, 20)
+	num = random.randrange(1, 21)
 	if num not in logNicks[chat].values():
 		logNicks[chat][nick] = num
 		return num
@@ -297,11 +297,11 @@ def logSetState(mType, source, argv):
 			reply(mType, source, u"Сейчас комната не логируется.")
 
 if logEnabled:
-	register_message_handler(logWriteMessage)
-	register_join_handler(logWriteJoined)
-	register_leave_handler(logWriteLeave)
-	register_presence_handler(logWritePresence)
-	command_handler(logSetState, 30, "logger")
 	register_stage0_init(logCacheFileInit)
 	register_stage1_init(logFileInit)
+	register_join_handler(logWriteJoined)
+	register_leave_handler(logWriteLeave)
+	register_message_handler(logWriteMessage)
+	register_presence_handler(logWritePresence)
+	command_handler(logSetState, 30, "logger")
 	findThemes()

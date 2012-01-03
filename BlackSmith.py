@@ -1161,7 +1161,7 @@ def PRESENCE_PROCESSING(client, Prs):
 def IQ_PROCESSING(client, iq):
 	INFO["iq"] += 1
 	fromjid = iq.getFrom()
-	if user_level(fromjid, fromjid.getStripped().lower()) <= -100:
+	if not fromjid or user_level(fromjid, fromjid.getStripped().lower()) <= -100:
 		return
 	if iq.getType() == "get":
 		nsType = iq.getQueryNS()
@@ -1325,7 +1325,7 @@ def main():
 	Print('\n\nBlackSmith is ready to work!\n\n', color3)
 	INFO['start'] = time.time()
 	call_stage_init(2)
-	Timeout = ((len(GROUPCHATS.keys())+1) / 6) + 1
+	Timeout = 1 if (len(GROUPCHATS.keys()) > 10) else 8### 120.0 / ((len(GROUPCHATS.keys())  / 2) + 1)
 	while True:
 		try:
 			Dispatch_handler(Timeout)
