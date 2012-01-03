@@ -2,7 +2,7 @@
 # coding: utf-8
 
 #  BlackSmith plugin
-#  Python Plugin
+#  Interpreter Plugin
 #  Idea (c) Unknown Author
 #  Code (c) simpleApps, 2011
 
@@ -45,7 +45,7 @@ def pyCalc(mType, source, expression):
 		result = `None`
 	reply(mType, source, str(result))
 
-command_handler(pyEval, 100, "python")
-command_handler(pyExec, 100, "python")
-command_handler(pyShell, 100, "python")
-command_handler(pyCalc, 10, "python")
+command_handler(pyEval, 100, "interpreter")
+command_handler(pyExec, 100, "interpreter")
+command_handler(pyShell, 100, "interpreter")
+command_handler(pyCalc, 10, "interpreter")
