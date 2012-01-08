@@ -20,11 +20,11 @@ def pyExec(mType, source, code):
 ## PyShell is a name of one our project...
 def pyShell(mType, source, cmd):
 	if os.name == "posix":
-		cmd = "sh -c \"%s\" 2>&1" % (cmd.encode("utf"))
+		cmd = "sh -c \"%s\" 2>&1" % (cmd.encode("utf-8"))
 	elif os.name == "nt":
 		cmd = cmd.encode("cp1251")
 	shell = os.popen(cmd)
-	result = shell.read(); shell.close()
+	result = shell.read()
 	if os.name == "nt": result = result.decode("cp866")
 	if not result: result = "Done."
 	reply(mType, source, result)

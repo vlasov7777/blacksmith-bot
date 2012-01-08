@@ -28,8 +28,8 @@ def cron_bust_handler(timer, cycles):
 		return u'Меньше минуты безсмысленно!'
 	return False
 
-def execute_cron_handler(commnad_handler, timer, cycles, command, type, source, body):
-	cycles = cycles - 1
+def execute_cron_handler(commnad_handler, timer, cycles, command, type, source, body):	
+	cycles = cycles - 1	
 	if cycles:
 		try:
 			commnad_handler(type, source, body)

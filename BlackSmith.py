@@ -182,7 +182,7 @@ def check_file(conf = None, file = None, data = "{}"):
 
 def initialize_file(name, data = "{}"):
 	name = chkFile(name)
-	if len(name.split('/')) >= 4:
+	if len(name.split('/')) >= 5:
 		return False
 	if os.path.exists(name):
 		return True
@@ -755,41 +755,12 @@ def delivery(body):
 	except:
 		write_file('delivery.txt', body, 'a')
 
-## We are so sorry for blocking arabic.
-from unicodedata import name as uName
-def detectSymbols(symbol):
-#	print u"%s: %s, %s, %s" % (uName(unicode(symbol)), symbol, str(ord(symbol)), str(symbol.isalpha()))
-	if symbol in [chr(9), chr(10), chr(13)]:
-		return False
-	try:
-		name = uName(unicode(symbol))
-		return name.count("ARABIC") or name.count("WIDTH NO-BREAK")
-	except:
-#		print "'%s'" % symbol
-		return True
-
-def checkArabic(text):
-	arabic = False
-	for x in text:
-		if detectSymbols(x):
-			arabic = True
-			break
-	return arabic
-
-def replaceArabic(text):
-	for x in text:
-		if detectSymbols(x):
-			text = text.replace(x, u"*")
-	return u"%s\n\n*** Text contains unavailable symbols." % text
 
 def msg(target, body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
 	obody = body
 	jid = str(target).split("/")[0]
-	if jid.endswith("xmpp.ru") or jid.endswith("jabber.ru"):
-		if checkArabic(body):
-			body = replaceArabic(body)
 	if GROUPCHATS.has_key(target):
 		ltype = 'groupchat'
 		if len(body) > CHAT_MSG_LIMIT:
