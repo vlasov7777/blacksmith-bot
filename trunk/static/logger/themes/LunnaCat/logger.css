@@ -3,10 +3,10 @@
  	Theme uses cursors from KDE Oxygen theme, that distributed under GPL license
 	Port (c) simpleApps, 2010 - 2011 */
 
-td, body {color: #4BD7FF; font:11pt none sans-serif; background: url("./ChatLog.png") no-repeat right bottom fixed; background-color: #001415; cursor:url('./left_ptr.cur'), auto}
-a:link {text-decoration:underline; color:#2F9FFF; cursor:url("./pointing_hand.cur"), pointer}
-a:active {text-decoration:underline; color:#2F9FFF ; cursor:url('./pointing_hand.cur'), pointer}
-a:visited {text-decoration:underline; color:#2F9FFF; cursor:url('./pointing_hand.cur'), pointer}
+td, body {color: #4BD7FF; font:11pt none sans-serif; background: url("./ChatLog.png") no-repeat right bottom fixed; background-color: #001415; cursor:url('./left_ptr.png'), auto}
+a:link {text-decoration:underline; color:#2F9FFF; cursor:url("./pointing_hand.png"), pointer}
+a:active {text-decoration:underline; color:#2F9FFF ; cursor:url('./pointing_hand.png'), pointer}
+a:visited {text-decoration:underline; color:#2F9FFF; cursor:url('./pointing_hand.png'), pointer}
 
 .shadowed {font-family:sans-serif; font-size:13pt; color:#2396ed; text-shadow: #000000 1px 0px 3px}
 .topic {color: #37EB73; font-weight: bold;}

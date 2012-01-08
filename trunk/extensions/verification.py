@@ -20,7 +20,7 @@ def handler_verification(conf, nick, afl, role):
 			QA = random.choice(QUESTIONS.keys())
 			OTVET[conf][jid] = {'ansver': QUESTIONS[QA]['answer'], 'col': 0}
 			handler_visitor(conf, nick, u'%s: Авторизация...' % (handler_botnick(conf)))
-			msg(conf+'/'+nick, u'Привет! Это IQ проверка, чтобы получить голос %s, У тебя три попытки и 1 минута!' % (QUESTIONS[QA]['question']))
+			msg(conf+'/'+nick, u'Привет! Это IQ проверка, чтобы получить голос %s, у тебя три попытки!' % (QUESTIONS[QA]['question']))
 
 def handler_verification_answer(raw, type, source, body):
 	if type == 'private' and source[1] in VERON:
