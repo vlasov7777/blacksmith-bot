@@ -52,7 +52,7 @@ DefaultLogHeader = u'''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
 <body>
 <div class="shadowed" align="right"><a href="http://simpleapps.ru/">BlackSmith Bot log file</a></div>
 <div class="shadowed" align="center"><a href="xmpp:%(chat)s?join" title="Join to %(chat)s">%(chat)s</a><hr></div></hr>
-<h3><div class="shadowed">%(chat)s<hr></div></h3>
+<h3><div class="shadowed">%(date)s<hr></div></h3>
 <div>
 <tt>'''
 
