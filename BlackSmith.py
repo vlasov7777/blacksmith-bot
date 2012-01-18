@@ -22,13 +22,21 @@ from urllib2 import urlopen
 from traceback import format_exc, print_exc
 import gc, os, re, sys, time, random, threading
 
-## Set "sys.path".
-if not (hasattr(sys, "argv") and sys.argv and sys.argv[0]):
-	sys.argv = [__file__]
-	
-os.chdir(os.path.dirname(sys.argv[0]))
+## Enable GC.
+gc.enable()
 
-sys.path.insert(1, "library.zip")
+## Set "sys.path".
+if not hasattr(sys, "argv") or not sys.argv[0]:
+	sys.argv = ["."]
+
+try:
+	__file__ = os.path.abspath(sys.argv[0])
+	os.chdir(os.path.dirname(__file__))
+except OSError:
+	print "#! Incorrect launch!"
+	time.sleep(5)
+	
+sys.path.insert(0, "library.zip")
 
 from enconf import *
 import xmpp, macros, simplejson
@@ -206,7 +214,7 @@ def read_file(name):
 
 def write_file(name, data, mode = "w"):
 	with wsmph:
-		fl = open(chkFile(name), mode)
+		fl = open(chkFile(name), mode, 0)
 		fl.write(data)
 		fl.close()
 		INFA['fw'] += 1
@@ -227,7 +235,7 @@ def lytic_crashlog(handler, command = None):
 			error = u'команды "%s" (%s)' % (command, handler)
 		else:
 			error = u'процесса "%s"' % (handler)
-		text += u'При выполнении %s --> произошла ошибка!' % (error)
+		text += u'При выполнении %s произошла ошибка!' % (error)
 	else:
 		Print('\n\nError: can`t execute "%s"!' % (handler), color2)
 	filename = (DIR+'/error[%s]%s.crash') % (str(INFA['cfw'] + 1), time.strftime('[%H.%M.%S][%d.%m.%Y]'))
@@ -240,11 +248,11 @@ def lytic_crashlog(handler, command = None):
 		crashfile.close()
 		if JCON.isConnected():
 			if BOT_OS == 'nt':
-				delivery(text + u' Ошибку смотри по команде --> "ошибка %s" (Крэшфайл --> %s)' % (str(Number), filename))
+				delivery(text + u' Ошибку смотри по команде: "ошибка %s" (Крэшфайл - %s)' % (str(Number), filename))
 			else:
-				delivery(text + u' Ошибку смотри по командам --> "ошибка %s", "sh cat %s"' % (str(Number), filename))
+				delivery(text + u' Ошибку смотри по командам: "ошибка %s", "sh cat %s"' % (str(Number), filename))
 		else:
-			Print('\n\nCrash file --> %s\nError number --> %s' % (filename, str(Number)), color2)
+			Print('\n\nCrash file: %s\nError number: %s' % (filename, str(Number)), color2)
 	except:
 		print_exc()
 		if JCON.isConnected():
@@ -343,8 +351,9 @@ def command_handler(instance, access = 0, plug = "default"):
 	if not COMMSTAT.get(command):
 		COMMSTAT[command] = {'col': 0, 'users': []}
 	if COMMANDS.get(command) or COMMAND_HANDLERS.get(command):
-		Print("\nCommands in \"%s\" and \"%s\" are repeated." % (plug, COMMANDS[command].get("plug")), color2)
-		command = instance.func_name
+		if plug != COMMANDS[command].get("plug"):
+			Print("\nCommands in \"%s\" and \"%s\" are repeated." % (plug, COMMANDS[command].get("plug")), color2)
+			command = instance.func_name
 	COMMAND_HANDLERS[command] = instance
 	COMMANDS[command] = {'plug': plug, 'access': access}
 
@@ -1282,9 +1291,9 @@ def main():
 			CONFS = {}
 			lytic_crashlog(read_file)
 			Print("\nChatrooms file corrupted! Load failed.", color2)
-		if len(CONFS): 
-			Print('\n\nThere are %d rooms in list:' % len(CONFS), color4)
-			for conf in CONFS:
+		if len(CONFS.keys()): 
+			Print('\n\nThere are %d rooms in list:' % len(CONFS.keys()), color4)
+			for conf in CONFS.keys():
 				BOT_NICKS[conf] = CONFS[conf]['nick']
 				try:
 					muc = join_groupchat(conf, handler_botnick(conf), CONFS[conf]['code'])

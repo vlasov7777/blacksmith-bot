@@ -10,10 +10,9 @@
 logConfigFile = "dynamic/logstate.txt"
 logCacheFile = "logcache.txt"
 
-LoggerCfg = {"theme": "LunnaCat", "enabled": False, "dir": "logs"}
 logThemes = {}
 
-Months, Days = (u"Январь", u"Февраль", u"Март", u"Апрель", u"Май", u"Июнь", u"Июль", u"Август", u"Сентябрь", u"Октябрь", u"Ноябрь", u"Декабрь"), (u"Понедельник", u"Вторник", u"Среда", u"Четверг", u"Пятница", u"Суббота", u"Воскресенье", u"Понедельник")
+Months, Days = ("", u"Январь", u"Февраль", u"Март", u"Апрель", u"Май", u"Июнь", u"Июль", u"Август", u"Сентябрь", u"Октябрь", u"Ноябрь", u"Декабрь"), (u"Понедельник", u"Вторник", u"Среда", u"Четверг", u"Пятница", u"Суббота", u"Воскресенье", u"Понедельник")
 
 logAfl = {
 	"none": u"посетитель",
@@ -56,14 +55,18 @@ DefaultLogHeader = u'''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
 <div>
 <tt>'''
 
+LoggerCfg = {"theme": "LunnaCat", "enabled": False, "timetype": "local", "dir": "logs"}
+
 def getLogFile(chat, Time):
-	logDir = chkFile("%s/%s/%d/%d" % (LoggerCfg["dir"], chat, Time.tm_year, Time.tm_mon))
+	mon = Time.tm_mon if (Time.tm_mon > 9) else ("0%d" % Time.tm_mon)
+	logDir = chkFile("%s/%s/%d/%s" % (LoggerCfg["dir"], chat, Time.tm_year, mon))
 	if not os.path.isdir(logDir):
 		try:
 			os.makedirs(logDir)
 		except:
 			return False
-	logFileName = "%s/%d.html" % (logDir, Time.tm_mday)
+	day = Time.tm_mday if (Time.tm_mday > 9) else ("0%d" % Time.tm_mday)
+	logFileName = "%s/%d.html" % (logDir, day)
 	if os.path.isfile(logFileName):
 		logFile = open(logFileName, "a")
 		INFA["fw"] += 1
@@ -85,7 +88,10 @@ def getLogFile(chat, Time):
 	return logFile
 
 def logWrite(chat, state, body, nick = None):
-	Time = time.gmtime()
+	if LoggerCfg["timetype"].lower() == "gmt": 
+		Time = time.gmtime()
+	elif LoggerCfg["timetype"].lower() == "local":
+		Time = time.localtime()
 	with logSynchronize[chat]:
 		logFile = getLogFile(chat, Time)
 		if logFile:
@@ -107,8 +113,8 @@ def logWrite(chat, state, body, nick = None):
 					logFile.write('<span class="status"><a id="t{0}" href="#t{0}">[{0}]</a></span>&nbsp;'.format(timestamp))
 					logFile.write('<span class="status">*** %s</span><br />' % (body))
 			else:
-				logFile.write('<span class="{0}"><a id="t{1}" href="#t{1}">[{1}]</a></span>&nbsp;'.format(nick or state, timestamp))
-				logFile.write('<span class="%s">%s</span><br />' % (nick or state, body))
+				logFile.write('<span class="{0}"><a id="t{1}" href="#t{1}">[{1}]</a></span>&nbsp;'.format(state, timestamp))
+				logFile.write('<span class="%s">%s</span><br />' % (state, body))
 			logFile.close()
 
 def coloredNick(chat, nick):
@@ -184,12 +190,13 @@ def logFileInit(chat):
 	if check_file(chat, logCacheFile, str(cfg)):
 		cfg = eval(read_file("dynamic/%s/%s" % (chat, logCacheFile)))
 	else:
-		delivery(u"Внимание! Не удалось создать файл \"%s\"!" % (chat, logCacheFile))
+		delivery(u"Внимание! Не удалось создать файл \"dynamic/%s/%s\"!" % (chat, logCacheFile))
 	logCfg[chat] = cfg
 	logNicks[chat] = {}
 	logSynchronize[chat] = threading.Semaphore()
 	if not os.path.isdir(chkFile("%s/%s/.theme" % (LoggerCfg["dir"], chat))) and logThemes.has_key(cfg["theme"]):
-		logThemeCopier(chat, cfg["theme"])
+		if logCfg[chat]["enabled"]:
+			logThemeCopier(chat, cfg["theme"])
 
 def init_logger():
 	if initialize_file(logConfigFile, str(LoggerCfg)):
@@ -232,8 +239,8 @@ def logSetStateMain(mType, source, argv):
 				LoggerCfg["enabled"] = True
 				write_file(logConfigFile, str(LoggerCfg))
 				register_stage1_init(logFileInit)
-				for conf in GROUPCHATS.keys():
-					execute_handler(logFileInit, (conf,))
+				for chat in GROUPCHATS.keys():
+					execute_handler(logFileInit, (chat,))
 				register_join_handler(logWriteJoined)
 				register_leave_handler(logWriteLeave)
 				register_message_handler(logWriteMessage)
@@ -277,6 +284,43 @@ def logSetStateMain(mType, source, argv):
 				reply(mType, source, u"Выключил логгер.")
 			else:
  				reply(mType, source, u"Логгер вообще не включён.")
+		elif a0 in (u"тема", "темы"):
+			if argv:
+				if logThemes.has_key(argv[0]):
+					themeFile = "static/logger/themes/%s/name.txt" % LoggerCfg["theme"]
+					if os.path.isfile(themeFile) and argv[0] == read_file(themeFile):
+						reply(mType, source, u"Тема «%s» уже используется плагином." % argv[0])
+					else:
+						LoggerCfg["theme"] = argv[0]
+						write_file(logConfigFile, str(LoggerCfg))
+						reply(mType, source, u"Установил «%s» стандартной темой.")
+				else:
+					reply(mType, source, u"Нет такой темы :(")
+			else:
+				ls = []
+				for Numb, Theme in enumerate(logThemes.keys()):
+					ls.append("%d. %s." % ((Numb + 1), Theme))
+				reply(mType, source, str.join(chr(10), ls))
+		elif a0 == u"папка":
+			if argv:
+				LoggerCfg["dir"] = argv[0]
+				logThemeCopier(source[1], "LunnaCat")
+				write_file(logConfigFile, str(LoggerCfg))
+				repl = u"Теперь логи будут храниться в папке «%s»." % argv[0]
+			else:
+				repl = u"Сейчас логи хрянятся в «%s»." % LoggerCfg["dir"]
+			reply(mType, source, repl)
+		elif a0 == u"время":
+			if argv:
+				if argv[0] in ("gmt", "local"):
+					LoggerCfg["timetype"] = argv[0]
+					write_file(logConfigFile, str(LoggerCfg))
+					repl = u"Установил тип записи времени на «%s»." % argv[0]					
+				else:
+					repl = u"Недопустимый тип. Доступные: local, gmt."
+			else:
+				repl = u"Сейчас установлен тип записи времени «%s»." % LoggerCfg["timetype"]
+			reply(mType, source, repl)
 		else:
 			reply(mType, source, u"Что-то не то...")
 	elif LoggerCfg["enabled"]:
@@ -286,46 +330,47 @@ def logSetStateMain(mType, source, argv):
 
 def logSetState(mType, source, argv):
 	if GROUPCHATS.has_key(source[1]):
+		chat = source[1]
 		if argv:
 			argv = argv.split()
-			chat = source[1]
 			a0 = (argv.pop(0)).lower()
 			if a0 in ("1", u"вкл"):
-				if not logCfg[source[1]]["enabled"]:
-					logCfg[source[1]]["enabled"] = True
+				if not logCfg[chat]["enabled"]:
+					logCfg[chat]["enabled"] = True
 					write_file("dynamic/%s/%s" % (chat, logCacheFile), str(logCfg[chat]))
-					reply(mType, source, u"Включил логирование «%s»." % source[1])
+					reply(mType, source, u"Включил логирование «%s»." % chat)
 				else:
 					reply(mType, source, u"Уже включено.")
 			elif a0 in ("0", u"выкл"):
-				if logCfg[source[1]]["enabled"]:
-					logCfg[source[1]]["enabled"] = False
+				if logCfg[chat]["enabled"]:
+					logCfg[chat]["enabled"] = False
 					write_file("dynamic/%s/%s" % (chat, logCacheFile), str(logCfg[chat]))
+					logWrite(chat, "status", u"*** Логирование конференции приостановлено")
 					reply(mType, source, u"Выключил логирование «%s»." % chat)
 				else:
 					reply(mType, source, u"«%s» не логируется.")
 			elif a0 in (u"тема", "темы"):
 				if argv:
-					if logThemes.has_key(argv[1]):
+					if logThemes.has_key(argv[0]):
 						themeFile = chkFile("%s/%s/.theme/name.txt" % (LoggerCfg["dir"], chat))
-						if os.path.isfile(themeFile) and argv[1] == read_file(themeFile):
-							reply(mType, source, u"Тема «%s» уже используется плагином." % argv[1])
+						if os.path.isfile(themeFile) and argv[0] == read_file(themeFile):
+							reply(mType, source, u"Тема «%s» уже используется плагином." % argv[0])
 						else:
-							logCfg[source[1]]["theme"] = argv[1]
+							logCfg[chat]["theme"] = argv[0]
 							write_file("dynamic/%s/%s" % (chat, logCacheFile), str(logCfg[chat]))
-							logThemeCopier(source[1], argv[1])
-							reply(mType, source, u"Установил тему «%s». Она вступит в силу немедленно." % argv[1])
+							logThemeCopier(chat, argv[0])
+							reply(mType, source, u"Установил тему «%s». Она вступит в силу немедленно." % argv[0])
 					else:
-						reply(mType, source, u"Нет такой темы :(")
+						reply(mType, source, u"Нет такой темы :(.")
 				else:
-					ls = []
-					for Numb, Theme in enumerate(logThemes.keys()):
-						ls.append("%d. %s." % ((Numb + 1), Theme))
-					reply(mType, source, str.join(chr(10), ls))
+					repl = str()
+					for num, thm in enumerate(logThemes.keys()):
+						repl += "%d. %s.\n" % (num + 1, thm)
+					reply(mType, source, repl)
 			else:
-				reply(mType, source, u"пшел вон")
-		elif logCfg[source[1]]["enabled"]:
-			reply(mType, source, u"Сейчас логгер включён. Тема, используемая плагином в текущей конференции, называется «%s»." % logCfg[source[1]]["theme"])
+				reply(mType, source, u"Нет такого параметра.")
+		elif logCfg[chat]["enabled"]:
+			reply(mType, source, u"Сейчас логгер включён. Тема, используемая плагином в текущей конференции, называется «%s»." % logCfg[chat]["theme"])
 		else:
 			reply(mType, source, u"Сейчас комната не логируется.")
 
