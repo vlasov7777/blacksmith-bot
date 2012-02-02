@@ -142,4 +142,4 @@ def Handler_Roster_IQ(stanza):
 
 command_handler(roster_control, 80, "roster")
 command_handler(roster_work, 80, "roster")
-#register_iq_handler(Handler_Roster_IQ)
+register_iq_handler(Handler_Roster_IQ)

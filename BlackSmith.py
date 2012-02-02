@@ -116,7 +116,7 @@ except Exception, e:
 if BOT_OS == 'nt':
 	os.system('Title BlackSmith - %s' % (Caps))
 
-MEMORY_LIMIT = (24576 if MEMORY_LIMIT and MEMORY_LIMIT <= 24576 else MEMORY_LIMIT)
+BOSS_PASS = BOSS_PASS if not BOSS_PASS.startswith("/random") else PASS_GENERATOR("", eval(BOSS_PASS.split("/random")[1]))
 
 ## Lists of handlers.
 IQ_HANDLERS = []
