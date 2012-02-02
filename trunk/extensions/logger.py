@@ -58,15 +58,15 @@ DefaultLogHeader = u'''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
 LoggerCfg = {"theme": "LunnaCat", "enabled": False, "timetype": "local", "dir": "logs"}
 
 def getLogFile(chat, Time):
-	mon = Time.tm_mon if (Time.tm_mon > 9) else ("0%d" % Time.tm_mon)
+	mon = str(Time.tm_mon) if (Time.tm_mon > 9) else ("0%d" % Time.tm_mon)
 	logDir = chkFile("%s/%s/%d/%s" % (LoggerCfg["dir"], chat, Time.tm_year, mon))
 	if not os.path.isdir(logDir):
 		try:
 			os.makedirs(logDir)
 		except:
 			return False
-	day = Time.tm_mday if (Time.tm_mday > 9) else ("0%d" % Time.tm_mday)
-	logFileName = "%s/%d.html" % (logDir, day)
+	day = str(Time.tm_mday) if (Time.tm_mday > 9) else ("0%d" % Time.tm_mday)
+	logFileName = "%s/%s.html" % (logDir, day)
 	if os.path.isfile(logFileName):
 		logFile = open(logFileName, "a")
 		INFA["fw"] += 1
