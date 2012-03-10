@@ -107,7 +107,7 @@ def handler_reklama_check(body):
 def handler_order_message(raw, type, source, body):
 	if source[1] in GROUPCHATS and user_level(source[0], source[1]) <= 10:
 		if source[2] != '':
-			if handler_reklama_check(body):
+			if ORDER[source[1]].get('adver') and handler_reklama_check(body):
 				handler_kick(source[1], source[2], u'%s: рекламируй свои канцтовары в другом месте' % handler_botnick(source[1]))
 				return
 			jid = handler_jid(source[0])
@@ -354,6 +354,13 @@ def handler_order_filt(type, source, body):
 					ORDER[source[1]]['kicks']['cond'] = 1
 				else:
 					reply(type, source, u'синтакс инвалид')
+			elif args[0] == u"антиреклама":
+				if args[1] in ["1", "0"]:
+					ORDER[source[1]]['adver'] = int(args[1])
+					reply(type, source, u'Изменил значение.')
+				else:
+					reply(type, source, u'синтакс инвалид')
+					
 			else:
 				reply(type, source, u'синтакс инвалид')
 			write_file('dynamic/'+source[1]+'/order.txt', str(ORDER[source[1]]))
@@ -373,10 +380,15 @@ def handler_order_filt(type, source, body):
 		flymode = ORDER[source[1]]['fly']['mode']
 		kicks = ORDER[source[1]]['kicks']['cond']
 		kickscnt = str(ORDER[source[1]]['kicks']['cnt'])
+		adver = ORDER[source[1]]['adver']
 		if time:
 			fon.append(u'временная фильтрация сообщений')
 		else:
 			foff.append(u'временная фильтрация сообщений')
+		if adver:
+			fon.append(u'антиреклама')
+		else:
+			foff.append(u"антиреклама")
 		if prs:
 			fon.append(u'временная фильтрация презенсов')
 		else:

@@ -46,7 +46,6 @@ INFO = {'start': 0, 'msg': 0, 'prs': 0, 'iq': 0, 'cmd': 0, 'thr': 0, 'errs': 0}
 INFA = {'outmsg': 0, 'outiq': 0, 'fr': 0, 'fw': 0, 'fcr': 0, 'cfw': 0}
 RSTR = {'AUTH': [], 'BAN': [], 'VN': 'off'}
 LAST = {'time': 0, 'cmd': 'start'}
-DCNT = {'col': 0, 'Yes!': True}
 STOP = {'mto': 0, 'jids': {}}
 
 ## Colored stdout.
@@ -63,15 +62,13 @@ def retry_body(x, y):
 	return (body, color)
 
 def text_color(text, color):
-	if colored:
+	if colored and color:
 		text = color+text+color0
 	return text
 
 def Print(text, color = False):
 	try:
-		if color:
-			text = text_color(text, color)
-		print text
+		print text_color(text, color)
 	except:
 		pass
 
@@ -108,20 +105,22 @@ def PASS_GENERATOR(codename, Number):
 
 try:
 	execfile(GENERAL_CONFIG_FILE)
+	BOSS_PASS = (PASS_GENERATOR("", eval(BOSS_PASS[7:])) if BOSS_PASS.startswith("/random") else BOSS_PASS)
 	execfile('static/versions.py')
 	reload(sys).setdefaultencoding('utf-8')
 except Exception, e:
-	Print('\n\nError: %s' % `e`, color2)
+	Exit('\n\nError: %s' % `e`, 1, 5)
 
 if BOT_OS == 'nt':
 	os.system('Title BlackSmith - %s' % (Caps))
-
-BOSS_PASS = BOSS_PASS if not BOSS_PASS.startswith("/random") else PASS_GENERATOR("", eval(BOSS_PASS.split("/random")[1]))
 
 ## Lists of handlers.
 IQ_HANDLERS = []
 JOIN_HANDLERS = []
 LEAVE_HANDLERS = []
+NEWROLE_HANDLERS = []
+NEWSTATUS_HANDLERS = []
+NEWNICK_HANDLERS = []
 MESSAGE_HANDLERS = []
 COMMAND_HANDLERS = {}
 PRESENCE_HANDLERS = []
@@ -198,32 +197,31 @@ def initialize_file(name, data = "{}"):
 		folder = os.path.dirname(name)
 		if folder and not os.path.exists(folder):
 			os.makedirs(folder, 0755)
-		write_file(name, data)
-		INFA['fcr'] += 1
+		with open(name, "w") as fp:
+			INFA['fcr'] += 1
+			fp.write(data)
 	except:
 		lytic_crashlog(initialize_file)
 		return False
 	return True
 
 def read_file(name):
-	fl = open(chkFile(name), "r")
-	text = fl.read()
-	INFA['fr'] += 1
-	fl.close()
-	return text
+	with open(chkFile(name), "r") as fp:
+		INFA['fr'] += 1
+		return fp.read()
 
 def write_file(name, data, mode = "w"):
 	with wsmph:
-		fl = open(chkFile(name), mode, 0)
-		fl.write(data)
-		fl.close()
-		INFA['fw'] += 1
+		with open(chkFile(name), mode) as fp:
+			INFA['fw'] += 1
+			fp.write(data)
 
 ## Crashfile writers.
 def Dispatch_fail():
 	crashfile = open('__main__.crash', 'a')
-	print_exc(limit = None, file = crashfile)
-	print "\n\n#-# Dispatch Error!"
+	INFO['errs'] += 1
+	print_exc(crashfile)
+	Print("\n\n#-# Dispatch fail!", color2)
 	crashfile.close()
 
 def lytic_crashlog(handler, command = None):
@@ -237,14 +235,14 @@ def lytic_crashlog(handler, command = None):
 			error = u'процесса "%s"' % (handler)
 		text += u'При выполнении %s произошла ошибка!' % (error)
 	else:
-		Print('\n\nError: can`t execute "%s"!' % (handler), color2)
+		Print('\n\nError: can\'t execute "%s"!' % (handler), color2) #'
 	filename = (DIR+'/error[%s]%s.crash') % (str(INFA['cfw'] + 1), time.strftime('[%H.%M.%S][%d.%m.%Y]'))
 	try:
 		if not os.path.exists(DIR):
 			os.mkdir(DIR, 0755)
 		crashfile = open(filename, 'w')
 		INFA['cfw'] += 1
-		print_exc(limit = None, file = crashfile)
+		print_exc(crashfile)
 		crashfile.close()
 		if JCON.isConnected():
 			if BOT_OS == 'nt':
@@ -282,6 +280,27 @@ def register_join_handler(instance):
 		if name == handler.func_name:
 			JOIN_HANDLERS.remove(handler)
 	JOIN_HANDLERS.append(instance)
+
+def register_newrole_handler(instance):
+	name = instance.func_name
+	for handler in NEWROLE_HANDLERS:
+		if name == handler.func_name:
+			NEWROLE_HANDLERS.remove(handler)
+	NEWROLE_HANDLERS.append(instance)
+
+def register_newstatus_handler(instance):
+	name = instance.func_name
+	for handler in NEWSTATUS_HANDLERS:
+		if name == handler.func_name:
+			NEWSTATUS_HANDLERS.remove(handler)
+	NEWSTATUS_HANDLERS.append(instance)
+
+def register_newnick_handler(instance):
+	name = instance.func_name
+	for handler in NEWNICK_HANDLERS:
+		if name == handler.func_name:
+			NEWNICK_HANDLERS.remove(handler)
+	NEWNICK_HANDLERS.append(instance)
 
 def register_leave_handler(instance):
 	name = instance.func_name
@@ -389,10 +408,9 @@ def Thread_Run(Thr, handler, command = None):
 
 def execute_handler(handler_instance, list = (), command = None):
 	try:
-		handler_instance(*list[:4])
-	except TypeError:
 		handler_instance(*list)
-	except (KeyboardInterrupt, SystemExit): pass
+	except (SystemExit, KeyboardInterrupt):
+		pass
 	except Exception:
 		lytic_crashlog(handler_instance, command)
 
@@ -414,8 +432,30 @@ def call_outgoing_message_handlers(target, body, obody):
 
 def call_join_handlers(conf, nick, afl, role, status = None, text = None):
 	for handler in JOIN_HANDLERS:
+		if handler.func_name == "logWriteJoined":
+			ls = (conf, nick, afl, role, status, text,)
+		else:
+			ls = (conf, nick, afl, role,)
 		with smph:
-			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (conf, nick, afl, role, status, text,),))
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, ls,))
+			Thread_Run(Thr, handler)
+
+def call_newrole_handlers(conf, nick, role, reason):
+	for handler in NEWROLE_HANDLERS:
+		with smph:
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (conf, nick, role, reason,),))
+			Thread_Run(Thr, handler)
+
+def call_newstatus_handlers(conf, nick, status, priority, text):
+	for handler in NEWSTATUS_HANDLERS:
+		with smph:
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (conf, nick, status, priority, text,),))
+			Thread_Run(Thr, handler)
+
+def call_newnick_handlers(conf, old_nick, nick):
+	for handler in NEWNICK_HANDLERS:
+		with smph:
+			Thr = threading.Thread(None, execute_handler, get_Thr_id(handler), (handler, (conf, old_nick, nick,),))
 			Thread_Run(Thr, handler)
 
 def call_leave_handlers(conf, nick, reason, code):
@@ -512,6 +552,23 @@ def load_quests():
 	else:
 		Print('\n\nError: questions file is not exist!', color2)
 
+def join_chats():
+	if initialize_file(GROUPCHATS_FILE):
+		try:
+			CONFS = eval(read_file(GROUPCHATS_FILE))
+		except KeyboardInterrupt:
+			raise KeyboardInterrupt("Interrupt (Ctrl+C)")
+		except:
+			CONFS = {}
+			lytic_crashlog(read_file)
+			Print("\nChatrooms file corrupted! Load failed.", color2)
+		if CONFS: 
+			Print('\n\nThere are %d rooms in list:' % len(CONFS.keys()), color4)
+			for conf in CONFS.keys():
+				BOT_NICKS[conf] = CONFS[conf]['nick']
+				join_groupchat(conf, handler_botnick(conf), CONFS[conf]['code'])
+	else:
+		Print('\n\nError: unable to create chatrooms list file!', color2)
 def read_pipe(command):
 	try:
 		if BOT_OS == "posix":
@@ -586,10 +643,10 @@ def save_conflist(conf, nick = None, code = None):
 			del list[conf]
 		write_file(GROUPCHATS_FILE, str(list))
 	else:
-		Print('\n\nError: can`t append conference to chatrooms list file!', color2)
+		Print("\n\nError: can't append conference into chatrooms list file!", color2)
 
 def memory_usage():
-	PID, memory = `BOT_PID`, `0`
+	PID, memory = `BOT_PID`, '0'
 	if BOT_OS == 'posix':
 		lines = read_pipe('ps -o rss -p %s' % (PID)).splitlines()
 		if len(lines) >= 2:
@@ -604,7 +661,7 @@ def memory_usage():
 	return (0 if not check_number(memory) else int(memory))
 
 def command_Prefix(conf, command):
-	if command in [u'хелп', u'комлист', u'команды', u'префикс', u'тест']:
+	if command in (u'хелп', u'комлист', u'команды', u'префикс', u'тест'):
 		return command
 	if PREFIX[conf] == command[:1]:
 		return command[1:]
@@ -612,7 +669,7 @@ def command_Prefix(conf, command):
 
 def Prefix_state(combody, bot_nick):
 	cmd_nick = combody.split()[0]
-	for symbol in [':', ',', '>']:
+	for symbol in (':', ',', '>'):
 		cmd_nick = cmd_nick.replace(symbol, '')
 	if cmd_nick != bot_nick:
 		return False
@@ -620,28 +677,26 @@ def Prefix_state(combody, bot_nick):
 
 def check_number(number):
 	try:
-		return int(number)
+		result = int(number)
 	except:
-		return False
+		result = False
+	return result
 
 def replace_all(retxt, list, data = False):
 	for x in list:
 		retxt = retxt.replace(x, data if data != False else list[x])
 	return retxt
 
-def that_day():
-	return int(time.strftime('%Y%m%d', time.gmtime()))
-
-Elist = [' %s' % (x) for x in [u'0 мес', u'0 дн', u'0 час', u'0 мин', u'0 сек']]
+that_day = lambda: int(time.strftime('%Y%m%d', time.gmtime()))
 
 def formatWord(Numb, ls):
-	ls = "{2}/{0}/{1}/{1}/{1}/{2}/{2}/{2}/{2}/{2}/{2}/{2}/{2}/{2}".format(*ls)
+	ls = "{2}/{0}/{1}/{1}/{1}/{2}/{2}/{2}/{2}/{2}/{2}/{2}/{2}/{2}/{2}".format(*ls)
 	ls = ls.split(chr(47))
 	if Numb in xrange(15):
-		x = ls[Numb]
+		edge = ls[Numb]
 	else:
-		x = ls[int(str(Numb)[-1])]
-	return x
+		edge = ls[int(str(Numb)[-1])]
+	return edge
 
 def timeElapsed(or_seconds):
 	minutes, seconds = divmod(or_seconds, 60)
@@ -649,18 +704,21 @@ def timeElapsed(or_seconds):
 	days, hours = divmod(hours, 24)
 	months, days = divmod(days, 30)
 	years, months = divmod(months, 12)
-	text = u'%d сек' % (seconds)
-	if or_seconds >= 60:
-		text = u'%d мин %s' % (minutes, text)
-	if or_seconds >= 3600:
-		text = u'%d час %s' % (hours, text)
-	if or_seconds >= 86400:
-		text = u'%d дн %s' % (days, text)
-	if or_seconds >= 2592000:
-		text = u'%d мес %s' % (months, text)
-	if or_seconds >= 31104000:
-		text = u'%d лет %s' % (years, text)
-	return replace_all(text, Elist, '')
+	if seconds:
+		text = u'%d секунд%s' % (seconds, formatWord(seconds, (u"а", u"ы", u"")))
+	else:
+		text = u''
+	if minutes:
+		text = u'%d минут%s %s' % (minutes, formatWord(minutes, (u"а", u"ы", u"")), text)
+	if hours:
+		text = u'%d час%s %s' % (hours, formatWord(hours, (u"", u"а", u"ов")), text)
+	if days:
+		text = u'%d %s %s' % (days, formatWord(days, (u"день", u"дня", u"дней")), text)
+	if months:
+		text = u'%d месяц%s %s' % (months, formatWord(months, (u"", u"а", u"ев")), text)
+	if years:
+		text = u'%d %s %s' % (years, formatWord(years, (u"год", u"года", u"лет")), text)
+	return text.rstrip()
 
 def upkeep():
 	while True:
@@ -716,6 +774,8 @@ def has_access(source, level, conf):
 
 ## MUC & Roster handlers.
 def send_join_presece(conf, nick, code = None):
+	for User in GROUPCHATS[conf].values():
+		User["ishere"] = False
 	Presence = xmpp.protocol.Presence('%s/%s' % (conf, nick))
 	Presence.setStatus(STATUS[conf]['message'])
 	Presence.setShow(STATUS[conf]['status'])
@@ -734,6 +794,7 @@ def join_groupchat(conf, nick, code = None):
 		STATUS[conf] = {'message': 'BlackSmith, XMPP BOT, is ready to work.', 'status': 'chat'}
 	save_conflist(conf, nick, code)
 	send_join_presece(conf, nick, code)
+	Print("joined %s" % (conf), color3)
 
 def leave_groupchat(conf, status = None):
 	Presence = xmpp.Presence(conf, 'unavailable')
@@ -944,26 +1005,26 @@ def MESSAGE_PROCESSING(client, stanza):
 	INFO['msg'] += 1
 	instance = fromjid.getStripped().lower()
 	if user_level(fromjid, instance) <= -100:
-		return
+		raise xmpp.NodeProcessed()
 	if instance in UNAVALABLE and not MSERVE:
-		return
-	if stanza.timestamp:
-		return
+		raise xmpp.NodeProcessed()
+	if stanza.getTimestamp():
+		raise xmpp.NodeProcessed()
 	bot_nick, nick = handler_botnick(instance), fromjid.getResource()
 	if bot_nick == nick:
-		return
-	body = stanza.getBody() or ""
+		raise xmpp.NodeProcessed()
+	body = stanza.getBody() or str()
 	if body:
 		body = body.strip()
 	if instance not in GROUPCHATS and instance not in ADLIST:
 		if not instance.count('@conf'):
 			if instance in RSTR['BAN'] or RSTR['VN'] == 'off':
-				return
+				raise xmpp.NodeProcessed()
 			elif instance not in RSTR['AUTH'] and RSTR['VN'] == 'iq':
 				INFO['thr'] += 1
 				Thread = threading.Thread(None, roster_check, 'rIQ-%d' % (INFO['thr']),(instance, body,))
 				Thread_Run(Thread, roster_check)
-				return
+				raise xmpp.NodeProcessed()
 	if len(body) > INC_MSG_LIMIT:
 		body = body[:INC_MSG_LIMIT]+('[...] limit %d symbols' % (INC_MSG_LIMIT))
 	ltype = stanza.getType()
@@ -974,7 +1035,7 @@ def MESSAGE_PROCESSING(client, stanza):
 	elif ltype == 'error':
 		if instance in GROUPCHATS:
 			feil_message(fromjid, instance, bot_nick, body, stanza.getErrorCode())
-		return
+		raise xmpp.NodeProcessed()
 	else:
 		type = 'private'
 	INFO['thr'] += 1
@@ -983,16 +1044,16 @@ def MESSAGE_PROCESSING(client, stanza):
 	except:
 		pass
 	command, Parameters, cbody, rcmd, combody = '', '', '', '', body
-	for key in [bot_nick+key for key in [':',',','>']]:
+	for key in [bot_nick+key for key in (':',',','>')]:
 		combody = combody.replace(key, '')
 	combody = combody.strip()
 	if not combody:
-		return
+		raise xmpp.NodeProcessed()
 	if STOP['mto'] >= 4:
-		return
+		raise xmpp.NodeProcessed()
 	rcmd = combody.split()[0].lower()
 	if instance in COMMOFF and rcmd in COMMOFF[instance]:
-		return
+		raise xmpp.NodeProcessed()
 	cbody = MACROS.expand(combody, [fromjid, instance, nick])
 	if instance in MACROS.macrolist.keys():
 		cmds = (MACROS.gmacrolist.keys() + MACROS.macrolist[instance].keys())
@@ -1002,13 +1063,13 @@ def MESSAGE_PROCESSING(client, stanza):
 	if instance in PREFIX and rcmd not in cmds:
 		NotPfx = Prefix_state(body, bot_nick)
 		if NotPfx or ltype == 'chat':
-			if not COMMANDS.has_key(command) and command[:1] in ["!", "@", "#", ".", "*", "?", "`"]:
+			if not COMMANDS.has_key(command) and command[:1] in ("!", "@", "#", ".", "*", "?", "`"):
 				command = command[1:]
 		else:
 			command = command_Prefix(instance, command)
 	if instance in COMMOFF and command in COMMOFF[instance]:
-		return
-	if cbody.count(' '):
+		raise xmpp.NodeProcessed()
+	if cbody.count(chr(32)):
 		Parameters = cbody[(cbody.find(' ') + 1):].strip()
 	if COMMANDS.has_key(command):
 		INFO['cmd'] += 1
@@ -1038,50 +1099,66 @@ def roster_subscribe(jid):
 		JCON.Roster.Unauthorize(jid)
 		if jid in JCON.Roster.getItems():
 			JCON.Roster.delItem(jid)
-	elif not jid in RSTR['BAN'] and RSTR['VN'] in ['iq', 'on']:
+	elif not jid in RSTR['BAN'] and RSTR['VN'] in ('iq', 'on'):
 		JCON.Roster.Authorize(jid)
 		JCON.Roster.Subscribe(jid)
 		JCON.Roster.setItem(jid, jid, ['USERS'])
 
-def PRESENCE_PROCESSING(client, Prs):
-	fromjid = Prs.getFrom()
+Roles = {'owner': 15, 'moderator': 15, 'participant': 10, 'admin': 5, 'member': 1}
+
+def calc_acc(conf, jid, role):
+	if not GLOBACCESS.has_key(jid):
+		if not (CONFACCESS.has_key(conf) and CONFACCESS[conf].has_key(jid)):
+			access = (Roles.get(role[0], 0) + Roles.get(role[1], 0))
+			change_local_access(conf, jid, access)
+
+def PRESENCE_PROCESSING(client, stanza):
+	fromjid = stanza.getFrom()
 	INFO['prs'] += 1
 	conf = fromjid.getStripped().lower()
 	if not has_access(fromjid, -5, conf):
-		return
-	Ptype = Prs.getType()
+		raise xmpp.NodeProcessed()
+	Ptype = stanza.getType()
 	if Ptype == 'subscribe':
 		roster_subscribe(conf)
 	if GROUPCHATS.has_key(conf):
 		nick = fromjid.getResource()
 		if Ptype == 'unavailable':
-			reason = Prs.getReason() or Prs.getStatus()
-			if nick in GROUPCHATS[conf] and GROUPCHATS[conf][nick]['ishere']:
+			reason = stanza.getReason() or stanza.getStatus()
+			if GROUPCHATS[conf].has_key(nick) and GROUPCHATS[conf][nick]['ishere']:
 				GROUPCHATS[conf][nick]['ishere'] = False
-			scode = Prs.getStatusCode()
-			if scode in ['301', '307'] and nick == handler_botnick(conf):
+			scode = stanza.getStatusCode()
+			if scode in ('301', '307') and nick == handler_botnick(conf):
 				leave_groupchat(conf, u'Got %s code!' % str(scode))
 				text = (u'забанили' if scode == '301' else u'кикнули')
 				delivery(u'Меня %s в "%s" и я оттуда вышел.' % (text, conf))
-				return
+				raise xmpp.NodeProcessed()
 			elif scode == '303':
-				full_jid = Prs.getJid()
+				full_jid = stanza.getJid()
 				if not full_jid:
 					full_jid = unicode(fromjid)
 					jid = unicode(fromjid)
 				else:
 					full_jid = unicode(full_jid)
 					jid = full_jid.split('/')[0].lower()
-				newnick = Prs.getNick()
-				join_date = GROUPCHATS[conf].get(nick, {'join_date': [that_day(), time.gmtime()]})['join_date']
-				joined = GROUPCHATS[conf].get(nick, {'joined': time.time()})['joined']
-				GROUPCHATS[conf][newnick] = {'full_jid': full_jid, 'jid': jid, 'join_date': join_date, 'idle': time.time(), 'joined': joined, 'ishere': True}
-				status_code_change(['idle','full_jid'], conf, nick)
+				Nick = stanza.getNick()
+				try:
+					GROUPCHATS[conf][Nick] = GROUPCHATS[conf].pop(nick)
+				except KeyError:
+					role = (stanza.getRole(), stanza.getAffiliation())
+					GROUPCHATS[conf][nick] = {"role": role, "caps": stanza.getTagAttr("c", "node"), 'full_jid': full_jid, 'jid': jid, 'join_date': (that_day(), time.gmtime()), 'idle': time.time(), 'joined': time.time(), 'ishere': True}
+					calc_acc(conf, jid, role)
+					status = stanza.getShow()
+					text = stanza.getStatus()
+					call_join_handlers(conf, nick, role[1], role[0], status, text)
+				else:
+					GROUPCHATS[conf][Nick]['idle'] = time.time()
+					call_newnick_handlers(conf, nick, Nick)
 			else:
-				status_code_change(['idle','full_jid','joined'], conf, nick)
+				status_code_change(('idle','full_jid','joined'), conf, nick)
 				call_leave_handlers(conf, nick, reason, scode)
-		elif Ptype in ['available', None]:
-			full_jid = Prs.getJid()
+		elif Ptype in ('available', None):
+			full_jid = stanza.getJid()
 			if not full_jid:
 				if MSERVE:
 					if conf not in UNAVALABLE:
@@ -1092,41 +1169,50 @@ def PRESENCE_PROCESSING(client, Prs):
 						UNAVALABLE.append(conf)
 						msg(conf, u'Отключаюсь до получения прав админа!')
 						change_bot_status(conf, u'Отказываюсь работать без прав!', 'xa')
-					return
+					raise xmpp.NodeProcessed()
 			elif conf in UNAVALABLE:
 				if MSERVE:
 					UNAVALABLE.remove(conf)
 					full_jid = unicode(full_jid)
 					jid = full_jid.split("/", 1)[0].lower()
 				else:
-					if nick == handler_botnick(conf) and Prs.getAffiliation() in ['admin','owner']:
+					if nick == handler_botnick(conf) and stanza.getAffiliation() in ('admin','owner'):
 						UNAVALABLE.remove(conf)
 						msg(conf, u'Походу дали админа, перезахожу!')
 						time.sleep(2)
 						leave_groupchat(conf, 'Rejoin...')
 						time.sleep(2)
 						join_groupchat(conf, handler_botnick(conf))
-					return
+					raise xmpp.NodeProcessed()
 			else:
 				full_jid = unicode(full_jid)
 				jid = full_jid.split("/", 1)[0].lower()
-			if not (nick in GROUPCHATS[conf] and GROUPCHATS[conf][nick]['jid'] == jid and GROUPCHATS[conf][nick]['ishere']):
-				GROUPCHATS[conf][nick] = {'full_jid': full_jid, 'jid': jid, 'join_date': [that_day(), time.gmtime()], 'idle': time.time(), 'joined': time.time(), 'ishere': True}
-				afl = Prs.getAffiliation()
-				status = Prs.getShow()
-				text = Prs.getStatus()
-				role = Prs.getRole()
-				call_join_handlers(conf, nick, afl, role, status, text)
+			ishere, role = GROUPCHATS[conf].has_key(nick), (stanza.getRole(), stanza.getAffiliation())
+			if not (ishere and GROUPCHATS[conf][nick]['jid'] == jid and GROUPCHATS[conf][nick]['ishere']):
+				GROUPCHATS[conf][nick] = {"role": role, "caps": stanza.getTagAttr("c", "node"), 'full_jid': full_jid, 'jid': jid, 'join_date': (that_day(), time.gmtime()), 'idle': time.time(), 'joined': time.time(), 'ishere': True}
+				calc_acc(conf, jid, role)
+				status = stanza.getShow()
+				text = stanza.getStatus()
+				call_join_handlers(conf, nick, role[1], role[0], status, text)
+			elif ishere and GROUPCHATS[conf][nick]["role"] != role:
+				GROUPCHATS[conf][nick]["role"] = role
+				calc_acc(conf, jid, role)
+				call_newrole_handlers(conf, nick, role, stanza.getReason())
+			else:
+				status = stanza.getShow()
+				text = stanza.getStatus()
+				priority = stanza.getPriority()
+				call_newstatus_handlers(conf, nick, status, priority, text)
 		elif Ptype == 'error':
-			ecode = Prs.getErrorCode()
+			ecode = stanza.getErrorCode()
 			if ecode:
 				if ecode == '409':
 					BOT_NICKS[conf] = '%s.' % (nick)
 					send_join_presece(conf, handler_botnick(conf))
-				elif ecode in ['401', '403', '405']:
+				elif ecode in ('401', '403', '405'):
 					leave_groupchat(conf, u'Got %s error code!' % str(ecode))
 					delivery(u'Ошибка %s, пришлось выйти из -> "%s"' % (ecode, conf))
-				elif ecode in ['404', '503']:
+				elif ecode in ('404', '503'):
 					try:
 						ThrName = "rejoin-%s" % (conf.decode("utf-8"))
 						if ThrName not in [x._Thread__name for x in threading._active.values()]:
@@ -1136,13 +1222,13 @@ def PRESENCE_PROCESSING(client, Prs):
 					except:
 						pass
 		if GROUPCHATS.has_key(conf):
-			call_presence_handlers(Prs)
+			call_presence_handlers(stanza)
 
 def IQ_PROCESSING(client, iq):
 	INFO["iq"] += 1
 	fromjid = iq.getFrom()
 	if not fromjid or user_level(fromjid, fromjid.getStripped().lower()) <= -100:
-		return
+		raise xmpp.NodeProcessed()
 	if iq.getType() == "get":
 		nsType = iq.getQueryNS()
 		result = iq.buildReply("result")
@@ -1178,7 +1264,7 @@ def IQ_PROCESSING(client, iq):
 			query.setTagData("tz", tz)
 			query.setTagData("display", LocTime)
 		client.send(result)
-		raise xmpp.NodeProcessed
+		raise xmpp.NodeProcessed()
 	call_iq_handlers(iq)
 
 ## actions start.
@@ -1189,21 +1275,45 @@ def starting_actions():
 	load_quests()
 	load_plugins()
 
-def col_minus():
-	if DCNT['col']:
-		DCNT['col'] += -1
+def Connect():
+	globals()['JCON'] = xmpp.Client(HOST, PORT, None)
+	Print('\n\nConnecting...', color4)
+	if SECURE:
+		CONNECT = JCON.connect((SERVER, PORT), None, None, False)
+	else:
+		CONNECT = JCON.connect((SERVER, PORT), None, False, True)
+	if CONNECT:
+		if SECURE and CONNECT != 'tls':
+			Print('\nWarning: unable to estabilish secure connection - TLS failed!', color2)
+		else:
+			Print('\nConnection is OK', color3)
+		Print('Using: %s' % str(JCON.isConnected()), color4)
+	else:
+		Exit("\nCan't Connect.\nSleep for 30 seconds", 0, 30)
+	Print('\nAuthentication plese wait...', color4)
+	AUTHENT = JCON.auth(USERNAME, PASSWORD, RESOURCE)
+	if AUTHENT:
+		if AUTHENT != 'sasl':
+			Print('\nWarning: unable to perform SASL auth. Old authentication method used!', color2)
+		else:
+			Print('Auth is OK', color3)
+	else:
+		Exit('\nAuth Error: %s %s\nMaybe, incorrect jid or password?' % (`JCON.lastErr`, `JCON.lastErrCode`), 0, 12)
+	JCON.sendInitPresence()
+	JCON.RegisterHandler(xmpp.NS_MESSAGE, MESSAGE_PROCESSING)
+	JCON.RegisterHandler(xmpp.NS_PRESENCE, PRESENCE_PROCESSING)
+	JCON.RegisterHandler(xmpp.NS_IQ, IQ_PROCESSING)
+	Print('\n\nYahoo! I am online!', color3)
 
-def lytic_restart():
-	DCNT['col'] += 1
-	if DCNT['Yes!'] and DCNT['col'] >= 3:
-		DCNT['Yes!'] = False
-		Print('\n\nDISCONNECTED', color2)
-		call_stage_init(3)
-		Exit('\n\nRESTARTING...', 0, 30)
-	try:
-		threading.Timer(3, col_minus).start()
-	except:
-		pass
+def calc_Timeout():
+	Chats = len(GROUPCHATS.keys())
+	if Chats <= 16:
+		Timeout = 8
+	elif Chats >= 48:
+		Timeout = 0.2
+	else:
+		Timeout = (7.8 / (Chats - 16))
+	return (0, Timeout)
 
 def Dispatch_handler(Timeout = 8):
 	try:
@@ -1212,6 +1322,11 @@ def Dispatch_handler(Timeout = 8):
 		Print('\n\nError: XMPP Conflict!', color2)
 		call_stage_init(3)
 		os._exit(0)
+	except (xmpp.SystemShutdown, IOError):
+		while not JCON.isConnected():
+			Connect()
+			try_sleep(5)
+		join_chats()
 	except xmpp.StreamError:
 		pass
 	except xmpp.simplexml.xml.parsers.expat.ExpatError:
@@ -1235,86 +1350,41 @@ def main():
 		PID = CACHE['PID']
 		if PID != BOT_PID:
 			if BOT_OS == 'nt':
-				kill = 'TASKKILL /PID %d /T /f' % (PID)
+				kill = "TASKKILL /PID %d /T /f" % (PID)
 				os.system(kill)
 			else:
-				killed = 'PID: %d - has been killed!' % (PID)
+				killed = "PID: %d - has been killed!" % (PID)
 				try:
 					os.kill(PID, 9)
 				except:
-					killed = 'Last PID wasn`t detected!'
+					killed = "Last PID wasn't detected!"
 				Print(killed, color3)
 			CACHE = {'PID': BOT_PID, 'START': time.time(), 'REST': []}
 		else:
 			CACHE['REST'].append(time.strftime('%d.%m.%Y (%H:%M:%S)'))
 	else:
 		CACHE = {'PID': BOT_PID, 'START': time.time(), 'REST': []}
-	Print('\nBot`s PID: %d' % (BOT_PID), color4)
+	Print('\nBot\'s PID: %d' % (BOT_PID), color4)
 	write_file(PID_FILE, str(CACHE))
 	globals()['RUNTIMES'] = {'START': CACHE['START'], 'REST': CACHE['REST']}
-	globals()['JCON'] = xmpp.Client(HOST, PORT, [])
 	starting_actions()
-	Print('\n\nConnecting...', color4)
-	if SECURE:
-		CONNECT = JCON.connect((SERVER, PORT), None, None, False)
-	else:
-		CONNECT = JCON.connect((SERVER, PORT), None, False, True)
-	if CONNECT:
-		if SECURE and CONNECT != 'tls':
-			Print('\nWarning: unable to estabilish secure connection - TLS failed!', color2)
-		else:
-			Print('\nConnection is OK', color3)
-		Print('Using: %s' % str(JCON.isConnected()), color4)
-	else:
-		Exit("\nCan't Connect.\nSleep for 30 seconds", 0, 30)
-	Print('\nAuthentication plese wait...', color4)
-	AUTHENT = JCON.auth(USERNAME, PASSWORD, RESOURCE)
-	if AUTHENT:
-		if AUTHENT != 'sasl':
-			Print('\nWarning: unable to perform SASL auth. Old authentication method used!', color2)
-		else:
-			Print('Auth is OK', color3)
-	else:
-		Exit('\nAuth Error: %s %s\nMaybe, incorrect jid or password?' % (`JCON.lastErr`, `JCON.lastErrCode`), 0, 12)
 	call_stage_init(0)
-	JCON.sendInitPresence()
-	JCON.RegisterHandler('message', MESSAGE_PROCESSING)
-	JCON.RegisterHandler('presence', PRESENCE_PROCESSING)
-	JCON.RegisterHandler('iq', IQ_PROCESSING)
-	JCON.RegisterDisconnectHandler(lytic_restart)
-	JCON.UnregisterDisconnectHandler(JCON.DisconnectHandler)
-	Print('\n\nYahoo! I am online!', color3)
-	if initialize_file(GROUPCHATS_FILE):
-		try:
-			CONFS = eval(read_file(GROUPCHATS_FILE))
-		except:
-			CONFS = {}
-			lytic_crashlog(read_file)
-			Print("\nChatrooms file corrupted! Load failed.", color2)
-		if len(CONFS.keys()): 
-			Print('\n\nThere are %d rooms in list:' % len(CONFS.keys()), color4)
-			for conf in CONFS.keys():
-				BOT_NICKS[conf] = CONFS[conf]['nick']
-				try:
-					muc = join_groupchat(conf, handler_botnick(conf), CONFS[conf]['code'])
-					Print(u"Joined in %(conf)s" % vars(), color3)
-				except:
-					Print(u"Failed join in %(conf)s" % vars(), color2)
-	else:
-		Print('\n\nError: unable to create chatrooms list file!', color2)
+	Connect()
+	join_chats()
 	Print('\n\nBlackSmith is ready to work!\n\n', color3)
 	INFO['start'] = time.time()
 	call_stage_init(2)
-	Timeout = 1 if (len(GROUPCHATS.keys()) > 10) else 8### 120.0 / ((len(GROUPCHATS.keys())  / 2) + 1)
+	Iters, Timeout = calc_Timeout() #'
 	while True:
+		if Iters >= 9000:
+			Iters, Timeout = calc_Timeout()
 		try:
 			Dispatch_handler(Timeout)
-		except Exception:
+		except:
 			Dispatch_fail()
-			INFO['errs'] += 1
 			if INFO['errs'] >= 7:
 				sys_exit('Fatal exception: %s' % returnExc())
-				break
+		Iters += 1
 
 if __name__ == "__main__":
 	while True:
