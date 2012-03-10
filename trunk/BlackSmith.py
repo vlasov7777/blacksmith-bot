@@ -22,7 +22,7 @@ from urllib2 import urlopen
 from traceback import format_exc, print_exc
 import gc, os, re, sys, time, random, threading
 
-## Enable GC.
+## Enable G.C.
 gc.enable()
 
 ## Set "sys.path".
