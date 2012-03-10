@@ -103,13 +103,10 @@ def PASS_GENERATOR(codename, Number):
 		codename += random.choice(symbols)
 	return codename
 
-try:
-	execfile(GENERAL_CONFIG_FILE)
-	BOSS_PASS = (PASS_GENERATOR("", eval(BOSS_PASS[7:])) if BOSS_PASS.startswith("/random") else BOSS_PASS)
-	execfile('static/versions.py')
-	reload(sys).setdefaultencoding('utf-8')
-except Exception, e:
-	Exit('\n\nError: %s' % `e`, 1, 5)
+execfile(GENERAL_CONFIG_FILE)
+BOSS_PASS = (PASS_GENERATOR("", eval(BOSS_PASS[7:])) if BOSS_PASS.startswith("/random") else BOSS_PASS)
+execfile('static/versions.py')
+reload(sys).setdefaultencoding('utf-8')
 
 if BOT_OS == 'nt':
 	os.system('Title BlackSmith - %s' % (Caps))
@@ -228,7 +225,7 @@ def lytic_crashlog(handler, command = None):
 	DIR, handler, Number, error_body = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), format_exc()
 	ERRORS[Number] = error_body
 	text = str()
-	if JCON.isConnected():
+	if globals().get("JCON") and JCON.isConnected():
 		if command:
 			error = u'команды "%s" (%s)' % (command, handler)
 		else:
@@ -244,7 +241,7 @@ def lytic_crashlog(handler, command = None):
 		INFA['cfw'] += 1
 		print_exc(crashfile)
 		crashfile.close()
-		if JCON.isConnected():
+		if globals().get("JCON") and JCON.isConnected():
 			if BOT_OS == 'nt':
 				delivery(text + u' Ошибку смотри по команде: "ошибка %s" (Крэшфайл - %s)' % (str(Number), filename))
 			else:
@@ -253,7 +250,7 @@ def lytic_crashlog(handler, command = None):
 			Print('\n\nCrash file: %s\nError number: %s' % (filename, str(Number)), color2)
 	except:
 		print_exc()
-		if JCON.isConnected():
+		if globals().get("JCON") and JCON.isConnected():
 			delivery(error_body)
 		else:
 			(body, color) = retry_body(error_body, color2)
@@ -1368,8 +1365,8 @@ def main():
 	write_file(PID_FILE, str(CACHE))
 	globals()['RUNTIMES'] = {'START': CACHE['START'], 'REST': CACHE['REST']}
 	starting_actions()
-	call_stage_init(0)
 	Connect()
+	call_stage_init(0)
 	join_chats()
 	Print('\n\nBlackSmith is ready to work!\n\n', color3)
 	INFO['start'] = time.time()
