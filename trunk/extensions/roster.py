@@ -132,11 +132,11 @@ def Handler_Roster_IQ(stanza):
 							try:
 								threading.Timer(600, IQ_finish).start()
 							except:
-								LAST['null'] += 1
+								pass
 						try:
 							threading.Timer(18, IQ_minus).start()
 						except:
-							LAST['null'] += 1
+							pass
 					else:
 						IQNT['list'].append(user)
 

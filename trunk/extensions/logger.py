@@ -57,6 +57,8 @@ DefaultLogHeader = u'''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
 
 LoggerCfg = {"theme": "LunnaCat", "enabled": False, "timetype": "local", "dir": "logs"}
 
+Subjs = {}
+
 def getLogFile(chat, Time):
 	mon = str(Time.tm_mon) if (Time.tm_mon > 9) else ("0%d" % Time.tm_mon)
 	logDir = chkFile("%s/%s/%d/%s" % (LoggerCfg["dir"], chat, Time.tm_year, mon))
@@ -65,6 +67,11 @@ def getLogFile(chat, Time):
 			os.makedirs(logDir)
 		except:
 			return False
+	prev, next = (Time.tm_mday - 1, Time.tm_mday  + 1)
+	if prev <= 9:
+		prev = "0%d" % prev
+	if next <= 9:
+		next = "0%d" % next
 	day = str(Time.tm_mday) if (Time.tm_mday > 9) else ("0%d" % Time.tm_mday)
 	logFileName = "%s/%s.html" % (logDir, day)
 	if os.path.isfile(logFileName):
@@ -85,6 +92,11 @@ def getLogFile(chat, Time):
 		logFile = open(logFileName, "w")
 		INFA["fcr"] += 1
 		logFile.write(pattern % vars())
+		if Subjs[chat]['time'] and Subjs[chat]['body']:
+			Time = time.time()
+			if (Time - Subjs[chat]['time']) > 20:
+				Subjs[chat]['time'] = Time
+				logFile.write('<span class="topic">%s</span><br>' % Subjs[chat]['body'].replace("\n", "<br>"))
 	return logFile
 
 def logWrite(chat, state, body, nick = None):
@@ -97,7 +109,7 @@ def logWrite(chat, state, body, nick = None):
 		if logFile:
 			timestamp = time.strftime("%H:%M:%S", Time)
 			body = xmpp.XMLescape(body)
-			body = re.sub("(https|http|ftp|svn)(\:\/\/[^\s<]+)", lambda obj: "<a href=\"{0}\">{0}</a>".format(obj.group(0)), body)
+			body = re.sub(r"(www\.(?!\.)|[a-z][a-z0-9+.-]*://)[^\s<>'\"]+[^!,\.\s<>\)'\"\]]", lambda obj: "<a href=\"{0}\">{0}</a>".format(obj.group(0)), body) #'
 			body = body.replace(chr(10), "<br/>")
 			logFile.write(chr(10))
 			if state == "subject":
@@ -131,15 +143,49 @@ def coloredNick(chat, nick):
 
 def logWriteMessage(stanza, mType, source, body):
 	if GROUPCHATS.has_key(source[1]) and mType == "public" and logCfg[source[1]]["enabled"]:
-		logWrite(source[1], ("subject" if stanza.getSubject() else "msg"), body, source[2])
+		if stanza.getSubject():
+			Time = time.time()
+			if (Time - Subjs[source[1]]['time']) > 20:
+				Subjs[source[1]] = {'body': body, 'time': Time}
+				logWrite(source[1], "subject", body)
+		else:
+			logWrite(source[1], "msg", body, source[2])
 
 def logWriteJoined(chat, nick, afl, role, status, text):
 	if GROUPCHATS.has_key(chat) and logCfg[chat]["enabled"]:
+		log = u"*** %(nick)s заходит как %(role)s"
+		if afl != "none":
+			log += u" и %(afl)s"
+		log += u" и теперь %(status)s"
 		afl, role, status = logAfl.get(afl, ""), logRole.get(role, ""), logStatus.get(status, "")
-		log = u"*** %(nick)s заходит как %(role)s и %(afl)s и теперь %(status)s"
 		if text:
 			log += " (%(text)s)"
 		logWrite(chat, "join", log % vars())
+
+def logWriteARole(chat, nick, aRole, reason):
+	if GROUPCHATS.has_key(chat) and logCfg[chat]["enabled"]:
+		role, afl = aRole
+		log = u"*** %(nick)s теперь %(role)s"
+		if afl != "none":
+			log += u" и %(afl)s"
+		if reason:
+			log += u" (%(reason)s)"
+		afl, role = logAfl.get(afl, ""), logRole.get(role, "")
+		logWrite(chat, "role", log % vars())
+
+def logWriteNickChange(chat, oldNick, nick):
+	if GROUPCHATS.has_key(chat) and logCfg[chat]["enabled"]:
+		logWrite(chat, "nick", u'*** %s меняет ник на %s' % (oldNick, nick))
+		
+def logWriteStatusChange(chat, nick, status, priority, text):
+	if GROUPCHATS.has_key(chat) and logCfg[chat]["enabled"]:
+		log = u"*** %(nick)s теперь %(status)s"
+		if text:
+			log += " (%(text)s)"
+		if priority:
+			log += " [%s]" % priority
+		status = logStatus.get(status, "")
+		logWrite(chat, "status", log % vars())		
 
 def logWriteLeave(chat, nick, reason, code):
 	if GROUPCHATS.has_key(chat) and logCfg[chat]["enabled"]:
@@ -159,34 +205,9 @@ def logWriteLeave(chat, nick, reason, code):
 		else:
 			logWrite(chat, "leave", u"*** %s выходит из конференции" % nick)
 
-def logWritePresence(Prs):
-	fromjid = Prs.getFrom()
-	chat = fromjid.getStripped()
-	if GROUPCHATS.has_key(chat) and logCfg[chat]["enabled"]:
-		nick = fromjid.getResource()
-		pType = Prs.getType()
-		if pType == 'unavailable':
-			scode = Prs.getStatusCode()
-			if scode == '303':
-				logWrite(chat, "nick", u'*** %s меняет ник на %s' % (nick, Prs.getNick()))
-		else:
-			afl = logAfl.get(Prs.getAffiliation(), "")
-			role = logRole.get(Prs.getRole(), "")
-			status = logStatus.get(Prs.getShow(), "")
-			reason = Prs.getReason()
-			priority = Prs.getPriority()
-			text = Prs.getStatus()
-			log = u"*** %(nick)s (%(afl)s, %(role)s) теперь %(status)s"
-			if text:
-				log += " (%(text)s)"
-			if priority:
-				log += " [%s]" % priority
-			if reason:
-				log += " (Причина: %(reason)s)"
-			logWrite(chat, ("role" if reason else "status"), log % vars())
-
 def logFileInit(chat):
 	cfg = {"theme": LoggerCfg["theme"], "enabled": False, "file": ""}
+	Subjs[chat] = {'body': '', 'time': 0}
 	if check_file(chat, logCacheFile, str(cfg)):
 		cfg = eval(read_file("dynamic/%s/%s" % (chat, logCacheFile)))
 	else:
@@ -217,7 +238,9 @@ def init_logger():
 			register_join_handler(logWriteJoined)
 			register_leave_handler(logWriteLeave)
 			register_message_handler(logWriteMessage)
-			register_presence_handler(logWritePresence)
+			register_newrole_handler(logWriteARole)
+			register_newnick_handler(logWriteNickChange)
+			register_newstatus_handler(logWriteStatusChange)
 			command_handler(logSetState, 30, "logger")
 	else:
 		Print("\nCan't init lostate.txt, logger was disabled.", color2)
@@ -239,13 +262,9 @@ def logSetStateMain(mType, source, argv):
 				LoggerCfg["enabled"] = True
 				write_file(logConfigFile, str(LoggerCfg))
 				register_stage1_init(logFileInit)
+				init_logger()
 				for chat in GROUPCHATS.keys():
 					execute_handler(logFileInit, (chat,))
-				register_join_handler(logWriteJoined)
-				register_leave_handler(logWriteLeave)
-				register_message_handler(logWriteMessage)
-				register_presence_handler(logWritePresence)
-				command_handler(logSetState, 30, "logger")
 				reply(mType, source, u"Включил логгер.")
 			else:
 				reply(mType, source, u"Уже включено.")
@@ -257,10 +276,18 @@ def logSetStateMain(mType, source, argv):
 				for handler in MESSAGE_HANDLERS:
 					if name == handler.func_name:
 						MESSAGE_HANDLERS.remove(handler)
-				name = logWritePresence.func_name
-				for handler in PRESENCE_HANDLERS:
+				name = logWriteNickChange.func_name
+				for handler in NEWNICK_HANDLERS:
 					if name == handler.func_name:
-						PRESENCE_HANDLERS.remove(handler)
+						NEWNICK_HANDLERS.remove(handler)
+				name = logWriteStatusChange.func_name
+				for handler in NEWSTATUS_HANDLERS:
+					if name == handler.func_name:
+						NEWSTATUS_HANDLERS.remove(handler)
+				name = logWriteARole.func_name
+				for handler in NEWROLE_HANDLERS:
+					if name == handler.func_name:
+						NEWROLE_HANDLERS.remove(handler)
 				name = logWriteJoined.func_name
 				for handler in JOIN_HANDLERS:
 					if name == handler.func_name:
@@ -293,7 +320,7 @@ def logSetStateMain(mType, source, argv):
 					else:
 						LoggerCfg["theme"] = argv[0]
 						write_file(logConfigFile, str(LoggerCfg))
-						reply(mType, source, u"Установил «%s» стандартной темой.")
+						reply(mType, source, u"Установил «%s» стандартной темой." % argv[0])
 				else:
 					reply(mType, source, u"Нет такой темы :(")
 			else:
@@ -315,7 +342,8 @@ def logSetStateMain(mType, source, argv):
 				if argv[0] in ("gmt", "local"):
 					LoggerCfg["timetype"] = argv[0]
 					write_file(logConfigFile, str(LoggerCfg))
-					repl = u"Установил тип записи времени на «%s»." % argv[0]					
+					repl = u"Установил тип записи времени на «%s»." % argv[0]
+					logWrite(source[1], "status", u"*** Установлен тип записи времени: %s" % argv[0])				
 				else:
 					repl = u"Недопустимый тип. Доступные: local, gmt."
 			else:
@@ -359,7 +387,12 @@ def logSetState(mType, source, argv):
 							logCfg[chat]["theme"] = argv[0]
 							write_file("dynamic/%s/%s" % (chat, logCacheFile), str(logCfg[chat]))
 							logThemeCopier(chat, argv[0])
-							reply(mType, source, u"Установил тему «%s». Она вступит в силу немедленно." % argv[0])
+							repl = u"Установил тему «%s». Она вступит в силу "
+							if os.path.exists(chkFile("%s/%s/.theme/pattern.html" % (LoggerCfg["dir"], chat))):
+								repl += u"с завтрашнего дня."
+							else:
+								repl += u"немедленно."
+							reply(mType, source, repl % argv[0])
 					else:
 						reply(mType, source, u"Нет такой темы :(.")
 				else:

@@ -53,13 +53,16 @@ def command_chatlist(mType, source, args):
 	if not args:
 		cList = u"\nСписок конференций, в которых"\
 			u" сидит бот (всего %d штук):\n" % len(GROUPCHATS.keys())
-		for x, y in enumerate(GROUPCHATS.keys()):
+		for x, y in enumerate(sorted(GROUPCHATS.keys())):
 			cList += u"%d. %s\n" % (x + 1, y)
 		if mType == "public":
 			reply(mType, source, u"Смотри в привате.") 
 		reply("private", source, cList)
 	elif args.strip() == "количество":
 		reply(mType, source, u"Количество обслуживаемых конференций: %d." % len(GROUPCHATS.keys()))
+	else:
+		a0, a1 = a
+	
 
 def handler_visitors(type, source, body):
 	if source[1] in GROUPCHATS:

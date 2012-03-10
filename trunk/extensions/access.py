@@ -172,7 +172,9 @@ def load_conf_access_levels(conf):
 	else:
 		delivery(u'Внимание! Не удалось создать access.txt для "%s"!' % (conf))
 
-command_handler(handler_superadmin_login, 20, "access")
+if BOSS_PASS.strip():
+	command_handler(handler_superadmin_login, 20, "access")
+
 command_handler(handler_superadmin_logout, 20, "access")
 command_handler(handler_view_access, 10, "access")
 command_handler(handler_set_access, 20, "access")
