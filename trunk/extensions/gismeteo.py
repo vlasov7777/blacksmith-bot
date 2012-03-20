@@ -52,7 +52,7 @@ def gismeteo(mType, source, body):
 				answer = u"Не могу получить доступ к странице."
 			else:
 				data = data.decode("utf-8")
-				data = data = get_text(data, "<a href=\"/weather/", "/(1/)*?\">", "\d+")
+				data = data = re_search(data, "<a href=\"/weather/", "/(1/)*?\">", "\d+")
 				if data:
 					if Numb != None:
 						data = str.join(chr(47), [data, str(Numb) if Numb != 0 else "weekly"])
@@ -62,7 +62,7 @@ def gismeteo(mType, source, body):
 						answer = u"Не могу получить доступ к странице."
 					else:
 						data = data.decode("utf-8")
-						mark = get_text(data, "<th colspan=\"2\">", "</th>")
+						mark = re_search(data, "<th colspan=\"2\">", "</th>")
 						if Numb != 0:
 							comp = re.compile('<tr class="tbody">\s+?<th.*?>(.+?)</th>\s+?<td.+?/></td>\s+?</tr>\s+?<tr>\s+?<td.+?>(.+?)</td>\s+?</tr>\s+?<tr class="dl">\s+?<td>&nbsp;</td>\s+?<td class="clpersp"><p>(.+?)</p></td>\s+?</tr>\s+?<tr class="dl"><td class="left">(.+?)</td><td>(.+?)</td></tr>\s+?<tr class="dl"><td class="left">(.+?)</td><td>(.+?)</td></tr>\s+?<tr class="dl bottom"><td class="left">(.+?)</td><td>(.+?)</td></tr>', 16)
 							list = comp.findall(data)
