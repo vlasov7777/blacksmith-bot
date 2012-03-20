@@ -25,10 +25,10 @@ BlackSmith - это многофункциональный бот для jabber-
 
 Как установить:
 
- Необходимо иметь интерпретатор python не ниже версии 2.5.2 (Python 3 версии не поддерживается).
+Необходимо иметь интерпретатор python не ниже версии 2.6 (Python 3 версии не поддерживается).
 
 1)  Переименуйте "_source.py" в "source.py" в папке "static". Отредактируйте source.py.
 2)  Запустите BlackSmith.py или launcher.py.
-3)  Из ростера с жида администратора командуйте "джойн chat[at]conference.tld"
+3)  Из ростера с Jabber ID администратора командуйте "джойн chat[at]conference.tld"
 
-Обратиться по поводу бота можно к mrDoctorWho в simpleapps@conference.jabber.ru
+Обратиться по поводу бота можно к mrDoctorWho в simpleapps@conference.jabber.ru.

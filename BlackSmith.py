@@ -604,8 +604,6 @@ def re_search(body, s0, s2, s1 = "(?:.|\s)+"):
 	body = comp.search(body)
 	if body:
 		body = (body.group(1)).strip()
-	else:
-		raise KeyError
 	return body
 
 def handler_botnick(conf):
@@ -695,8 +693,8 @@ def formatWord(Numb, ls):
 		edge = ls[int(str(Numb)[-1])]
 	return edge
 
-def timeElapsed(or_seconds):
-	minutes, seconds = divmod(or_seconds, 60)
+def timeElapsed(seconds):
+	minutes, seconds = divmod(int(seconds), 60)
 	hours, minutes = divmod(minutes, 60)
 	days, hours = divmod(hours, 24)
 	months, days = divmod(days, 30)

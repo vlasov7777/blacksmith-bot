@@ -74,6 +74,7 @@ def getLogFile(chat, Time):
 		next = "0%d" % next
 	day = str(Time.tm_mday) if (Time.tm_mday > 9) else ("0%d" % Time.tm_mday)
 	logFileName = "%s/%s.html" % (logDir, day)
+	prev, next = ("%s/%s" % (logDir, prev), "%s/%s" % (logDir, next))
 	if os.path.isfile(logFileName):
 		logFile = open(logFileName, "a")
 		INFA["fw"] += 1
