@@ -7,6 +7,9 @@
 # (c) Gigabyte
 # http://jabbrik.ru
 
+#-extmanager-depends:static/questions.txt-#
+
+
 QUIZ_FILE = 'static/questions.txt'
 QUIZ_TOTAL_LINES = 10240
 QUIZ_TIME_LIMIT = 200
