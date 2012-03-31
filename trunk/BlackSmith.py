@@ -844,6 +844,7 @@ def reply(ltype, source, body):
 	if ltype == 'public':
 		body = '%s: %s' % (source[2], body)
 		msg(source[1], body)
+		write_file("repl.txt", body, "a")
 	elif ltype == 'private':
 		msg(source[0], body)
 

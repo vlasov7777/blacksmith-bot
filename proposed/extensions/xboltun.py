@@ -5,7 +5,9 @@
 #  new_boltun_plugin.py
 
 # Coded: by WitcherGeralt [WitcherGeralt@rocketmail.com]
-# http://witcher-team.ucoz.ru/
+# http://witcher-team.ucoz.
+
+#-extmanager-depends:static/boltun/ident_base.txt;static/boltun/random_base.txt-#
 
 IDENT_BASE = 'static/boltun/ident_base.txt'
 RAND_BASE = 'static/boltun/random_base.txt'

@@ -76,7 +76,7 @@ def handler_load_plugin(type, source, body):
 		Plugin = '%s.py' % body.lower()
 		if Plugin in handler_plug_list(type, source, 'get_valid_plugins'):
 			try:
-				execfile('%s/%s' % (PLUGIN_DIR, Plugin))
+				execfile('%s/%s' % (PLUGIN_DIR, Plugin), globals())
 				repl = u'Плагин %s был успешно подгружен!' % (Plugin)
 			except:
 				exc = sys.exc_info()
