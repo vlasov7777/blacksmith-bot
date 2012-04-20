@@ -84,7 +84,7 @@ def list_search_answer(coze, stanza, id, afl, name):
 									AFLIST_SEARCH[id][afl].append(jid)
 								except:
 									break
-
+import traceback
 def handler_list_answer(coze, stanza, type, source, afl):
 	if stanza:
 		if stanza.getType() == 'result':
@@ -101,12 +101,11 @@ def handler_list_answer(coze, stanza, type, source, afl):
 								if jid in ADLIST:
 									handler_unban(source[1], jid)
 							list += '\n'+str(col)+'. '+jid
-							try:
-								reason = (item.getTag('reason')).getData()
+							reasonTag = item.getTag("reason")
+							if reasonTag:
+								reason = reasonTag.getData()
 								if reason:
-									list += ' ['+reason+']'
-							except:
-								LAST['null'] += 1
+									list += ' [%s]' % reason
 				if col != 0:
 					if type == 'public':
 						reply(type, source, u'глянь в приват')

@@ -2,11 +2,14 @@
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
-#  collect_plugin.py
 
-# Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
-# http://witcher-team.ucoz.ru/
+def test(mType, source, args):	 ## Тип сообщения, [JID-instance, room, user nick], аргументы.
+	testfr = u"All is OK!"
+	reply(mType, source, args)
 
+command_handler(test, 15, "test") ## (имя функции, доступ, имя файла помощи)
+
+	
 BLACK_LIST = 'dynamic/blacklist.txt'
 
 CHAT_CACHE = {}

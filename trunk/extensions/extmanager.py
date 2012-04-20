@@ -8,7 +8,7 @@
 ## NOTICE: 
 ##			All plugins that depend from another plugins or files (not help files that placed in help dir)
 ##			Must be contain this code: #-extmanager-depends:depend1;depend2;depend3-#
-##			Where depend1, depend2, and depend3 are depends of this plugin.
+##			Where depend1, depend2 and depend3 are depends of this plugin.
 import urllib
 
 svnUrl = "http://blacksmith-bot.googlecode.com/svn/proposed/%s/"
