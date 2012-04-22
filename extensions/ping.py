@@ -126,3 +126,4 @@ def handler_ping_stat(type, source, nick):
 	reply(type, source, repl)
 
 command_handler(handler_ping, 10, "ping")
+command_handler(handler_ping_stat, 10, "ping")

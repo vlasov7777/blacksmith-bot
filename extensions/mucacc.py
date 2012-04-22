@@ -8,7 +8,10 @@
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 # http://witcher-team.ucoz.ru/
 
-def handler_IQ_SendAndCall(type, source, conf, item_name, item, afrls, afrl, nick, rsn = None):
+BanBase = {}
+BanBaseFile = "dynamic/banbase.txt"
+
+def IQSender(mType, source, conf, item_name, item, afrls, afrl, nick, rsn = None):
 	stanza = xmpp.Iq(to = conf, typ = 'set')
 	INFA['outiq'] += 1
 	query = xmpp.Node('query')
@@ -17,34 +20,34 @@ def handler_IQ_SendAndCall(type, source, conf, item_name, item, afrls, afrl, nic
 	if rsn:
 		afl_role.setTagData('reason', rsn)
 	stanza.addChild(node = query)
-	JCON.SendAndCallForResponse(stanza, handler_afrls_answer, {'type': type, 'source': source})
+	JCON.SendAndCallForResponse(stanza, handler_afrls_answer, {'mType': mType, 'source': source})
 
-def handler_afrls_answer(coze, stanza, type, source):
-	if stanza.getType() == 'result':
-		reply(type, source, u"Сделано.")
+def handler_afrls_answer(coze, stanza, mType, source):
+	if stanza.getmType() == 'result':
+		reply(mType, source, u"Сделано.")
 	else:
-		reply(type, source, u"Запрещено. Тип: %s." % stanza.getType())
+		reply(mType, source, u"Запрещено. Тип: %s." % stanza.getmType())
 
-def handler_ban2(type, source, conf, jid, nick, reason):
-	handler_IQ_SendAndCall(type, source, conf, 'jid', jid, 'affiliation', 'outcast', nick, reason)
-def handler_none2(type, source, conf, jid, nick, reason):
-	handler_IQ_SendAndCall(type, source, conf, 'jid', jid, 'affiliation', 'none', nick, reason)
-def handler_member2(type, source, conf, jid, nick, reason):
-	handler_IQ_SendAndCall(type, source, conf, 'jid', jid, 'affiliation', 'member', nick, reason)
-def handler_admin2(type, source, conf, jid, nick, reason):
-	handler_IQ_SendAndCall(type, source, conf, 'jid', jid, 'affiliation', 'admin', nick, reason)
-def handler_owner2(type, source, conf, jid, nick, reason):
-	handler_IQ_SendAndCall(type, source, conf, 'jid', jid, 'affiliation', 'owner', nick, reason)
-def handler_kick2(type, source, conf, nick, reason):
-	handler_IQ_SendAndCall(type, source, conf, 'nick', nick, 'role', 'none', nick, reason)
-def handler_visitor2(type, source, conf, nick, reason):
-	handler_IQ_SendAndCall(type, source, conf, 'nick', nick, 'role', 'visitor', nick, reason)
-def handler_participant2(type, source, conf, nick, reason):
-	handler_IQ_SendAndCall(type, source, conf, 'nick', nick, 'role', 'participant', nick, reason)
-def handler_moder2(type, source, conf, nick, reason):
-	handler_IQ_SendAndCall(type, source, conf, 'nick', nick, 'role', 'moderator', nick, reason)
+def handler_ban2(mType, source, conf, jid, nick, reason):
+	IQSender(mType, source, conf, 'jid', jid, 'affiliation', 'outcast', nick, reason)
+def handler_none2(mType, source, conf, jid, nick, reason):
+	IQSender(mType, source, conf, 'jid', jid, 'affiliation', 'none', nick, reason)
+def handler_member2(mType, source, conf, jid, nick, reason):
+	IQSender(mType, source, conf, 'jid', jid, 'affiliation', 'member', nick, reason)
+def handler_admin2(mType, source, conf, jid, nick, reason):
+	IQSender(mType, source, conf, 'jid', jid, 'affiliation', 'admin', nick, reason)
+def handler_owner2(mType, source, conf, jid, nick, reason):
+	IQSender(mType, source, conf, 'jid', jid, 'affiliation', 'owner', nick, reason)
+def handler_kick2(mType, source, conf, nick, reason):
+	IQSender(mType, source, conf, 'nick', nick, 'role', 'none', nick, reason)
+def handler_visitor2(mType, source, conf, nick, reason):
+	IQSender(mType, source, conf, 'nick', nick, 'role', 'visitor', nick, reason)
+def handler_participant2(mType, source, conf, nick, reason):
+	IQSender(mType, source, conf, 'nick', nick, 'role', 'participant', nick, reason)
+def handler_moder2(mType, source, conf, nick, reason):
+	IQSender(mType, source, conf, 'nick', nick, 'role', 'moderator', nick, reason)
 
-def command_kick(type, source, body):
+def command_kick(mType, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			args = body.split()
@@ -55,15 +58,15 @@ def command_kick(type, source, body):
 					reason = body[(body.find(' ') + 1):].strip()
 				else:
 					reason = source[2]
-				handler_kick2(type, source, source[1], nick, reason)
+				handler_kick2(mType, source, source[1], nick, reason)
 			else:
-				reply(type, source, u'кикать своего админа? да ни за что!')
+				reply(mType, source, u'кикать своего админа? да ни за что!')
 		else:
-			reply(type, source, u'кого?')
+			reply(mType, source, u'кого?')
 	else:
-		reply(type, source, u'приколист :-D')
+		reply(mType, source, u'приколист :-D')
 
-def command_visitor(type, source, body):
+def command_visitor(mType, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			args = body.split()
@@ -74,15 +77,15 @@ def command_visitor(type, source, body):
 					reason = body[(body.find(' ') + 1):].strip()
 				else:
 					reason = source[2]
-				handler_visitor2(type, source, source[1], nick, reason)
+				handler_visitor2(mType, source, source[1], nick, reason)
 			else:
-				reply(type, source, u'затыкать своего админа? да ни за что!')
+				reply(mType, source, u'затыкать своего админа? да ни за что!')
 		else:
-			reply(type, source, u'кого?')
+			reply(mType, source, u'кого?')
 	else:
-		reply(type, source, u'приколист :-D')
+		reply(mType, source, u'приколист :-D')
 
-def command_participant(type, source, body):
+def command_participant(mType, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			args = body.split()
@@ -90,13 +93,13 @@ def command_participant(type, source, body):
 				reason = body[(body.find(' ') + 1):].strip()
 			else:
 				reason = source[2]
-			handler_participant2(type, source, source[1], args[0].strip(), reason)
+			handler_participant2(mType, source, source[1], args[0].strip(), reason)
 		else:
-			reply(type, source, u'кого?')
+			reply(mType, source, u'кого?')
 	else:
-		reply(type, source, u'приколист :-D')
+		reply(mType, source, u'приколист :-D')
 
-def command_moder(type, source, body):
+def command_moder(mType, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			args = body.split()
@@ -104,13 +107,13 @@ def command_moder(type, source, body):
 				reason = body[(body.find(' ') + 1):].strip()
 			else:
 				reason = source[2]
-			handler_moder2(type, source, source[1], args[0].strip(), reason)
+			handler_moder2(mType, source, source[1], args[0].strip(), reason)
 		else:
-			reply(type, source, u'кого выделывать то?')
+			reply(mType, source, u'кого выделывать то?')
 	else:
-		reply(type, source, u'приколист :-D')
+		reply(mType, source, u'приколист :-D')
 
-def command_member(type, source, body):
+def command_member(mType, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			args = body.split()
@@ -124,15 +127,15 @@ def command_member(type, source, body):
 					reason = body[(body.find(' ') + 1):].strip()
 				else:
 					reason = source[2]
-				handler_member2(type, source, source[1], jid, nick, reason)
+				handler_member2(mType, source, source[1], jid, nick, reason)
 			else:
-				reply(type, source, u'Хрень пишешь! Это не жид и юзеров с таким ником здесь небыло!')
+				reply(mType, source, u'Хрень пишешь! Это не жид и юзеров с таким ником здесь небыло!')
 		else:
-			reply(type, source, u'кого выделывать то?')
+			reply(mType, source, u'кого выделывать то?')
 	else:
-		reply(type, source, u'приколист :-D')
+		reply(mType, source, u'приколист :-D')
 
-def command_admin(type, source, body):
+def command_admin(mType, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			args = body.split()
@@ -146,15 +149,15 @@ def command_admin(type, source, body):
 					reason = body[(body.find(' ') + 1):].strip()
 				else:
 					reason = source[2]
-				handler_admin2(type, source, source[1], jid, nick, reason)
+				handler_admin2(mType, source, source[1], jid, nick, reason)
 			else:
-				reply(type, source, u'Хрень пишешь! Это не жид и юзеров с таким ником здесь небыло!')
+				reply(mType, source, u'Хрень пишешь! Это не жид и юзеров с таким ником здесь небыло!')
 		else:
-			reply(type, source, u'кого выделывать то?')
+			reply(mType, source, u'кого выделывать то?')
 	else:
-		reply(type, source, u'приколист :-D')
+		reply(mType, source, u'приколист :-D')
 
-def command_owner(type, source, body):
+def command_owner(mType, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			args = body.split()
@@ -168,15 +171,15 @@ def command_owner(type, source, body):
 					reason = body[(body.find(' ') + 1):].strip()
 				else:
 					reason = source[2]
-				handler_owner2(type, source, source[1], jid, nick, reason)
+				handler_owner2(mType, source, source[1], jid, nick, reason)
 			else:
-				reply(type, source, u'Хрень пишешь! Это не жид и юзеров с таким ником здесь небыло!')
+				reply(mType, source, u'Хрень пишешь! Это не жид и юзеров с таким ником здесь небыло!')
 		else:
-			reply(type, source, u'кого выделывать то?')
+			reply(mType, source, u'кого выделывать то?')
 	else:
-		reply(type, source, u'приколист :-D')
+		reply(mType, source, u'приколист :-D')
 
-def command_ban(type, source, body):
+def command_ban(mType, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			args = body.split()
@@ -191,17 +194,17 @@ def command_ban(type, source, body):
 						reason = body[(body.find(' ') + 1):].strip()
 					else:
 						reason = source[2]
-					handler_ban2(type, source, source[1], jid, nick, reason)
+					handler_ban2(mType, source, source[1], jid, nick, reason)
 				else:
-					reply(type, source, u'своего админа? да ни за что!')
+					reply(mType, source, u'своего админа? да ни за что!')
 			else:
-				reply(type, source, u'Хрень пишешь! Это не жид и юзеров с таким ником здесь небыло!')
+				reply(mType, source, u'Хрень пишешь! Это не жид и юзеров с таким ником здесь небыло!')
 		else:
-			reply(type, source, u'кого?')
+			reply(mType, source, u'кого?')
 	else:
-		reply(type, source, u'приколист :-D')
+		reply(mType, source, u'приколист :-D')
 
-def command_none(type, source, body):
+def command_none(mType, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			args = body.split()
@@ -215,16 +218,15 @@ def command_none(type, source, body):
 					reason = body[(body.find(' ') + 1):].strip()
 				else:
 					reason = source[2]
-				handler_none2(type, source, source[1], jid, nick, reason)
+				handler_none2(mType, source, source[1], jid, nick, reason)
 			else:
-				reply(type, source, u'Хрень пишешь! Это не жид и юзеров с таким ником здесь небыло!')
+				reply(mType, source, u'Хрень пишешь! Это не жид и юзеров с таким ником здесь небыло!')
 		else:
-			reply(type, source, u'кого?')
+			reply(mType, source, u'кого?')
 	else:
-		reply(type, source, u'приколист :-D')
+		reply(mType, source, u'приколист :-D')
 
-def command_fullban(type, source, body):
-	if source[1] in GROUPCHATS:
+def command_fullban(mType, source, body):
 		if body:
 			args = body.split()
 			nick = args[0].strip()
@@ -233,31 +235,55 @@ def command_fullban(type, source, body):
 					jid = handler_jid('%s/%s' % (source[1], nick))
 				else:
 					jid = nick
-				if len(args) >= 2:
+				if len(args) > 1:
 					reason = body[(body.find(' ') + 1):].strip()
 				else:
 					reason = source[2]
+				if BanBase.get(jid):
+					reply(mType, source, u"Этот пользователь уже глобально забанен.")
+					return
+				else:
+					BanBase[jid] = {"date": time.strftime("%d.%m.%Y (%H:%M:%S)"),
+     								"reason": reason}
+					write_file(BanBaseFile, str(BanBase))
 				for conf in GROUPCHATS.keys():
 					handler_banjid(conf, jid, reason)
-				reply(type, source, u'сделано')
+				answer = u"Сделано."
 			else:
-				reply(type, source, u'хрень пишеш это не жид и юзеров с таким ником здесь небыло')
+				answer = u"Это не JID и юзеров с таким ником здесь не было."
+		elif BanBase:
+			answer = str()
+			num = 0
+			for jid in BanBase.keys():
+				date, reason = BanBase[jid].values()
+				num += 1
+				answer +=  u"\n%i. %s (%s) [%s]." % (num, jid, reason, date)
 		else:
-			reply(type, source, u'кого банить то?')
-	else:
-		reply(type, source, u'это надо делать в чате')
+			answer = u"В базе фуллбана пусто."
+		reply(mType, source, answer)
 
-def command_fullunban(type, source, jid):
+def command_fullunban(mType, source, jid):
 	if jid:
 		if jid.count('.') and not jid.count(' '):
+			if jid in BanBase:
+				del BanBase[jid]
+				write_file(BanBaseFile, str(BanBase))
 			for conf in GROUPCHATS.keys():
 				handler_unban(conf, jid)
-			reply(type, source, u'сделано')
+			reply(mType, source, u'Сделано.')
 		else:
-			reply(type, source, u'Хрень пишешь! Это не жид!')
+			reply(mType, source, u'Хрень пишешь! Это не жид!')
 	else:
-		reply(type, source, u'кого разбанивать то?')
+		reply(mType, source, u'кого разбанивать то?')
 
+def banbase_init():
+	if initialize_file(BanBaseFile, `{}`):
+		globals()["BanBase"] = eval(read_file(BanBaseFile))
+	else:
+		Print('\n\nError: can`t create banbase.txt!', color2)
+
+
+register_stage0_init(banbase_init)
 command_handler(command_moder, 20, "mucacc")
 command_handler(command_member, 20, "mucacc")
 command_handler(command_admin, 30, "mucacc")

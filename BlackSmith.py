@@ -215,11 +215,11 @@ def write_file(name, data, mode = "w"):
 
 ## Crashfile writers.
 def Dispatch_fail():
-	crashfile = open('__main__.crash', 'a')
-	INFO['errs'] += 1
-	print_exc(crashfile)
+	error = format_exc()
+	write_file("__main__.crash", error, "a")
 	Print("\n\n#-# Dispatch fail!", color2)
-	crashfile.close()
+	delivery("Внимание! При парсинге станзы произошла критическая ошибка!"\
+				+ "\n" + error)
 
 def lytic_crashlog(handler, command = None):
 	DIR, handler, Number, error_body = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), format_exc()
@@ -249,7 +249,7 @@ def lytic_crashlog(handler, command = None):
 		else:
 			Print('\n\nCrash file: %s\nError number: %s' % (filename, str(Number)), color2)
 	except:
-		print_exc()
+		Print(error_body)
 		if globals().get("JCON") and JCON.isConnected():
 			delivery(error_body)
 		else:
