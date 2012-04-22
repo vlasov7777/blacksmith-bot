@@ -2,13 +2,6 @@
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
-
-def test(mType, source, args):	 ## Тип сообщения, [JID-instance, room, user nick], аргументы.
-	testfr = u"All is OK!"
-	reply(mType, source, args)
-
-command_handler(test, 15, "test") ## (имя функции, доступ, имя файла помощи)
-
 	
 BLACK_LIST = 'dynamic/blacklist.txt'
 

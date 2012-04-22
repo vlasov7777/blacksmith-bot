@@ -84,7 +84,7 @@ def list_search_answer(coze, stanza, id, afl, name):
 									AFLIST_SEARCH[id][afl].append(jid)
 								except:
 									break
-import traceback
+
 def handler_list_answer(coze, stanza, type, source, afl):
 	if stanza:
 		if stanza.getType() == 'result':
