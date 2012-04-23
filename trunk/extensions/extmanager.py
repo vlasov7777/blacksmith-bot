@@ -35,7 +35,7 @@ def getDepsSize(depList):
 	
 def saveDeps(path):
 	Dir = os.path.split(path)[0]	
-	if not os.path.exists(Dir):
+	if Dir and not os.path.exists(Dir):
 		os.makedirs(Dir)
 	return path
 	
