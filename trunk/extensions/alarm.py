@@ -14,7 +14,7 @@ def alarmConfig(mType, source, text):
 			data = text[(text.find(chr(32)) + 1):].strip()
 			if not ALARM_LIST.get(jid):
 				ALARM_LIST[jid] = list()
-			if len(ALARM_LIST[jid]) > 5:
+			if jid != BOSS and len(ALARM_LIST[jid]) > 5:
 				reply(mType, source, u"Лимит напомниналок исчерпан!")
 				return
 			if text not in ALARM_LIST:
@@ -28,6 +28,12 @@ def alarmConfig(mType, source, text):
 				answer = u"Удалил запись под номером %s." % args[1]
 			else:
 				answer = u"Либо «%s» не число, либо нет записи с таким номером." % args[1]
+		elif args[0] == u"очистить":
+			if ALARM_LIST.get(jid):
+				ALARM_LIST[jid] = list()
+				answer = u"Очищено."
+			else:
+				answer = u"Пусто."
 		else:
 			answer = "\n"
 			if ALARM_LIST.get(jid):

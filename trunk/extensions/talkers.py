@@ -16,7 +16,7 @@ def handler_talkers(type, source, body):
 			if len(args) >= 2:
 				seckey, key = body[(body.find(' ') + 1):].strip(), args[0].strip().lower()
 				if key in [u'топ', 'top']:
-					if seckey in [u'локальный', 'local']:
+					if args[1] in [u'локальный', 'local']:
 						list = []
 						for jid in TALKERS[source[1]]['jids']:
 							nick = TALKERS[source[1]]['jids'][jid]['lastnick']
@@ -27,12 +27,15 @@ def handler_talkers(type, source, body):
 						list.reverse()
 						col = 0
 						repl = u'\n[№][Юзер][Фраз][Слов][Коэф.]'
+						maxcol = 10
+						if len(args) > 2 and check_number(args[2]) and maxcol <= 30:
+							maxcol = int(args[2])
 						for item in list:
 							col = col + 1
 							repl += '\n'+str(col)+'. '+item[2]+'\t\t'+str(item[0])+'\t'+str(item[1])+'\t'+str(round((round(item[1]) / round(item[0])), 1))
-							if col >= 10:
+							if col >= maxcol:
 								break
-					elif seckey in [u'глобальный', 'global']:
+					elif args[1] in [u'глобальный', 'global']:
 						globlist = {}
 						for conf in TALKERS.keys():
 							for jid in TALKERS[conf]['jids']:
@@ -54,10 +57,13 @@ def handler_talkers(type, source, body):
 						list.reverse()
 						col = 0
 						repl = u'\n[№][Юзер][Фраз][Слов][Коэф.]'
+						maxcol = 20
+						if len(args) > 2 and check_number(args[2]) and maxcol <= 30:
+							maxcol = int(args[2])
 						for item in list:
 							col = col + 1
 							repl += '\n'+str(col)+'. '+item[2]+'\t\t'+str(item[0])+'\t'+str(item[1])+'\t'+str(round((round(item[1]) / round(item[0])), 1))
-							if col >= 20:
+							if col >= maxcol:
 								break
 					else:
 						repl = u'Топ чего?'
@@ -151,7 +157,7 @@ def talkers_init(conf):
 		delivery(u'Внимание! Не удалось создать talkers.txt для "%s"!' % (conf))
 
 register_message_handler(handler_talkers_register)
-command_handler(handler_talkers, 10, "talkers")
+command_handler(handler_talkers, 11, "talkers")
 register_stage3_init(talkers_save)
 
 register_stage1_init(talkers_init)

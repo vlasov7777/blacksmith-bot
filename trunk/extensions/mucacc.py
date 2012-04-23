@@ -23,7 +23,7 @@ def IQSender(mType, source, conf, item_name, item, afrls, afrl, nick, rsn = None
 	JCON.SendAndCallForResponse(stanza, handler_afrls_answer, {'mType': mType, 'source': source})
 
 def handler_afrls_answer(coze, stanza, mType, source):
-	if stanza.getmType() == 'result':
+	if stanza.getType() == 'result':
 		reply(mType, source, u"Сделано.")
 	else:
 		reply(mType, source, u"Запрещено. Тип: %s." % stanza.getmType())
