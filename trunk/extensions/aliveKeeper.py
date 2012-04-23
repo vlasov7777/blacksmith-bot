@@ -40,7 +40,7 @@ def aliveKeeper_answer(coze, iQ, qType):
 		else:
 			aliveKeeper["iters"] = 0
 	else:
-		AliveKeeper["iters"] += 1
+		aliveKeeper["iters"] += 1
 
 def aliveKeeper_worker():
 	while True:
