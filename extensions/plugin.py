@@ -79,12 +79,11 @@ def handler_load_plugin(type, source, body):
 				execfile('%s/%s' % (PLUGIN_DIR, Plugin), globals())
 				repl = u'Плагин %s был успешно подгружен!' % (Plugin)
 			except:
-				exc = sys.exc_info()
-				repl = u'Плагин %s не был подгружен!\nОшибка: %s:\n%s' % (Plugin, exc[0].__name__, exc[1])
+				repl = u'Плагин %s не был подгружен!\nОшибка: %s:\n%s' % (Plugin, returnExc())
 		else:
 			repl = u'Этот плагин не был найден в списке'
 	else:
-		repl = u'Если незнаеш чего грузить - глянь список (команда: плаг_лист)'
+		repl = u'Если не знаешь, что подгрузить, то посмотри список плагинов (команда: плаглист)'
 	reply(type, source, repl)
 
 command_handler(handler_from_out_com, 100, "plugin")

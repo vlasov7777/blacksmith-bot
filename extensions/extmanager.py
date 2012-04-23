@@ -31,7 +31,6 @@ def getDepsSize(depList):
 	size = int()
 	for dep in depList:
 		size += getSize(svnUrl % dep)
-		print "dep: %s; size: %d" % (dep, size)
 	return size
 	
 def saveDeps(path):
@@ -93,14 +92,15 @@ def extManager(mType, source, args):
 				if a[1] == u"инфо":
 					pluginInfo = eval(read_url(svnUrl % ("help/" + a[0])).decode("utf-8"))
 					commandList = [pluginInfo[x]["cmd"] for x in pluginInfo.keys()]
-					jDepList = str.join(", ", depList)
-					sizeOf = byteFormat(getDepsSize(depList) + getSize(svnUrl % "extensions/%s" % fullName))
+					if depList:
+						jDepList = str.join(", ", depList)
+						sizeOf = byteFormat(getDepsSize(depList) + getSize(svnUrl % "extensions/%s" % fullName))
 					commandList = str.join(", ", commandList)
 					answer =\
 						"\nПлагин: %(name)s.\nСодержит команды: %(commandList)s."
 					if depList:
 						answer +=\
-							"\nДля плагина требуется: %(jDepList)s, что займёт: %(sizeOf)s."
+							"\nДля плагина требуется: %(jDepList)s, после установки будет занятно примерно %(sizeOf)s."
 					answer = answer % vars()
 	
 				elif a[1] == u"установить":

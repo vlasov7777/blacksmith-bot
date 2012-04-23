@@ -213,14 +213,7 @@ def write_file(name, data, mode = "w"):
 			INFA['fw'] += 1
 			fp.write(data)
 
-## Crashfile writers.
-def Dispatch_fail():
-	error = format_exc()
-	write_file("__main__.crash", error, "a")
-	Print("\n\n#-# Dispatch fail!", color2)
-	delivery("Внимание! При парсинге станзы произошла критическая ошибка!"\
-				+ "\n" + error)
-
+## Crashfile writer.
 def lytic_crashlog(handler, command = None):
 	DIR, handler, Number, error_body = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), format_exc()
 	ERRORS[Number] = error_body
@@ -242,7 +235,7 @@ def lytic_crashlog(handler, command = None):
 		print_exc(crashfile)
 		crashfile.close()
 		if globals().get("JCON") and JCON.isConnected():
-			if BOT_OS == 'nt':
+			if BOT_OS == "nt":
 				delivery(text + u' Ошибку смотри по команде: "ошибка %s" (Крэшфайл - %s)' % (str(Number), filename))
 			else:
 				delivery(text + u' Ошибку смотри по командам: "ошибка %s", "sh cat %s"' % (str(Number), filename))
@@ -814,10 +807,12 @@ def delivery(body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
 	INFA['outmsg'] += 1
-	if not INFO.get("creporter"): return
+	if not INFO.get("creporter"): 
+		return
 	try:
 		JCON.send(xmpp.Message(BOSS, body, 'chat'))
 	except:
+		print_exc()
 		write_file('delivery.txt', body, 'a')
 
 
@@ -1320,6 +1315,7 @@ def Dispatch_handler(Timeout = 8):
 		os._exit(0)
 	except (xmpp.SystemShutdown, IOError):
 		while not JCON.isConnected():
+			Print("\n#-# Reconnecting.", color2)
 			Connect()
 			try_sleep(5)
 		join_chats()
@@ -1330,6 +1326,14 @@ def Dispatch_handler(Timeout = 8):
 	except KeyboardInterrupt:
 		sys_exit('Interrupt (Ctrl+C)')
 
+def Dispatch_fail():
+	INFO["errs"] += 1
+	error = format_exc()
+	write_file("__main__.crash", error, "a")
+	Print("\n\n#-# Dispatch fail!", color2)
+	delivery("Внимание! При парсинге станзы произошла критическая ошибка!"\
+				+ "\n" + error)
+
 def sys_exit(exit_reason = 'SUICIDE'):
 	Print('\n\n%s' % (exit_reason), color2)
 	if JCON.isConnected():
@@ -1337,6 +1341,9 @@ def sys_exit(exit_reason = 'SUICIDE'):
 	if (time.time() - INFO['start']) >= 30:
 		call_stage_init(3)
 	Exit('\n\nRESTARTING...\n\nPress Ctrl+C to exit', 0, 30)
+
+class NoIqAnswer(Exception):
+	pass
 
 ## Main.
 def main():
@@ -1372,14 +1379,18 @@ def main():
 	call_stage_init(2)
 	Iters, Timeout = calc_Timeout() #'
 	while True:
+		if INFO["errs"] > 6:
+			sys_exit("Fatal exception: %s\n" % str(format_exc()))
 		if Iters >= 9000:
 			Iters, Timeout = calc_Timeout()
 		try:
 			Dispatch_handler(Timeout)
+		except NoIqAnswer:
+			sys_exit("Can't get the iQ answer.")
+		except IOError:
+			sys_exit(format_exc())
 		except:
 			Dispatch_fail()
-			if INFO['errs'] >= 7:
-				sys_exit('Fatal exception: %s' % returnExc())
 		Iters += 1
 
 if __name__ == "__main__":

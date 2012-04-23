@@ -177,13 +177,16 @@ def handler_order_join(conf, nick, afl, role):
 
 def handler_order_presence(Prs):
 	ptype = Prs.getType()
-#	print Prs.getTagAttr("c", "node")
 	if ptype not in ['unavailable', 'error']:
 		fromjid = Prs.getFrom()
 		conf = fromjid.getStripped()
 		if conf not in ORDER_STATS:
 			ORDER_STATS[conf] = {}
-		nick = fromjid.getResource()
+		code = Prs.getStatusCode()
+		if code == '303':
+			nick = Prs.getNick()
+		else:
+			nick = fromjid.getResource()
 		if nick != handler_botnick(conf):
 			stmsg = Prs.getStatus()
 			jid = handler_jid(fromjid)
@@ -210,6 +213,21 @@ def handler_order_presence(Prs):
 									ORDER_STATS[conf][jid]['prs']['status'] = 0
 									handler_kick(conf, nick, u'%s: презенс-флуд' % handler_botnick(conf))
 									return
+						if ORDER[conf].get("nicklen") and len(nick) > ORDER[conf].get("nicklen"):
+							handler_kick(conf, nick, u'Слишком длинный ник!')
+						else:
+							cmd_nick = nick.split()[0].strip()
+							if conf in PREFIX:
+								item = command_Prefix(conf, cmd_nick.lower())
+							else:
+								item = cmd_nick.lower()
+							if conf in MACROS.macrolist.keys():
+								cmds = (COMMANDS.keys() + MACROS.gmacrolist.keys() + MACROS.macrolist[conf].keys())
+							else:
+								cmds = (COMMANDS.keys() + MACROS.gmacrolist.keys())
+							if item in cmds or nick.count("%"):
+								handler_kick(conf, nick, u'Твой ник под запретом!')
+
 						if ORDER[conf]['obscene']:
 							if order_check_obscene(nick, conf, jid, nick):
 								return
@@ -354,12 +372,20 @@ def handler_order_filt(type, source, body):
 					ORDER[source[1]]['kicks']['cond'] = 1
 				else:
 					reply(type, source, u'синтакс инвалид')
+## New.
 			elif args[0] == u"антиреклама":
 				if args[1] in ["1", "0"]:
 					ORDER[source[1]]['adver'] = int(args[1])
 					reply(type, source, u'Изменил значение.')
 				else:
 					reply(type, source, u'синтакс инвалид')
+			elif args[0] == u"никлен":
+				if check_number(args[1]):
+					ORDER[source[1]]["nicklen"] = int(args[1])
+					answer = u"Теперь максимальная длина ника «%s»."
+				else:
+					answer = u"«%s» — не число."
+				reply(type, source, answer % args[1])
 					
 			else:
 				reply(type, source, u'синтакс инвалид')
@@ -380,7 +406,13 @@ def handler_order_filt(type, source, body):
 		flymode = ORDER[source[1]]['fly']['mode']
 		kicks = ORDER[source[1]]['kicks']['cond']
 		kickscnt = str(ORDER[source[1]]['kicks']['cnt'])
-		adver = ORDER[source[1]]['adver']
+## New.
+		adver = ORDER[source[1]].get("adver")
+		nicklen = ORDER[source[1]].get("nicklen")
+		if nicklen:
+			fon.append(u"кик за длинный ник (> %d символов)" % nicklen)
+		else:
+			foff.append(u"кик за длинный ник")
 		if time:
 			fon.append(u'временная фильтрация сообщений')
 		else:
