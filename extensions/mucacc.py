@@ -26,7 +26,7 @@ def handler_afrls_answer(coze, stanza, mType, source):
 	if stanza.getType() == 'result':
 		reply(mType, source, u"Сделано.")
 	else:
-		reply(mType, source, u"Запрещено. Тип: %s." % stanza.getmType())
+		reply(mType, source, u"Запрещено. Тип: %s." % stanza.getType())
 
 def handler_ban2(mType, source, conf, jid, nick, reason):
 	IQSender(mType, source, conf, 'jid', jid, 'affiliation', 'outcast', nick, reason)
