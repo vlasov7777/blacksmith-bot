@@ -254,7 +254,7 @@ def crashReport_cfg(mType, source, argv):
 	reply(mType, source, answer)
 
 def crashReport_cfg_loader():
-	if initialize_file("creporter.txt", "1"):
+	if initialize_file("dynamic/creporter.txt", "1"):
 		INFO["creporter"] = read_file("dynamic/creporter.txt")
 
 command_handler(handler_set_prefix, 30, "admin")

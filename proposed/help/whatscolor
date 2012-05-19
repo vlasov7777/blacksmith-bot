@@ -1,0 +1,11 @@
+{
+u"whatColorFill": {
+u"syntax": u'''цвет''',
+
+u"cmd": u'''цвет''',
+
+u"examples": [u'''цвет хрень''', u'''цвет google'''],
+
+u"desc": u'''Называет цвет вещи. \nVia http://xml.yandex.net/cgi/color-search.pl'''
+}
+}
