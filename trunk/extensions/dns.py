@@ -3,12 +3,6 @@
 # (c) simpleApps CodingTeam, 2011
 # This program distributed under Apache 2.0 license.
 
-def punycode(domain):
-	try:
-		return domain.encode("idna")
-	except:
-		return domain
-
 def chkForDomain(domain, func):
 	iterations = - 1
 	host = domain
@@ -22,7 +16,7 @@ def chkForDomain(domain, func):
 def getHost(argv):
 	if argv:
 		if not chkUnicode(argv): 
-			argv = punycode(argv)
+			argv = IDNA(argv)
 		from socket import gethostbyname
 		dns = chkForDomain(argv.strip(), gethostbyname)
 		del gethostbyname
@@ -66,6 +60,7 @@ def command_chkServer(mType, source, argv):
 			sock.connect((addr,port))
 			answer = u"Порт %d на \"%s\" открыт." % (port, addr)
 		except:
+			print_exc()
 			answer = u"Порт %d на \"%s\" закрыт. Не достучался за 5 секунд." % (port, addr) 
 		sock.close()
 		del socket, AF_INET, SOCK_STREAM

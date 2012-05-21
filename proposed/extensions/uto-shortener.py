@@ -23,7 +23,7 @@ def punycode(domain):
 		return domain
 
 def uto_parse(code):
-	data = re.search("'#shurlout'\)\.val\('(.*)'\)\.show\(\)\.focus\(\)", code)
+	data = re.search("#shurlout'\)\.val\('(.*)'\)\.show\(\)\.focus\(\)", code)
 	if data:
 		data = data.group(1)
 	return data
@@ -40,8 +40,11 @@ def url_shortener(mType, source, args):
 		twill.commands.agent(load_uagent(twill))
 		if cookies.get("load"):
 			twill.commands.load_cookies(cookies.get("file"))
-		if not chkUnicode(args): 
+		if not chkUnicode(args):
+			reply(mType, source,"punycode")
 			args = punycode(args)
+#		if not args.startswith("http") or not args.startswith("ftp"):
+#			args = "http://" + args
 		twill.commands.go("http://u.to/")
 		twill.commands.fv("2", "url", args)
 		twill.commands.submit()

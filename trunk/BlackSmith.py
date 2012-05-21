@@ -39,6 +39,7 @@ except OSError:
 sys.path.insert(0, "library.zip")
 
 from enconf import *
+from webtools import *
 import xmpp, macros, simplejson
 
 ## Stats.
@@ -214,7 +215,7 @@ def write_file(name, data, mode = "w"):
 			fp.write(data)
 
 ## Crashfile writer.
-def lytic_crashlog(handler, command = None):
+def lytic_crashlog(handler, command = None, text = None):
 	DIR, handler, Number, error_body = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), format_exc()
 	ERRORS[Number] = error_body
 	text = str()
@@ -234,6 +235,8 @@ def lytic_crashlog(handler, command = None):
 		INFA['cfw'] += 1
 		print_exc(crashfile)
 		crashfile.close()
+		if text:
+			write_file(filename, "\n\nDeveloper Comment: %s" % text, "a")
 		if globals().get("JCON") and JCON.isConnected():
 			if BOT_OS == "nt":
 				delivery(text + u' Ошибку смотри по команде: "ошибка %s" (Крэшфайл - %s)' % (str(Number), filename))

@@ -13,7 +13,6 @@ import urllib
 
 svnUrl = "http://blacksmith-bot.googlecode.com/svn/proposed/%s/"
 
-
 def urlsplit(url):
 	if url and url.count("/"):
 		strippedUrl = url.rstrip("/")
