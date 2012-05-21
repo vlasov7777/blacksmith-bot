@@ -8,12 +8,6 @@
 # http://jabbrik.ru
 
 from urllib import urlencode
-def uHTML(text):
-	from HTMLParser import HTMLParser
-	text = text.replace("<br>", "\n").replace("</br>", "\n").replace("<br />", "\n")
-	text = HTMLParser().unescape(text)
-	del HTMLParser
-	return text
 	
 def google(type, source, body):
 	if body:

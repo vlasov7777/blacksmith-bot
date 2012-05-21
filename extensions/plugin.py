@@ -79,7 +79,7 @@ def handler_load_plugin(type, source, body):
 				execfile('%s/%s' % (PLUGIN_DIR, Plugin), globals())
 				repl = u'Плагин %s был успешно подгружен!' % (Plugin)
 			except:
-				repl = u'Плагин %s не был подгружен!\nОшибка: %s:\n%s' % (Plugin, returnExc())
+				repl = u'Плагин %s не был подгружен!\nОшибка: %s' % (Plugin, returnExc())
 		else:
 			repl = u'Этот плагин не был найден в списке'
 	else:
