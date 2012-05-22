@@ -215,7 +215,7 @@ def write_file(name, data, mode = "w"):
 			fp.write(data)
 
 ## Crashfile writer.
-def lytic_crashlog(handler, command = None, text = None):
+def lytic_crashlog(handler, command = None, comment = None):
 	DIR, handler, Number, error_body = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), format_exc()
 	ERRORS[Number] = error_body
 	text = str()
@@ -231,12 +231,9 @@ def lytic_crashlog(handler, command = None, text = None):
 	try:
 		if not os.path.exists(DIR):
 			os.mkdir(DIR, 0755)
-		crashfile = open(filename, 'w')
-		INFA['cfw'] += 1
-		print_exc(crashfile)
-		crashfile.close()
-		if text:
-			write_file(filename, "\n\nDeveloper Comment: %s" % text, "a")
+		write_file(filename, error_body)
+		if comment:
+			write_file(filename, "\n\nDeveloper Comment: %s" % comment, "a")
 		if globals().get("JCON") and JCON.isConnected():
 			if BOT_OS == "nt":
 				delivery(text + u' Ошибку смотри по команде: "ошибка %s" (Крэшфайл - %s)' % (str(Number), filename))
@@ -562,6 +559,7 @@ def join_chats():
 				join_groupchat(conf, handler_botnick(conf), CONFS[conf]['code'])
 	else:
 		Print('\n\nError: unable to create chatrooms list file!', color2)
+
 def read_pipe(command):
 	try:
 		if BOT_OS == "posix":

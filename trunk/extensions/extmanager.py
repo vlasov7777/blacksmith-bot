@@ -53,24 +53,6 @@ def findDeps(data, join = None):
 		if join:
 			return str.join(join, depList)
 		return depList
-		
-def byteFormat(or_bytes):
-	kbytes, bytes  = divmod(or_bytes, 1024)
-	mbytes, kbytes = divmod(kbytes, 1024)
-	gbytes, mbytes = divmod(mbytes, 1024)
-	tbytes, gbytes = divmod(gbytes, 1024)
-	text = str()
-	if bytes:
-		text = u"%d байт" % (bytes)
-	if or_bytes >= 1024:
-		text = u"%d kB %s" % (kbytes, text)
-	if or_bytes >= 1048576:
-		text = u"%d MB %s" % (mbytes, text)
-	if or_bytes >= 1073741824:
-		text = u"%d GB %s" % (gbytes, text)
-	if or_bytes >= 1099511627776:
-		text = u"%d TB %s" % (tbytes, text)
-	return text
 
 def extManager(mType, source, args):
 	if args:
