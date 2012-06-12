@@ -1334,6 +1334,7 @@ def Dispatch_fail():
 	Print("\n\n#-# Dispatch fail!", color2)
 	delivery("Внимание! При парсинге станзы произошла критическая ошибка!"\
 				+ "\n" + error)
+	sys_exit(format_exc())
 
 def sys_exit(exit_reason = 'SUICIDE'):
 	Print('\n\n%s' % (exit_reason), color2)

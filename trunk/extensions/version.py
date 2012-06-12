@@ -16,12 +16,12 @@ def command_getVersion(mType, source, args):
 			if args in GROUPCHATS[source[1]]:
 				target = "%s/%s" % (source[1], args.lstrip())
 				if not GROUPCHATS[source[1]][args]['ishere']:
-					reply(mType, source, "Его здесь нет")
+					reply(mType, source, "Его здесь нет.")
 					return
 			else:
 				target = args
 		else:
-			reply(mType, source, u"Только для конференций")
+			reply(mType, source, u"Только для конференций.")
 			return
 	else:
 		target = source[0]
@@ -31,16 +31,20 @@ def command_getVersion(mType, source, args):
 
 def answer_version(coze, stanza, mType, source):
 	if xmpp.isResultNode(stanza):
-		Name, Ver, Os = "[None]", "[None]", "[None]"
-		for x in stanza.getQueryChildren():
-			xname = x.getName()
-			if xname == "name":
-				Name = x.getData()
-			elif xname == "version":
-				Ver = x.getData()
-			elif xname == "os":
-				Os = x.getData()
-		answer = "\nName: %s\nVer.: %s\nOS: %s" % (Name, Ver, Os)
+		Name, Ver, OS = "[None]", "[None]", "[None]"
+		data =  stanza.getQueryChildren()
+		if data:
+			for x in data:
+				xname = x.getName()
+				if xname == "name":
+					Name = x.getData()
+				elif xname == "version":
+					Ver = x.getData()
+				elif xname == "os":
+					OS = x.getData()
+			answer = "\nName: %s\nVer.: %s\nOS: %s" % (Name, Ver, OS)
+		else:
+			answer = u"Error: null."
 	else:
 		answer = u"Нет ответа."
 	reply(mType, source, answer)

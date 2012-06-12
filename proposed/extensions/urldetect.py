@@ -40,7 +40,7 @@ def urlWatcher(raw, mType, source, body):
 						Type, Charset = contentTypeParser(url, data)
 						data = data.decode(Charset)
 						title = getTag("title", data)
-						answer = u"Заголовок: %s" % title
+						answer = u"Заголовок: %s" % uHTML(title).replace("\n", "")
 					else:
 						Type = headers.get("Content-Type") or ""
 						Size = byteFormat(int(headers.get("Content-Length")) or 0)

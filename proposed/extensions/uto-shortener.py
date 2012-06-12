@@ -1,5 +1,5 @@
-# BS. mark. 1
-# /* encoding: utf-8 */
+# BS mark.1
+# /* coding: utf8 */
 # BlackSmith Bot Plugin
 # Copyright Url Shortener (by service u.to) © simpleApps CodingTeam (Fri Oct 28 18:54:26 2011)
 # This program published under Apache 2.0 license
@@ -43,17 +43,16 @@ def url_shortener(mType, source, args):
 		if not chkUnicode(args):
 			reply(mType, source,"punycode")
 			args = punycode(args)
-#		if not args.startswith("http") or not args.startswith("ftp"):
-#			args = "http://" + args
 		twill.commands.go("http://u.to/")
 		twill.commands.fv("2", "url", args)
 		twill.commands.submit()
 		if cookies.get("save"):
 			open(cookies.get("file"), "w").close()
 			twill.commands.save_cookies(cookies.get("file"))
-		reply(mType, source, uto_parse(twill.commands.browser.get_html()))
+		answer = uto_parse(twill.commands.browser.get_html()) or u"Какая-то проблема с получением результата." 
 		del twill
 	else:
-		reply(mType, source, u"Не нашёл URL.")
+		answer = u"Не нашёл URL."
+	reply(mType, source, answer)
 
 command_handler(url_shortener, 10, "uto-shortener")
