@@ -2,7 +2,7 @@
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
-#  presence.py
+#  aliveKeeper.py
 
 # (c) simpleApps CodingTeam.
 # WARNING: THIS CODE IS NOT TESTED.

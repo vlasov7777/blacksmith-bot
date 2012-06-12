@@ -10,7 +10,7 @@ from time import sleep
 
 
 interpreter = sys.executable
-kernel = os.path.normpath(os.path.split(sys.argv[0])[0] + "/BlackSmith.py")
+kernel = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'BlackSmith.py')
 launch_target = u"%s %s" % (interpreter, kernel)
 
 del os, sys

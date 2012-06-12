@@ -14,7 +14,7 @@ def alarmConfig(mType, source, text):
 			data = text[(text.find(chr(32)) + 1):].strip()
 			if not ALARM_LIST.get(jid):
 				ALARM_LIST[jid] = list()
-			if jid != BOSS and len(ALARM_LIST[jid]) > 5:
+			if jid not in ADLIST and len(ALARM_LIST[jid]) > 5:
 				reply(mType, source, u"Лимит напомниналок исчерпан!")
 				return
 			if text not in ALARM_LIST:
@@ -44,13 +44,13 @@ def alarmConfig(mType, source, text):
 		write_file(ALARM_FILE, str(ALARM_LIST))
 		reply(mType, source, answer)
 
-def alarmWork(conf, nick, afl, role):
-	jid = handler_jid(conf+'/'+nick)
+def alarmWork(chat, nick, afl, role):
+	jid = handler_jid(chat+'/'+nick)
 	answer = "\nНапоминаю: "
 	if ALARM_LIST.get(jid):
 		for x, y in enumerate(ALARM_LIST[jid]):
 			answer +=  u"%i. %s.\n" % (x + 1, y)
-		msg(conf+"/"+nick, answer)
+		msg(chat + "/" + nick, answer)
 
 def alarmInit():
 	if initialize_file(ALARM_FILE):
