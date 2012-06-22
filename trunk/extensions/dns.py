@@ -39,7 +39,7 @@ def command_dns(mType, source, argv):
 def command_chkServer(mType, source, argv):
 	answer = u"что?"	
 	if argv:
-		argv = argv.split()
+		argv = argv.split()[:2]
 		addr, port = str(), str()
 		if len(argv) > 1:
 			addr, port = argv

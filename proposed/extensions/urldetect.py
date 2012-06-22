@@ -7,14 +7,12 @@
 # BETA! 
 import re
 
-urlDetect = []
-
 def contentTypeParser(opener, data):
 	ContentType = opener.headers.get("Content-Type")
 	Type, Charset = ContentType, None
 	try:
 		if ContentType.count(";"):
-			Type, Charset = re.findall("(.*); charset=(.*)", ContentType)[0]
+			Type, Charset = re.findall("(.*);[ ]?charset=(.*)", ContentType)[0]
 			Charset = Charset.lower()
 			if Charset == "unicode": Charset = "utf-8"
 		if not Charset and Type == "text/html":
@@ -36,7 +34,7 @@ def urlWatcher(raw, mType, source, body):
 					url = urllib.urlopen(url)
 					headers  = url.headers
 					if "text/html" in headers.get("Content-Type"):
-						data = url.read()[:4500]
+						data = url.read(4500)
 						Type, Charset = contentTypeParser(url, data)
 						data = data.decode(Charset)
 						title = getTag("title", data)
@@ -47,9 +45,8 @@ def urlWatcher(raw, mType, source, body):
 						Date = headers.get("Last-Modified") or ""
 						answer = u"Тип: %s, размер: %s; последнее изменение файла: %s." % (Type, Size, Date)
 					msg(source[1], answer)
-
 			except: 
-				lytic_crashlog(urlWatcher)
+				lytic_crashlog(urlWatcher, "", u"While parsing \"%s\"." % opener.url)
 
 def urlWatcherConfig(mType, source, args):
 	if args:

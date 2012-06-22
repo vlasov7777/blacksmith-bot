@@ -15,19 +15,12 @@ cookies = {"save": True,
   		   "file": "dynamic/cook.me"} ## Cook Me!
 
 cookies["load"] = os.path.exists(cookies["file"])
-
-def punycode(domain):
-	try:
-		return domain.encode("idna")
-	except:
-		return domain
-
+		
 def uto_parse(code):
 	data = re.search("#shurlout'\)\.val\('(.*)'\)\.show\(\)\.focus\(\)", code)
 	if data:
 		data = data.group(1)
 	return data
-
 
 def load_uagent(twill):
 	uagent = twill.commands._agent_map[random.choice(twill.commands._agent_map.keys())]
@@ -41,8 +34,7 @@ def url_shortener(mType, source, args):
 		if cookies.get("load"):
 			twill.commands.load_cookies(cookies.get("file"))
 		if not chkUnicode(args):
-			reply(mType, source,"punycode")
-			args = punycode(args)
+			args = IDNA(args)
 		twill.commands.go("http://u.to/")
 		twill.commands.fv("2", "url", args)
 		twill.commands.submit()
@@ -55,4 +47,4 @@ def url_shortener(mType, source, args):
 		answer = u"Не нашёл URL."
 	reply(mType, source, answer)
 
-command_handler(url_shortener, 10, "uto-shortener")
+command_handler(url_shortener, 11, "uto-shortener")
