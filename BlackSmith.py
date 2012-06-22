@@ -209,8 +209,7 @@ def read_file(name):
 		return fp.read()
 
 def write_file(name, data, mode = "w"):
-	with wsmph:
-		with open(chkFile(name), mode) as fp:
+	with wsmph, open(chkFile(name), mode) as fp:
 			INFA['fw'] += 1
 			fp.write(data)
 
@@ -233,7 +232,7 @@ def lytic_crashlog(handler, command = None, comment = None):
 			os.mkdir(DIR, 0755)
 		write_file(filename, error_body)
 		if comment:
-			write_file(filename, "\n\nDeveloper Comment: %s" % comment, "a")
+			write_file(filename, "\nDeveloper Comment: %s" % comment, "a")
 		if globals().get("JCON") and JCON.isConnected():
 			if BOT_OS == "nt":
 				delivery(text + u' Ошибку смотри по команде: "ошибка %s" (Крэшфайл - %s)' % (str(Number), filename))
@@ -488,7 +487,7 @@ def call_command_handlers(command, typ, source, body, callee):
 			if jid not in COMMSTAT[command]['users']:
 				COMMSTAT[command]['users'].append(jid)
 		else:
-			reply(typ, source, u'недостаточный доступ.')
+			reply(typ, source, u"Недостаточный доступ.")
 
 ## Plugins loader.
 def load_plugins():
@@ -840,7 +839,6 @@ def reply(ltype, source, body):
 	if ltype == 'public':
 		body = '%s: %s' % (source[2], body)
 		msg(source[1], body)
-		write_file("repl.txt", body, "a")
 	elif ltype == 'private':
 		msg(source[0], body)
 
@@ -1065,7 +1063,7 @@ def MESSAGE_PROCESSING(client, stanza):
 		Parameters = cbody[(cbody.find(' ') + 1):].strip()
 	if COMMANDS.has_key(command):
 		INFO['cmd'] += 1
-		LAST['cmd'] = u'Помощь по команде "хелп" (последнее действие - "%s")' % (command)
+		LAST['cmd'] = u'Помощь по командам: "хелп" (последнее действие - "%s")' % (command)
 		call_command_handlers(command, type, [fromjid, instance, nick], unicode(Parameters), rcmd)
 		LAST['time'] = time.time()
 	else:
