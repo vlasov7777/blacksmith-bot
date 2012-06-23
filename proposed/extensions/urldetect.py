@@ -31,13 +31,13 @@ def urlWatcher(raw, mType, source, body):
 				if url:
 					url = url[0].split()[0].strip(".,\\")
 					if not chkUnicode(url): url = "http://" + IDNA(url)
-					url = urllib.urlopen(url)
-					headers  = url.headers
+					opener = urllib.urlopen(url)
+					headers  = opener.headers
 					if "text/html" in headers.get("Content-Type"):
-						data = url.read(4500)
-						Type, Charset = contentTypeParser(url, data)
-						data = data.decode(Charset)
+						data = opener.read(4500)
+						Type, Charset = contentTypeParser(opener, data)
 						title = getTag("title", data)
+						title = title.decode(Charset)
 						answer = u"Заголовок: %s" % uHTML(title).replace("\n", "")
 					else:
 						Type = headers.get("Content-Type") or ""
@@ -46,7 +46,7 @@ def urlWatcher(raw, mType, source, body):
 						answer = u"Тип: %s, размер: %s; последнее изменение файла: %s." % (Type, Size, Date)
 					msg(source[1], answer)
 			except: 
-				lytic_crashlog(urlWatcher, "", u"While parsing \"%s\"." % opener.url)
+				lytic_crashlog(urlWatcher, "", u"While parsing \"%s\"." % locals().get("url"))
 
 def urlWatcherConfig(mType, source, args):
 	if args:

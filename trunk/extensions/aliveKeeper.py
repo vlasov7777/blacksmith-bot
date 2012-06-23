@@ -49,6 +49,11 @@ def aliveKeeper_worker():
 			aliveKeeper_ask("chat")
 		except KeyboardInterrupt:
 			break
+		except IOError, e:
+			if e.message == "Disconnected!":
+				sys_exit("Can't get the iQ answer.")
+			else:
+				lytic_crashlog(aliveKeeper_worker)
 		except:
 			lytic_crashlog(aliveKeeper_worker)
 
