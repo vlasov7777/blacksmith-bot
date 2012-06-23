@@ -216,7 +216,6 @@ def write_file(name, data, mode = "w"):
 ## Crashfile writer.
 def lytic_crashlog(handler, command = None, comment = None):
 	DIR, handler, Number, error_body = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), format_exc()
-	ERRORS[Number] = error_body
 	text = str()
 	if globals().get("JCON") and JCON.isConnected():
 		if command:
@@ -227,6 +226,7 @@ def lytic_crashlog(handler, command = None, comment = None):
 	else:
 		Print('\n\nError: can\'t execute "%s"!' % (handler), color2) #'
 	filename = (DIR+'/error[%s]%s.crash') % (str(INFA['cfw'] + 1), time.strftime('[%H.%M.%S][%d.%m.%Y]'))
+	ERRORS[Number] = filename
 	try:
 		if not os.path.exists(DIR):
 			os.mkdir(DIR, 0755)

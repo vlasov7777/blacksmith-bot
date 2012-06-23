@@ -158,7 +158,7 @@ def handler_error_stat(type, source, body):
 			if number in ERRORS:
 				error = ERRORS[number]
 				try:
-					error = unicode(error)
+					error = unicode(read_file(error))
 					if type == 'public':
 						reply(type, source, u'Глянь в приват')
 					msg(source[0], error)
