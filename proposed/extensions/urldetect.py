@@ -10,12 +10,12 @@ import re
 def contentTypeParser(opener, data):
 	ContentType = opener.headers.get("Content-Type")
 	Type, Charset = ContentType, None
-	try:
+ 	try:
 		if ContentType.count(";"):
 			Type, Charset = re.findall("(.*);[ ]?charset=(.*)", ContentType)[0]
 			Charset = Charset.lower()
 			if Charset == "unicode": Charset = "utf-8"
-		if not Charset and Type == "text/html":
+		if not (Charset and Type == "text/html") or opener.url.endswith((".html", ".htm")):
 			Charset = re.findall("/?charset=[\"|']?(.+?)['|\"|\>|\/]/?", data)[0]
 	except:
 		lytic_crashlog(contentTypeParser, "", u"During the search encoding on %s." % opener.url)
@@ -29,11 +29,11 @@ def urlWatcher(raw, mType, source, body):
 			try:
 				url = re.findall(r'(http[s]?://.*)', body)
 				if url:
-					url = url[0].split()[0].strip(".,\\")
+					url = url[0].split()[0].strip(".,\\)\"")
 					if not chkUnicode(url): url = "http://" + IDNA(url)
 					opener = urllib.urlopen(url)
 					headers  = opener.headers
-					if "text/html" in headers.get("Content-Type"):
+					if "text/html" in headers.get("Content-Type") or url.endswith(".html"):
 						data = opener.read(4500)
 						Type, Charset = contentTypeParser(opener, data)
 						title = getTag("title", data)
@@ -41,7 +41,7 @@ def urlWatcher(raw, mType, source, body):
 						answer = u"Заголовок: %s" % uHTML(title).replace("\n", "")
 					else:
 						Type = headers.get("Content-Type") or ""
-						Size = byteFormat(int(headers.get("Content-Length")) or 0)
+						Size = byteFormat(int(headers.get("Content-Length") or 0))
 						Date = headers.get("Last-Modified") or ""
 						answer = u"Тип: %s, размер: %s; последнее изменение файла: %s." % (Type, Size, Date)
 					msg(source[1], answer)
