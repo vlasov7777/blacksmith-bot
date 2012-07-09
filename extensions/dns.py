@@ -60,7 +60,6 @@ def command_chkServer(mType, source, argv):
 			sock.connect((addr,port))
 			answer = u"Порт %d на \"%s\" открыт." % (port, addr)
 		except:
-			print_exc()
 			answer = u"Порт %d на \"%s\" закрыт. Не достучался за 5 секунд." % (port, addr) 
 		sock.close()
 		del socket, AF_INET, SOCK_STREAM

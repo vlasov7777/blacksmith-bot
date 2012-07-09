@@ -209,7 +209,8 @@ def read_file(name):
 		return fp.read()
 
 def write_file(name, data, mode = "w"):
-	with wsmph, open(chkFile(name), mode) as fp:
+	with wsmph:
+		with open(chkFile(name), mode) as fp:
 			INFA['fw'] += 1
 			fp.write(data)
 
@@ -346,7 +347,11 @@ def register_command_handler(instance, command, category = [], access = 0, desc 
 	if not COMMSTAT.has_key(command):
 		COMMSTAT[command] = {'col': 0, 'users': []}
 	COMMAND_HANDLERS[command] = instance
-	COMMANDS[command] = {'access': access, 'desc': desc.decode('utf-8'), 'syntax': syntax.decode('utf-8'), 'examples': [ex.decode('utf-8') for ex in examples]}
+	COMMANDS[command] = {'access': 
+		access, 
+		'desc': desc.decode('utf-8'), 
+		'syntax': syntax.decode('utf-8'), 
+		'examples': [ex.decode('utf-8') for ex in examples]}
 	
 ## New command handler.
 def command_handler(instance, access = 0, plug = "default"):
@@ -493,6 +498,8 @@ def call_command_handlers(command, typ, source, body, callee):
 def load_plugins():
 	Print('\n\nLOADING PLUGINS:', color4)
 	ltc, tal, Npl = [], [], []
+	if not os.path.exists(PLUGIN_DIR):
+		return
 	for Plugin in os.listdir(PLUGIN_DIR):
 		if Plugin.endswith('.py'):
 			filename = '%s/%s' % (PLUGIN_DIR, Plugin)
