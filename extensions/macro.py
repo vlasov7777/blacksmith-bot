@@ -21,7 +21,7 @@ def handler_local_macro(type, source, Params):
 					pl = MACROS.parse_cmd(body)
 					if len(pl) >= 2:
 						command = pl[1].split()[0].strip().lower()
-						if command in COMMANDS or command in MACROS.gmacrolist or command in MACROS.macrolist[source[1]]:
+						if command in COMMANDS: ##or command in MACROS.gmacrolist or command in MACROS.macrolist[source[1]]:
 							real_access = MACROS.get_access(command, source[1])
 							if real_access < 0 and command in COMMAND_HANDLERS:
 								real_access = COMMANDS[command]['access']
@@ -100,12 +100,16 @@ def handler_global_macro(type, source, Params):
 					pl = MACROS.parse_cmd(body.strip())
 					if len(pl) >= 2:
 						macro = pl[0].strip().lower()
+						cmd = pl[1].split()[0].lower()
 						if not macro in COMMANDS:
-							MACROS.add(macro, pl[1])
-							MACROS.flush(act = 'macr')
-							reply(type, source, u'добавил')
+							if not cmd in MACROS.gmacrolist and not cmd in MACROS.macrolist[source[1]]:
+	 							MACROS.add(macro, pl[1])
+								MACROS.flush(act = 'macr')
+								reply(type, source, u'добавил')
+							else:
+								reply(type, source, u"ВТФ?")
 						else:
-							reply(type, source, u'нельзя, так как это команда')
+							reply(type, source, u'нельзя, так как это команда/макрос')
 					else:
 						reply(type, source, u'инвалид синтакс')
 				elif cmd in [u'дел', '-']:
@@ -129,7 +133,7 @@ def handler_global_macro(type, source, Params):
 										time.sleep(2)
 										MACROS.flush(act = 'sacc')
 									else:
-										reply(type, source, u'доступ что ты пытаешся дать не является числом')
+										reply(type, source, u'доступ, что ты пытаешься дать не является числом')
 								else:
 									reply(type, source, u'нет такого макроса')
 							else:
