@@ -9,6 +9,7 @@
 # Modifications:
 #  Als [Als@exploit.in]
 #  WitcherGeralt [WitcherGeralt@rocketmail.com]
+#  mrDoctorWho [support@simpleapps.ru]
 
 def handler_local_macro(type, source, Params):
 	if source[1] in GROUPCHATS:
@@ -20,8 +21,9 @@ def handler_local_macro(type, source, Params):
 				if cmd in [u'адд', '+']:
 					pl = MACROS.parse_cmd(body)
 					if len(pl) >= 2:
+						cmd = pl[1].split()[0].lower()
 						command = pl[1].split()[0].strip().lower()
-						if command in COMMANDS: ##or command in MACROS.gmacrolist or command in MACROS.macrolist[source[1]]:
+						if command in COMMANDS or command in MACROS.gmacrolist or command in MACROS.macrolist[source[1]]:
 							real_access = MACROS.get_access(command, source[1])
 							if real_access < 0 and command in COMMAND_HANDLERS:
 								real_access = COMMANDS[command]['access']
@@ -32,9 +34,12 @@ def handler_local_macro(type, source, Params):
 							if access:
 								macro = pl[0].strip().lower()
 								if not macro in COMMANDS:
-									MACROS.add(macro, pl[1], source[1])
-									MACROS.flush(source[1], 'macr')
-									reply(type, source, u'добавил')
+									if not cmd in MACROS.gmacrolist and not cmd in MACROS.macrolist[source[1]]:
+										MACROS.add(macro, pl[1], source[1])
+										MACROS.flush(source[1], 'macr')
+										reply(type, source, u'добавил')
+									else:
+										reply(type, source, u"Совмещение макросов противоречит системе безопасности.")
 								else:
 									reply(type, source, u'нельзя, так как это команда')
 							else:
@@ -107,7 +112,7 @@ def handler_global_macro(type, source, Params):
 								MACROS.flush(act = 'macr')
 								reply(type, source, u'добавил')
 							else:
-								reply(type, source, u"ВТФ?")
+								reply(type, source, u"Совмещение макросов запрещено.")
 						else:
 							reply(type, source, u'нельзя, так как это команда/макрос')
 					else:
