@@ -1056,6 +1056,8 @@ def MESSAGE_PROCESSING(client, stanza):
 		cmds = (MACROS.gmacrolist.keys() + MACROS.macrolist[instance].keys())
 	else:
 		cmds = MACROS.gmacrolist.keys()
+	if not cbody:
+		raise xmpp.NodeProcessed()
 	command = cbody.split()[0].lower()
 	if instance in PREFIX and rcmd not in cmds:
 		NotPfx = Prefix_state(body, bot_nick)
