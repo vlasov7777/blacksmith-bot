@@ -39,7 +39,6 @@ except OSError:
 sys.path.insert(0, "library.zip")
 
 from enconf import *
-from webtools import *
 import xmpp, macros, simplejson
 
 ## Stats.
@@ -176,6 +175,9 @@ else:
 	os_name = os.name.upper()
 os_name = os_name.strip() + " " + getArchitecture()
 del ntDetect, getArchitecture
+
+from webtools import *
+UserAgents["BlackSmith"] = "BlackSmith XMPP-BOT mark.1 (%s; %d.%d; ru)" % (os_name, BOT_VER, CORE_MODE)
 
 ## File workers.
 def check_file(conf = None, file = None, data = "{}"):
