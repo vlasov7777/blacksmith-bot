@@ -1,38 +1,26 @@
 #===istalismanplugin===
 # /* coding: utf-8 */
-# © simpleApps Unofficial.
+# © simpleApps, 2011 - 2012.
 
-strip_tags = re.compile(r'<[^<>]+>')
 
-uagent = "Opera/9.60 (J2ME/MIDP; Opera Mini/4.2.13337/724; U; ru)"
-
-def uHTML(text):
-	from HTMLParser import HTMLParser
-	text = text.replace("<br>", "\n").replace("</br>", "\n").replace("<br />", "\n")
-	text = HTMLParser().unescape(text)
-	del HTMLParser
-	return text
-
-def joke(type, source, parameters):
+def AnecDote(mType, source, body):
 	target = urlopen("http://anekdot.odessa.ua/rand-anekdot.php").read()
-	od = re.search(">", target)
-	text = target[od.end():]
-	text = text[:re.search("<a href=", text).start()]
-	reply(type ,source, u"Анекдот: %s" % uHTML(text.decode("cp1251")))
+	data = re.search(">(.*)<a href=", target, 16)
+	if data:
+		data = uHTML(data.group(1).decode("cp1251")).strip()
+	reply(mType, source, u"Анекдот: \n%s" % data)
 
-
-def bashOrg(type, source, parameters):
-	if parameters.isdigit():
-		link = 'http://bash.org.ru/quote/'+parameters
+def bashOrg(type, source, body):
+	if body.isdigit():
+		link = "http://bash.im/quote/%s" % body
 	else:
-		link = 'http://bash.org.ru/random'
-	data = read_url(link)
+		link = "http://bash.im/random"
+	data = read_url(link, UserAgents["BlackSmith"])
 	try:
-		comp = re.compile('<span id="v\d+?" class="rating">(\d+?)</span>(?:.|\s)+?<a href="/quote/\d+?" class="id">#(\d+?)</a>\s*?</div>\s+?<div class="text">((?:.|\s)+?)</div>', 16)
-		data = comp.search(data)
+		data = re.search('<span id="v\d+?" class="rating">(\d+?)</span>(?:.|\s)+?<a href="/quote/\d+?" class="id">#(\d+?)</a>\s*?</div>\s+?<div class="text">((?:.|\s)+?)</div>', data, 16)
 		if data:
 			rate, id, data = data.groups()
-			answer = uHTML(u"Цитата: #%s (Рейтинг: %s)\n%s" % (id, rate, data.decode('cp1251')))
+			answer = uHTML(u"Цитата: #%s (Рейтинг: %s)\n%s" % (id, rate, data.decode("cp1251")))
 		else:
 			answer = u"Ошибка."
 		reply(type, source, answer)
@@ -40,20 +28,23 @@ def bashOrg(type, source, parameters):
 		reply(type, source, returnExc())
 
 
-def itHappens(type, source, parameters):
-	main = urlopen("http://ithappens.ru/random").read()
-	od = re.search("<h3>#", main)
-	id = main[od.end():]
-	id = id[:re.search(":", id).start()].strip()
-	od = re.search('id="story_%s">' % id, main)
-	text = main[od.end():]
-	text = text[:re.search("</p>", text).start()]
-	reply(type,source, u"Цитата #%s:\n%s" % (id, uHTML(text.decode("cp1251"))))
+def itHappens(mType, source, body):
+	if body and body.isdigit():
+		url = "http://ithappens.ru/story/%s" % body
+	else:
+		url = "http://ithappens.ru/random"
+	data = read_url(url, UserAgents["BlackSmith"])
+	data = re.search("<div class=\"text\">(.*)</p>", data, 16)
+	if data:
+		data = data.group(1).decode("cp1251")
+		data = stripTags(uHTML(data), " ")
+	reply(mType, source, data)
 
 
+## TODO: Fix it. Rewrite to RE. (mrDoctorWHo)
 def bashAbyss(type, source, args):
 	try:
-		target = read_url('http://bash.org.ru/abysstop', uagent)
+		target = read_url('http://bash.org.ru/abysstop', UserAgents["BlackSmith"])
 		id=`random.randrange(1, 25)`
 		od = re.search('<b>'+id+':',target)
 		q1 = target[od.end():]
@@ -65,29 +56,20 @@ def bashAbyss(type, source, args):
 	except:
 		reply(type,source, returnExc())
 
-def jQuotes(type, source, body):
-	if body:
-		body = body.lower()
-	if body in (u'ранд', 'rand'):
-		link = 'http://jabber-quotes.ru/random'
-	elif body in (u'топ20', 'top20'):
-		link = 'http://jabber-quotes.ru/up'
+def JQuotes(mType, source, body):
+	if body and body.isdigit():
+		url = "http://jabber-quotes.ru/api/read/?id=%d" % body
 	else:
-		link = 'http://jabber-quotes.ru/'
-	try:
-		List = read_link(link).split('<blockquote>')
-		List.pop(0)
-		quote = random.choice(List).split('</blockquote>')[0].decode('cp1251')
-		quote = uHTML(quote)
-		quote = quote.replace('\n\n\n', '\n\n')
-		reply(type, source, quote)
-	except Exception:
-		reply(type, source, returnExc())
+		url = "http://jabber-quotes.ru/api/read/?id=random"
+	data = read_url(url, UserAgents["BlackSmith"])
+	data = re.search("<id>(.*)</id>\n<author>(.*)</author>\n<quote>(.*)</quote>", data, 16)
+	if data:
+		iD, Author, Quote = data.groups()
+	reply(mType, source, "\nЦитата: #%s | Автор: %s.\n%s" % (iD, Author, uHTML(Quote)))
 
 def pyOrg(type, source, body):
 	try:
-		data = re_search(read_link('http://python.org/'), 
-			'<h2 class="news">', '</div>')
+		data = re_search(read_link('http://python.org/'), '<h2 class="news">', '</div>')
 		data, repl = strip_tags.sub('', uHTML(data)), "\n"
 		for line in data.splitlines():
 			if line.strip():
@@ -99,17 +81,36 @@ def pyOrg(type, source, body):
 def afor(type, source, body):
 	try:
 		data = re_search(read_url('http://skio.ru/quotes/humour_quotes.php',
-			 uagent), '<form id="qForm" method="post"><div align="center">', '</div>')
+			 UserAgents["BlackSmith"]), '<form id="qForm" method="post"><div align="center">', '</div>')
 		data = strip_tags.sub('', uHTML(data))
 		reply(type, source, data.decode('cp1251'))
 	except Exception:
 		reply(type, source, returnExc())
 
+# Coded by: Evgеn [email: meb81@mail.ru]
+# http://witcher-team.ucoz.ru/
+# TODO: Rewrite it to re (mrDoctorWho)
 
-command_handler(jQuotes, 10, "quotes")
+def Fomenko(mType, source, body):
+	try:
+		radky = read_link("http://www.fomenko.ru/foma/lenta/text.html").splitlines()
+		if len(radky) >= 16:
+			radky = radky[15].decode('windows-1251')
+			if radky.find("<b>"):
+				radky = radky.split('<b>')[1]
+			else:
+				radky = u'что-то левое с разметкой'
+		else:
+			radky = u'что-то левое с разметкой'
+	except:
+		radky = u'не могу пропарсить сайт'
+	reply(mType, source, radky)
+
+command_handler(Fomenko, 10, "quotes")
+command_handler(JQuotes, 10, "quotes")
 command_handler(pyOrg, 10, "quotes")
 command_handler(bashOrg, 0, "quotes")
 command_handler(itHappens, 10, "quotes")
-command_handler(joke, 10, "quotes")
+command_handler(AnecDote, 10, "quotes")
 command_handler(bashAbyss, 0, "quotes")
 command_handler(afor, 10, "quotes")

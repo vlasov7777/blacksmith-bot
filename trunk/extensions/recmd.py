@@ -57,6 +57,7 @@ def handler_reinit_command(type, source, body):
 										COMMAND_HANDLERS[new_cmd] = COMMAND_HANDLERS[command]
 										COMMSTAT[new_cmd] = {'col': 0, 'users': []}
 										cmd_mass = {'command': command, 'list': COMMANDS[new_cmd]}
+										RECMDS["list"].append(new_cmd)
 										reinit_record_handler(new_cmd, cmd_mass)
 										reply(type, source, u'Теперь вместо "%s" будет "%s"' % (command, new_cmd))
 									else:
@@ -87,7 +88,7 @@ def handler_reinit_command(type, source, body):
 					del COMMAND_HANDLERS[del_cmd]
 					reply(type, source, u'команда "%s" - теперь в норме!' % (command))
 				else:
-					reply(type, source, u'команда "%s" - итак в норме!' % (command))
+					reply(type, source, u'команда "%s" - и так в норме!' % (command))
 			else:
 				reply(type, source, u'чего нужно?')
 		else:
