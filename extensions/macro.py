@@ -1,7 +1,7 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
+#  BlackSmith mark.1
 #  macro_plugin.py
 
 # Author:
@@ -235,6 +235,6 @@ command_handler(handler_local_macro, 20, "macro")
 command_handler(handler_global_macro, 100, "macro")
 command_handler(macrolist_handler, 10, "macro")
 command_handler(macroaccess_handler, 10, "macro")
-register_stage0_init(glob_macro_files_init)
+handler_register("00si", glob_macro_files_init)
 
-register_stage1_init(lokal_macro_files_init)
+handler_register("01si", lokal_macro_files_init)

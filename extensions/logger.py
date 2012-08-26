@@ -1,11 +1,11 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  BlackSmith plugin
+#  BlackSmith mark.1
 #  logger.py
 
-# © 2011 simpleApps (http://simpleapps.ru)
-# Thanks to: WitcherGeralt (WitcherGeralt@jabber.ru)
+# © 2011-2012 simpleApps (http://simpleapps.ru)
+# Thanks to: WitcherGeralt (alkorgun@gmail.com)
 
 logConfigFile = "dynamic/logstate.txt"
 logCacheFile = "logcache.txt"
@@ -76,7 +76,7 @@ def getLogFile(chat, Time):
 	logFileName = "%s/%s.html" % (logDir, day)
 	if os.path.isfile(logFileName):
 		logFile = open(logFileName, "a")
-		INFA["fw"] += 1
+		INFO["fw"] += 1
 	else:
 		date = time.strftime("{0}, {1} %d, %Y".format(Days[Time.tm_wday], Months[Time.tm_mon]), Time)
 		themeFile = chkFile("%s/%s/.theme/pattern.html" % (LoggerCfg["dir"], chat))
@@ -90,7 +90,7 @@ def getLogFile(chat, Time):
 				 write_file(exfile, "\n</tt>\n</div>\n</body>\n</html>", "a")
 			logCfg[chat]["file"] = logFileName
 		logFile = open(logFileName, "w")
-		INFA["fcr"] += 1
+		INFO["fcr"] += 1
 		logFile.write(pattern % vars())
 		if Subjs[chat]['time'] and Subjs[chat]['body']:
 			Time = time.time()
@@ -173,7 +173,7 @@ def logWriteARole(chat, nick, aRole, reason):
 		afl, role = logAfl.get(afl, ""), logRole.get(role, "")
 		logWrite(chat, "role", log % vars())
 
-def logWriteNickChange(chat, oldNick, nick):
+def logWriteNickChange(stanza, chat, oldNick, nick):
 	if GROUPCHATS.has_key(chat) and logCfg[chat]["enabled"]:
 		logWrite(chat, "nick", u'*** %s меняет ник на %s' % (oldNick, nick))
 		
@@ -234,13 +234,13 @@ def init_logger():
 				if os.path.isdir(path):
 					if "logger.css" in os.listdir(path):
 						logThemes[Theme] = path
-			register_stage1_init(logFileInit)
-			register_join_handler(logWriteJoined)
-			register_leave_handler(logWriteLeave)
-			register_message_handler(logWriteMessage)
-			register_newrole_handler(logWriteARole)
-			register_newnick_handler(logWriteNickChange)
-			register_newstatus_handler(logWriteStatusChange)
+			handler_register("01si", logFileInit)
+			handler_register("04eh", logWriteJoined)
+			handler_register("05eh", logWriteLeave)
+			handler_register("01eh", logWriteMessage)
+			handler_register("07eh", logWriteARole)
+			handler_register("06eh", logWriteNickChange)
+			handler_register("08eh", logWriteStatusChange)
 			command_handler(logSetState, 30, "logger")
 	else:
 		Print("\nCan't init lostate.txt, logger was disabled.", color2)
@@ -261,7 +261,7 @@ def logSetStateMain(mType, source, argv):
 			if not LoggerCfg["enabled"]:
 				LoggerCfg["enabled"] = True
 				write_file(logConfigFile, str(LoggerCfg))
-				register_stage1_init(logFileInit)
+				handler_register("01si", logFileInit)
 				init_logger()
 				for chat in GROUPCHATS.keys():
 					execute_handler(logFileInit, (chat,))
@@ -273,29 +273,29 @@ def logSetStateMain(mType, source, argv):
 				LoggerCfg["enabled"] = False
 				write_file(logConfigFile, str(LoggerCfg))
 				name = logWriteMessage.func_name
-				for handler in MESSAGE_HANDLERS:
+				for handler in Handlers["01eh"]:
 					if name == handler.func_name:
-						MESSAGE_HANDLERS.remove(handler)
+						Handlers["01eh"].remove(handler)
 				name = logWriteNickChange.func_name
-				for handler in NEWNICK_HANDLERS:
+				for handler in Handlers["06eh"]:
 					if name == handler.func_name:
-						NEWNICK_HANDLERS.remove(handler)
+						Handlers["06eh"].remove(handler)
 				name = logWriteStatusChange.func_name
-				for handler in NEWSTATUS_HANDLERS:
+				for handler in Handlers["08eh"]:
 					if name == handler.func_name:
-						NEWSTATUS_HANDLERS.remove(handler)
+						Handlers["08eh"].remove(handler)
 				name = logWriteARole.func_name
-				for handler in NEWROLE_HANDLERS:
+				for handler in Handlers["07eh"]:
 					if name == handler.func_name:
-						NEWROLE_HANDLERS.remove(handler)
+						Handlers["07eh"].remove(handler)
 				name = logWriteJoined.func_name
-				for handler in JOIN_HANDLERS:
+				for handler in Handlers["04eh"]:
 					if name == handler.func_name:
-						JOIN_HANDLERS.remove(handler)
+						Handlers["04eh"].remove(handler)
 				name = logWriteLeave.func_name
-				for handler in LEAVE_HANDLERS:
+				for handler in Handlers["05eh"]:
 					if name == handler.func_name:
-						LEAVE_HANDLERS.remove(handler)
+						Handlers["05eh"].remove(handler)
 				name = logFileInit.func_name
 				try:
 					command = eval(read_file("help/logger").decode('utf-8'))[logSetState.func_name]["cmd"]
@@ -303,9 +303,9 @@ def logSetStateMain(mType, source, argv):
 					delivery(u"Внимание! Не удалось загрузить файл помощи логгера.")
 				else:
 					del COMMAND_HANDLERS[command]
-				for handler in STAGE1_INIT:
+				for handler in Handlers["01si"]:
 					if name == handler.func_name:
-						STAGE1_INIT.remove(handler)
+						Handlers["01si"].remove(handler)
 				logCfg.clear()
 				logSynchronize.clear()
 				reply(mType, source, u"Выключил логгер.")
@@ -407,5 +407,5 @@ def logSetState(mType, source, argv):
 		else:
 			reply(mType, source, u"Сейчас комната не логируется.")
 
-register_stage0_init(init_logger)
+handler_register("00si", init_logger)
 command_handler(logSetStateMain, 100, "logger")

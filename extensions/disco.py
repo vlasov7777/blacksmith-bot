@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -29,9 +29,9 @@ def handler_disco(type, source, body):
 			else:
 				srch = args[1]
 		iq = xmpp.Iq(to = tojid, typ = 'get')
-		INFA['outiq'] += 1
+		INFO['outiq'] += 1
 		iq.addChild('query', {}, [], xmpp.NS_DISCO_ITEMS)
-		JCON.SendAndCallForResponse(iq, handler_disco_ext, {'type': type, 'source': source, 'stop': stop, 'srch': srch, 'tojid': tojid})
+		jClient.SendAndCallForResponse(iq, handler_disco_ext, {'type': type, 'source': source, 'stop': stop, 'srch': srch, 'tojid': tojid})
 	else:
 		reply(type, source, u'Ну а дальше то чего?')
 

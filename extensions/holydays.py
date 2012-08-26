@@ -1,12 +1,12 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
-#  hollydays_plugin.py
+#  holidays_plugin.py
 
 # Coded by: 40tman (40tman@qip.ru)
 
-def handler_hollydays(type, source, body):
+def handler_holidays(type, source, body):
 	try:
 		data = read_url('http://wap.n-urengoy.ru/cgi-bin/wappr.pl', 'Mozilla/5.0')
 		data = re_search(data, '<div class="title">', 'назад')
@@ -16,4 +16,4 @@ def handler_hollydays(type, source, body):
 	except:
 		reply(type, source, u'По вашему запросу ничего не найдено')
 
-command_handler(handler_hollydays, 10, "hollydays")
+command_handler(handler_holidays, 10, "holydays")

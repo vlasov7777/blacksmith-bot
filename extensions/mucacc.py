@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -13,14 +13,14 @@ BanBaseFile = "dynamic/banbase.txt"
 
 def IQSender(mType, source, conf, item_name, item, afrls, afrl, nick, rsn = None):
 	stanza = xmpp.Iq(to = conf, typ = 'set')
-	INFA['outiq'] += 1
+	INFO['outiq'] += 1
 	query = xmpp.Node('query')
 	query.setNamespace(xmpp.NS_MUC_ADMIN)
 	afl_role = query.addChild('item', {item_name: item, afrls: afrl})
 	if rsn:
 		afl_role.setTagData('reason', rsn)
 	stanza.addChild(node = query)
-	JCON.SendAndCallForResponse(stanza, handler_afrls_answer, {'mType': mType, 'source': source})
+	jClient.SendAndCallForResponse(stanza, handler_afrls_answer, {'mType': mType, 'source': source})
 
 def handler_afrls_answer(coze, stanza, mType, source):
 	if stanza.getType() == 'result':
@@ -283,7 +283,7 @@ def banbase_init():
 		Print('\n\nError: can`t create banbase.txt!', color2)
 
 
-register_stage0_init(banbase_init)
+handler_register("00si", banbase_init)
 command_handler(command_moder, 20, "mucacc")
 command_handler(command_member, 20, "mucacc")
 command_handler(command_admin, 30, "mucacc")

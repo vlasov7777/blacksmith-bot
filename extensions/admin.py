@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -135,7 +135,7 @@ def handler_admin_restart(type, source, reason):
 		msg(conf, status)
 	time.sleep(6)
 	send_unavailable(status)
-	call_stage_init(3)
+	call_efunctions("03si")
 	Exit('\n\nRESTARTING...', 0, 5)
 
 def handler_admin_exit(type, source, reason):
@@ -146,7 +146,7 @@ def handler_admin_exit(type, source, reason):
 		msg(conf, status)
 	time.sleep(6)
 	send_unavailable(status)
-	call_stage_init(3)
+	call_efunctions("03si")
 	try: os.kill(os.getppid(), 9)
 	except: pass
 	Exit('\n\n--> BOT STOPPED', 1, 10)
@@ -187,9 +187,9 @@ def handler_botup_info(type, source, body):
 		repl = u'\n*** Статистика работы (Bot PID: %s):\n• Рабочая сессия %s' % (PID, timeElapsed(Now_time - RUNTIMES['START']))
 		if RUNTIMES['REST']:
 			repl += u'\n• Последняя сессия %s' % (timeElapsed(Now_time - INFO['start']))
-		repl += u'\n• Обработано %i презенсов и %i iq-запросов\n• Отправлено %i сообщений и %i iq-запросов' % (INFO['prs'], INFO['iq'], INFA['outmsg'], INFA['outiq'])
+		repl += u'\n• Обработано %i презенсов и %i iq-запросов\n• Отправлено %i сообщений и %i iq-запросов' % (INFO['prs'], INFO['iq'], INFO['outmsg'], INFO['outiq'])
 		repl += u'\n• Произошло %i ошибок и %i ошибок диспатчера\n• Получено %i сообщений\n• Выполнено %i команд' % (len(ERRORS.keys()), INFO['errs'], INFO['msg'], INFO['cmd'])
-		repl += u'\n• Создано файлов: %i\n• Прочтений файлов: %i\n• Записей в файлах: %i\n• Записей крэш-логов: %i' % (INFA['fcr'], INFA['fr'], INFA['fw'], INFA['cfw'])
+		repl += u'\n• Создано файлов: %i\n• Прочтений файлов: %i\n• Записей в файлах: %i\n• Записей крэш-логов: %i' % (INFO['fcr'], INFO['fr'], INFO['fw'], INFO['cfw'])
 		if len(GROUPCHATS.keys()):
 			repl += u"\n• Обслуживаю %d конференц%s" % (cService, formatWord(cService, (u"ию", u"ии", "ий")))
 		memory = memory_usage()
@@ -270,5 +270,5 @@ command_handler(handler_command_stat, 10, "admin")
 command_handler(crashReport_cfg, 100, "admin")
 
 
-register_stage0_init(crashReport_cfg_loader)
-register_stage1_init(load_conf_prefix)
+handler_register("00si", crashReport_cfg_loader)
+handler_register("01si", load_conf_prefix)

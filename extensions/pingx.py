@@ -1,10 +1,10 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
-#  pingX_plugin.py
+#  BlackSmith mark.1
+#  pingx.py
 
-# (C) 2004 Lars Strand
+# © (2004) Lars Strand
 
 ICMP_DATA_STR = 56
 ICMP_TYPE = 8
@@ -172,7 +172,7 @@ def PING_START(type, source, alive = 0, timeout = 1.0, ipv6 = 0, number = sys.ma
 	try:
 		Psocket.close()
 	except:
-		LAST['null'] += 1
+		pass
 	return repl
 
 def handler_NetPING(type, source, body):

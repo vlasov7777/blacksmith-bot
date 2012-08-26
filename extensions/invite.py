@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -35,8 +35,8 @@ def handler_send_invite(type, source, body):
 						reason = False
 					INV_TIMES[source[1]] = time.time()
 					invite = xmpp.Message(to = source[1])
-					INFA['outmsg'] += 1
-					id = 'inv_'+str(INFA['outmsg'])
+					INFO['outmsg'] += 1
+					id = 'inv_'+str(INFO['outmsg'])
 					invite.setID(id)
 					x = xmpp.Node('x')
 					x.setNamespace(xmpp.NS_MUC_USER)
@@ -46,7 +46,7 @@ def handler_send_invite(type, source, body):
 					else:
 						inv.setTagData('reason', u'Вас приглашает '+source[2])
 					invite.addChild(node = x)
-					JCON.send(invite)
+					jClient.send(invite)
 					reply(type, source, u'Приглашение выслано!')
 				else:
 					reply(type, source, u'Я его незнаю!')

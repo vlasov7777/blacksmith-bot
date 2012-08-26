@@ -1,4 +1,4 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -17,7 +17,7 @@ def most_message_handler(raw, type, source, body):
 		elif source[1] == MOST_C2:
 			msg(MOST_C1, 'from: <'+source[2]+'>,\n'+body)
 
-def most_join_handler(chat, nick, afl, role):
+def most_join_handler(chat, nick, afl, role, status, text):
 	if chat in [MOST_C1, MOST_C2]:
 		conf = chat.split('@')[0]
 		if chat == MOST_C1:
@@ -92,8 +92,8 @@ def handler_most_delete(type, source, body):
 	else:
 		reply(type, source, u'эта команда выполняеться только в чате!')
 
-register_message_handler(most_message_handler)
-register_leave_handler(most_leave_handler)
-register_join_handler(most_join_handler)
+handler_register("01eh", most_message_handler)
+handler_register("05eh", most_leave_handler)
+handler_register("04eh", most_join_handler)
 command_handler(handler_most_create, 30, "most")
 command_handler(handler_most_delete, 20, "most")

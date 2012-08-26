@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -56,7 +56,7 @@ def handler_greetex(type, source, body):
 	else:
 		reply(type, source, u'Пшел вон мудак!')
 
-def atjoin_greetex(conf, nick, afl, role):
+def atjoin_greetex(conf, nick, afl, role, status, text):
 	if (GROUPCHATS[conf][nick].get('joined', 0) - INFO['start']) >= 20:
 		if afl in GRTX[conf]:
 			msg(conf, random.choice(GRTX[conf][afl]).replace("%NICK%", nick))
@@ -69,7 +69,7 @@ def greetex_init(conf):
 		delivery(u'Внимание! Не удалось создать greetex.txt для "%s"!' % (conf))
 	GRTX[conf] = list
 
-register_join_handler(atjoin_greetex)
+handler_register("04eh", atjoin_greetex)
 command_handler(handler_greetex, 20, "greetex")
 
-register_stage1_init(greetex_init)
+handler_register("01si", greetex_init)

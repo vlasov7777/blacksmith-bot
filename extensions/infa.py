@@ -1,7 +1,7 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
+#  BlackSmith mark.1
 #  infa_plugin.py
 
 # Author: Mike Mintz [mikemintz@gmail.com]
@@ -13,7 +13,7 @@ def handler_SG_infa(type, source, body):
 	iq = xmpp.Iq(to = SERVER, typ = 'get')
 	iq.setQueryNS(xmpp.NS_STATS)
 	iq.setTo(SERVER)
-	JCON.SendAndCallForResponse(iq, first_handler_SG, {'body': body, 'type': type, 'source': source})
+	jClient.SendAndCallForResponse(iq, first_handler_SG, {'body': body, 'type': type, 'source': source})
 
 def first_handler_SG(coze, stanza, body, type, source):
 	sType = stanza.getType()
@@ -24,7 +24,7 @@ def first_handler_SG(coze, stanza, body, type, source):
 		iq = xmpp.Iq(to = body, typ = 'get')
 		iq.setQueryNS(xmpp.NS_STATS)
 		iq.setQueryPayload(Qu)
-		JCON.SendAndCallForResponse(iq, second_handler_SG, {'body': body,'type': type,'source': source})
+		jClient.SendAndCallForResponse(iq, second_handler_SG, {'body': body,'type': type,'source': source})
 	else:
 		reply(type, source, u'не дождался')
 

@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -68,4 +68,4 @@ def note_file_init():
 		Print('\n\nError: can`t create notepad.txt!', color2)
 
 command_handler(handler_note, 10, "note")
-register_stage0_init(note_file_init)
+handler_register("00si", note_file_init)

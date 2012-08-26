@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -27,13 +27,13 @@ def handler_afl_list(type, source, body):
 					AFLIST_SEARCH[id] = {}
 					for afl in ['owner', 'admin', 'member', 'outcast']:
 						iq = xmpp.Iq(to = source[1], typ = 'get')
-						INFA['outiq'] += 1
-						iq.setID('list_'+str(INFA['outiq']))
+						INFO['outiq'] += 1
+						iq.setID('list_'+str(INFO['outiq']))
 						query = xmpp.Node('query')
 						query.setNamespace(xmpp.NS_MUC_ADMIN)
 						query.addChild('item', {'affiliation': afl})
 						iq.addChild(node = query)
-						JCON.SendAndCallForResponse(iq, list_search_answer, {'id': id, 'afl': afl, 'name': list[1]})
+						jClient.SendAndCallForResponse(iq, list_search_answer, {'id': id, 'afl': afl, 'name': list[1]})
 					reply(type, source, u'ответ жди в привате через 32 секунды')
 					time.sleep(32)
 					answer = ''
@@ -55,13 +55,13 @@ def handler_afl_list(type, source, body):
 				afl = get_afl_hnd(body)
 				if afl:
 					iq = xmpp.Iq(to = source[1], typ = 'get')
-					INFA['outiq'] += 1
-					iq.setID('list_'+str(INFA['outiq']))
+					INFO['outiq'] += 1
+					iq.setID('list_'+str(INFO['outiq']))
 					query = xmpp.Node('query')
 					query.setNamespace(xmpp.NS_MUC_ADMIN)
 					query.addChild('item', {'affiliation': afl})
 					iq.addChild(node = query)
-					JCON.SendAndCallForResponse(iq, handler_list_answer, {'type': type, 'source': source, 'afl': afl})
+					jClient.SendAndCallForResponse(iq, handler_list_answer, {'type': type, 'source': source, 'afl': afl})
 				else:
 					reply(type, source, u'чего?')
 		else:

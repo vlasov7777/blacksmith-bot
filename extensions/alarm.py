@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 # (c) simpleApps, 2011.
 # Idea (c) WitcherGeralt, 2010 - 2011.
@@ -44,7 +44,7 @@ def alarmConfig(mType, source, text):
 		write_file(ALARM_FILE, str(ALARM_LIST))
 		reply(mType, source, answer)
 
-def alarmWork(chat, nick, afl, role):
+def alarmWork(chat, nick, afl, role, status, text):
 	jid = handler_jid(chat+'/'+nick)
 	answer = "\nНапоминаю: "
 	if ALARM_LIST.get(jid):
@@ -58,6 +58,6 @@ def alarmInit():
 	else:
 		Print('\n\nError: can`t create alarm.txt!', color2)
 
-register_join_handler(alarmWork)
+handler_register("04eh", alarmWork)
 command_handler(alarmConfig, 10, "alarm")
-register_stage0_init(alarmInit)
+handler_register("00si", alarmInit)

@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -23,9 +23,9 @@ def handler_ping(type, source, nick):
 	else:
 		user, jid = source[0], handler_jid(source[0])
 	iq = xmpp.Iq(to = user, typ = 'get')
-	INFA['outiq'] += 1
+	INFO['outiq'] += 1
 	iq.addChild('ping', {}, [], xmpp.NS_PING)
-	JCON.SendAndCallForResponse(iq, handler_ping_answer, {'t0': time.time(), 'mtype': type, 'source': source, 'nick': nick, 'jid': jid, 'user': user})
+	jClient.SendAndCallForResponse(iq, handler_ping_answer, {'t0': time.time(), 'mtype': type, 'source': source, 'nick': nick, 'jid': jid, 'user': user})
 
 def handler_ping_answer(coze, stanza, t0, mtype, source, nick, jid, user):
 		if stanza:
@@ -64,7 +64,7 @@ def handler_ping_answer(coze, stanza, t0, mtype, source, nick, jid, user):
 def reping_by_version(type, source, user, jid, nick):
 	iq = xmpp.Iq(to = user, typ = 'get')
 	iq.addChild('query', {}, [], xmpp.NS_VERSION)
-	JCON.SendAndCallForResponse(iq, handler_ping_ver_answer, {'t1': time.time(), 'type': type, 'source': source, 'nick': nick, 'jid': jid, 'user': user})
+	jClient.SendAndCallForResponse(iq, handler_ping_ver_answer, {'t1': time.time(), 'type': type, 'source': source, 'nick': nick, 'jid': jid, 'user': user})
 
 def handler_ping_ver_answer(coze, stanza, t1, type, source, nick, jid, user):
 		if stanza:

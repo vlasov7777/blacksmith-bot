@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -65,9 +65,9 @@ def roster_status_set(show_x = None, status_x = None):
 	else:
 		Presence = xmpp.Presence(show = show_x, status = status_x)
 	Presence.setTag('c', namespace = xmpp.NS_CAPS, attrs = {'node': Caps, 'ver': CapsVer})
-	JCON.send(Presence)
+	jClient.send(Presence)
 
 command_handler(handler_set_bot_status, 100, "botstatus")
 
-register_stage1_init(load_conf_status)
-register_stage2_init(roster_status_set)
+handler_register("01si", load_conf_status)
+handler_register("02si", roster_status_set)

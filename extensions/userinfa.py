@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -13,18 +13,18 @@
 USERINFA = {}
 IDS_USERINFA = []
 
-def handler_userinfa(conf, nick, afl, role):
+def handler_userinfa(conf, nick, afl, role, status, text):
 	if USERINFA[conf] != 'off' and afl == 'none':
 		conf_nick = conf+'/'+nick
 		user = handler_jid(conf_nick)
 		if user not in ADLIST:
 			vcard_iq = xmpp.Iq(to = conf_nick, typ = 'get')
-			INFA['outiq'] += 1
-			ID = 'userinfa_'+str(INFA['outiq'])
+			INFO['outiq'] += 1
+			ID = 'userinfa_'+str(INFO['outiq'])
 			IDS_USERINFA.append(ID)
 			vcard_iq.addChild('vCard', {}, [], 'vcard-temp')
 			vcard_iq.setID(ID)
-			JCON.SendAndCallForResponse(vcard_iq, handler_userinfa_answer, {'conf': conf,'nick': nick})
+			jClient.SendAndCallForResponse(vcard_iq, handler_userinfa_answer, {'conf': conf,'nick': nick})
 
 def handler_userinfa_answer(coze, stanza, nick, conf):
 	ID = stanza.getID()
@@ -151,7 +151,7 @@ def userinfa_init(conf):
 		delivery(u'Внимание! Не удалось создать userinfa.txt для "%s"!' % (conf))
 	USERINFA[conf] = state
 
-register_join_handler(handler_userinfa)
+handler_register("04eh", handler_userinfa)
 command_handler(handler_userinfa_control, 20, "userinfa")
 
-register_stage1_init(userinfa_init)
+handler_register("01si", userinfa_init)

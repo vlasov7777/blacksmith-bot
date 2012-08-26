@@ -1,4 +1,4 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 # BlackSmith Bot Plugin
 # Other bots compability: True
@@ -13,6 +13,6 @@ def msgDelivery(client, msg):
 			client.send(reportMsg)
 
 def registerMsgDelivery(nothing):
-	JCON.RegisterHandler("message", msgDelivery)
+	jClient.RegisterHandler("message", msgDelivery)
 
-register_stage1_init(registerMsgDelivery)
+handler_register("01si", registerMsgDelivery)

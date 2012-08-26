@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -10,7 +10,7 @@
 SERVSTAT = {}
 RESSTAT = {}
 
-def handler_servres_stat(conf, nick, afl, role):
+def handler_servres_stat(conf, nick, afl, role, status, text):
 	instance = GROUPCHATS[conf][nick]
 	if instance.has_key('full_jid'):
 		jid = instance['full_jid']
@@ -56,6 +56,6 @@ def handler_check_resstat(type, source, body):
 			list += '\n'+str(col)+'. '+item[1]+' - '+str(item[0])
 	reply(type, source, u'Всего ресурсов '+str(col)+' :'+list)
 
-register_join_handler(handler_servres_stat)
+handler_register("04eh", handler_servres_stat)
 command_handler(handler_check_servstat, 10, "servres")
 command_handler(handler_check_resstat, 10, "servres")

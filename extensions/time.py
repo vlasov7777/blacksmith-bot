@@ -1,7 +1,7 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
+#  BlackSmith mark.1
 #  time_plugin.py
 
 #  Initial Copyright © 2007 Als <Als@exploit.in>
@@ -32,9 +32,9 @@ def handler_gettime_xep_disco(type, source, body):
 					gettime_xep0090(type, source, jid, source[2])
 					return
 		iq = xmpp.Iq(to = jid, typ = 'get')
-		INFA['outiq'] += 1
+		INFO['outiq'] += 1
 		iq.addChild('query', {}, [], xmpp.NS_DISCO_INFO)
-		JCON.SendAndCallForResponse(iq, handler_gettime_xep_disco_answer, {'type': type, 'source': source, 'body': body, 'jid': jid})
+		jClient.SendAndCallForResponse(iq, handler_gettime_xep_disco_answer, {'type': type, 'source': source, 'body': body, 'jid': jid})
 	else:
 		reply(type, source, u'Только в чате!')
 
@@ -75,9 +75,9 @@ def gettime_xep0090(type, source, jid, body = None):
 	else:
 		nick = ''
 	time_iq = xmpp.Iq(to = jid, typ = 'get')
-	INFA['outiq'] += 1
+	INFO['outiq'] += 1
 	time_iq.addChild('query', {}, [], xmpp.NS_TIME)
-	JCON.SendAndCallForResponse(time_iq, gettime_xep0090_answer, {'type': type, 'source': source, 'nick': nick})
+	jClient.SendAndCallForResponse(time_iq, gettime_xep0090_answer, {'type': type, 'source': source, 'nick': nick})
 
 def gettime_xep0090_answer(coze, res, nick, type, source):
 		if res:
@@ -104,9 +104,9 @@ def gettime_xep0202(type, source, jid, body = None):
 	else:
 		nick = ''
 	time_iq = xmpp.Iq(to = jid, typ = 'get')
-	INFA['outiq'] += 1
+	INFO['outiq'] += 1
 	time_iq.addChild('time', {}, [], 'urn:xmpp:time')
-	JCON.SendAndCallForResponse(time_iq, gettime_xep0202_answer, {'type': type, 'source': source, 'nick': nick})
+	jClient.SendAndCallForResponse(time_iq, gettime_xep0202_answer, {'type': type, 'source': source, 'nick': nick})
 
 def gettime_xep0202_answer(coze, res, nick, type, source):
 		if res:

@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -279,6 +279,6 @@ command_handler(handler_wtf_private, 10, "wtf")
 command_handler(handler_wtf_search, 10, "wtf")
 command_handler(handler_wtf_all, 10, "wtf")
 command_handler(handler_wtf_export, 100, "wtf")
-register_stage0_init(global_wtf_file_init)
+handler_register("00si", global_wtf_file_init)
 
-register_stage1_init(lokal_wtf_file_init)
+handler_register("01si", lokal_wtf_file_init)

@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -11,7 +11,7 @@ STATCONFS_FILE = 'dynamic/statconfs.txt'
 
 STATCONFS = {'joins': 0, 'confs': {}}
 
-def handler_statconfs(conf, nick, afl, role):
+def handler_statconfs(conf, nick, afl, role, status, text):
 	if conf not in STATCONFS['confs']:
 		STATCONFS['confs'][conf] = {}
 	today = that_day()
@@ -181,7 +181,7 @@ def statconfs_save():
 	if STATCONFS['joins']:
 		write_file(STATCONFS_FILE, str(STATCONFS['confs']))
 
-register_join_handler(handler_statconfs)
+handler_register("04eh", handler_statconfs)
 command_handler(show_statconfs, 20, "statconfs")
-register_stage0_init(statconfs_init)
-register_stage3_init(statconfs_save)
+handler_register("00si", statconfs_init)
+handler_register("03si", statconfs_save)

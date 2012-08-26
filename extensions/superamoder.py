@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -42,12 +42,12 @@ def BossToModer_init(conf):
 		chats = []
 	globals()["BossToModer_exc"] = chats
 	
-def setBossToModer(conf, nick, afl, role):
+def setBossToModer(conf, nick, afl, role, status, text):
 	if not role == 'moderator':
 		jid = handler_jid(conf+'/'+nick)
 		if jid in ADLIST and not conf in BossToModer_exc:
 			handler_moder(conf, nick, u'BOSS BlackSmith всегда модер!')
 
 command_handler(BossToModer_cfg, 30, "superamoder")
-register_join_handler(setBossToModer)
-register_stage1_init(BossToModer_init)
+handler_register("04eh", setBossToModer)
+handler_register("01si", BossToModer_init)

@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -16,38 +16,38 @@ def roster_control(type, source, body):
 			if jid.count('@') and jid.count('.'):
 				action = args[0].strip()
 				if action == '+':
-					JCON.Roster.Authorize(jid)
-					JCON.Roster.Subscribe(jid)
+					jClient.Roster.Authorize(jid)
+					jClient.Roster.Subscribe(jid)
 					if len(args) >= 3:
 						if len(args) >= 4:
 							lx = args[3].strip().lower()
 						else:
 							lx = 'el-lx body'
 						if lx in [u'админ', 'admin']:
-							JCON.Roster.setItem(jid, args[2].strip(), ['ADMINS'])
+							jClient.Roster.setItem(jid, args[2].strip(), ['ADMINS'])
 							reply(type, source, u'добавил в группу "ADMINS" с ником "%s"' % (args[2].strip()))
 						else:
 							RSTR['AUTH'].append(jid)
 							if jid in RSTR['BAN']:
 								RSTR['BAN'].remove(jid)
 							write_file(ROSTER_FILE, str(RSTR))
-							JCON.Roster.setItem(jid, args[2].strip(), ['USERS'])
+							jClient.Roster.setItem(jid, args[2].strip(), ['USERS'])
 							reply(type, source, u'добавил в группу "USERS" с ником "%s"' % (args[2].strip()))
 					else:
 						RSTR['AUTH'].append(jid)
 						if jid in RSTR['BAN']:
 							RSTR['BAN'].remove(jid)
 						write_file(ROSTER_FILE, str(RSTR))
-						JCON.Roster.setItem(jid, jid.split('@')[0], ['USERS'])
+						jClient.Roster.setItem(jid, jid.split('@')[0], ['USERS'])
 						reply(type, source, u'добавил в группу "USERS"')
 				elif action == '-':
-					if jid in JCON.Roster.getItems():
+					if jid in jClient.Roster.getItems():
 						RSTR['BAN'].append(jid)
 						if jid in RSTR['AUTH']:
 							RSTR['AUTH'].remove(jid)
 						write_file(ROSTER_FILE, str(RSTR))
-						JCON.Roster.Unsubscribe(jid)
-						JCON.Roster.delItem(jid)
+						jClient.Roster.Unsubscribe(jid)
+						jClient.Roster.delItem(jid)
 						reply(type, source, u'сделано')
 					else:
 						reply(type, source, u'у меня в ростере его и так нет')
@@ -59,7 +59,7 @@ def roster_control(type, source, body):
 			reply(type, source, u'инвалид синтакс')
 	else:
 		list, col = '', 0
-		for jid in JCON.Roster.getItems():
+		for jid in jClient.Roster.getItems():
 			if not jid.count('@conf'):
 				col = col + 1
 				list += '\n'+str(col)+'. '+jid
@@ -121,7 +121,7 @@ def Handler_Roster_IQ(stanza):
 						IQNT['col'] += 1
 						if IQNT['col'] <= 4:
 							if subscr == 'both':
-								if JCON.Roster.getSubscription(user) != 'both' and user not in [BOSS, BOSS.lower()]:
+								if jClient.Roster.getSubscription(user) != 'both' and user not in [BOSS, BOSS.lower()]:
 									delivery(u'Контакт %s добавлен в ростер!' % (user))
 							elif subscr == 'remove':
 								delivery(u'Контакт %s удалился из ростера!' % (user))
@@ -130,11 +130,11 @@ def Handler_Roster_IQ(stanza):
 							IQNT['Yes!'] = False
 							delivery(u'Внимание! Меня атакуют (вроде), через 10 минут пришлю отчёт...')
 							try:
-								threading.Timer(600, IQ_finish).start()
+								composeTimer(600, IQ_finish).start()
 							except:
 								pass
 						try:
-							threading.Timer(18, IQ_minus).start()
+							composeTimer(18, IQ_minus).start()
 						except:
 							pass
 					else:
@@ -142,4 +142,4 @@ def Handler_Roster_IQ(stanza):
 
 command_handler(roster_control, 80, "roster")
 command_handler(roster_work, 80, "roster")
-register_iq_handler(Handler_Roster_IQ)
+handler_register("03eh", Handler_Roster_IQ)

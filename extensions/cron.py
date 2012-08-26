@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -36,7 +36,7 @@ def execute_cron_handler(commnad_handler, timer, cycles, command, type, source, 
 		except:
 			lytic_crashlog(commnad_handler, command)
 		NUM = len(CRON['tmrs']) + 1
-		CRON['tmrs'][NUM] = threading.Timer(timer, execute_cron_handler,(commnad_handler, timer, cycles, command, type, source, body))
+		CRON['tmrs'][NUM] = composeTimer(timer, execute_cron_handler, None, (commnad_handler, timer, cycles, command, type, source, body))
 		try:
 			CRON['tmrs'][NUM].start()
 		except:
@@ -92,7 +92,7 @@ def handler_cron_command(type, source, body):
 											if COMMAND_HANDLERS.has_key(command):
 												NUM = len(CRON['tmrs']) + 1
 												handler = COMMAND_HANDLERS[command]
-												CRON['tmrs'][NUM] = threading.Timer(timer, execute_cron_handler,(handler, timer, cycles, command, type, source, Params))
+												CRON['tmrs'][NUM] = composeTimer(timer, execute_cron_handler, None, (handler, timer, cycles, command, type, source, Params))
 												try:
 													CRON['tmrs'][NUM].start()
 												except:

@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -47,7 +47,7 @@ def handler_greet(type, source, body):
 	else:
 		reply(type, source, u'Отвали мудак!')
 
-def atjoin_greetz(conf, nick, afl, role):
+def atjoin_greetz(conf, nick, afl, role, status, text):
 	if (GROUPCHATS[conf][nick]['joined'] - INFO['start']) >= 20:
 		jid = handler_jid(conf+'/'+nick)
 		if jid in GREETZ[conf]:
@@ -62,6 +62,6 @@ def greetz_init(conf):
 	GREETZ[conf] = list
 
 command_handler(handler_greet, 20, "greetz")
-register_join_handler(atjoin_greetz)
+handler_register("04eh", atjoin_greetz)
 
-register_stage1_init(greetz_init)
+handler_register("01si", greetz_init)

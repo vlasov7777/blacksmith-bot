@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -40,18 +40,18 @@ def antibot_leave(conf):
 		if conf in ANTIBOT_MESS:
 			ANTIBOT_MESS.remove(conf)
 
-def handler_antibot_join(conf, nick, afl, role):
+def handler_antibot_join(conf, nick, afl, role, status, text):
 	if conf in GROUPCHATS and conf not in EXCEPTIONS:
 		if GROUPCHATS[conf][nick]['ishere']:
 			conf_nick = conf+'/'+nick
 			iq = xmpp.Iq(to = conf_nick, typ = 'get')
-			INFA['outiq'] += 1
+			INFO['outiq'] += 1
 			iq.addChild('query', {}, [], xmpp.NS_VERSION)
 			if conf not in ANTIBOT_LIST:
 				ANTIBOT_LIST[conf] = []
 			jid = handler_jid(conf_nick)
 			if jid not in ANTIBOT_LIST[conf]:
-				JCON.SendAndCallForResponse(iq, handler_antibot_version, {'conf': conf, 'jid': jid})
+				jClient.SendAndCallForResponse(iq, handler_antibot_version, {'conf': conf, 'jid': jid})
 
 def handler_antibot_version(coze, stanza, conf, jid):
 	if stanza:
@@ -66,7 +66,7 @@ def handler_antibot_version(coze, stanza, conf, jid):
 							if conf not in ANTIBOT_MESS:
 								ANTIBOT_MESS.append(conf); msg(conf, u'Здесь слишком много ботов! Если в течение 15 минут лишние не будут удалены - я сваливаю...')
 							try:
-								threading.Timer(900, antibot_leave,(conf,)).start()
+								composeTimer(900, antibot_leave, None, (conf,)).start()
 							except:
 								pass
 
@@ -121,7 +121,7 @@ def antibot_exceptions_init():
 		Print('\n\nError: can`t create antibot exceptions file!', color2)
 ##	exceptions_cleanup()
 
-register_leave_handler(handler_antibot_leave)
-register_join_handler(handler_antibot_join)
+handler_register("05eh", handler_antibot_leave)
+handler_register("04eh", handler_antibot_join)
 command_handler(handler_antibot_exceptions, 100, "antibot")
-register_stage0_init(antibot_exceptions_init)
+handler_register("00si", antibot_exceptions_init)

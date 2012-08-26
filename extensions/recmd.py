@@ -1,8 +1,8 @@
-# BS mark.1
+# BS mark.1-55
 # coding: utf-8
 
-#  BlackSmith plugin
-#  recmd_plugin.py
+#  BlackSmith mark.1
+#  recmd.py
 
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 # http://witcher-team.ucoz.ru/
@@ -145,4 +145,5 @@ def reinit_commands():
 		Print('\n\nError: can`t create commands reinit file!', color2)
 
 command_handler(handler_reinit_command, 100, "recmd")
-register_stage0_init(reinit_commands)
+
+handler_register("00si", reinit_commands)

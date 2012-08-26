@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -11,7 +11,7 @@
 OTVET = {}
 VERON = {}
 
-def handler_verification(conf, nick, afl, role):
+def handler_verification(conf, nick, afl, role, status, text):
 	if VERON[conf] != 'off' and afl == 'none':
 		jid = handler_jid(conf+'/'+nick)
 		if jid not in ADLIST:
@@ -69,8 +69,8 @@ def verification_init(conf):
 		delivery(u'Внимание! Не удалось создать verification.txt для "%s"!' % (conf))
 	VERON[conf] = state
 
-register_join_handler(handler_verification)
-register_message_handler(handler_verification_answer)
+handler_register("04eh", handler_verification)
+handler_register("01eh", handler_verification_answer)
 command_handler(handler_verification_control, 20, "verification")
 
-register_stage1_init(verification_init)
+handler_register("01si", verification_init)

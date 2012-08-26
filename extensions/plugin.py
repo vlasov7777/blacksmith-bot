@@ -1,11 +1,10 @@
-# BS mark.1
+# BS mark.1-55
 # coding: utf-8
 
-#  BlackSmith plugin
-#  plugin_plugin.py
+#  BlackSmith mark.1
+#  plugin.py
 
-# Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
-# http://witcher-team.ucoz.ru/
+#  Copyleft
 
 OUT_COMMANDS = {}
 
@@ -41,45 +40,38 @@ def handler_from_out_com(type, source, body):
 		handler_out_list(type, source)
 
 def handler_plug_list(type, source, body):
-	ltc, tal, Ypl, Npl = [], [], [], []
-	for Plugin in os.listdir(PLUGIN_DIR):
-		Ext = Plugin[-3:].lower()
-		if Ext == '.py':
+	Ok, Feil = [], []
+	for ext in sorted(os.listdir(EXT_DIR)):
+		if ext.endswith(".py"):
+			path = os.path.join(EXT_DIR, ext)
 			try:
-				data = open('%s/%s' % (PLUGIN_DIR, Plugin)).read(20)
+				data = open(path).read(20)
 			except:
 				data = str()
-			Plug = Plugin.split('.')
-			if data.count('# BS mark.1'):
-				ltc.append(Plug[0]); Ypl.append(Plugin)
-			elif data.count('talis'):
-				tal.append(Plug[0]); Ypl.append(Plugin)
+			ext_name = ext.split(".")[0]
+			if data.count("# BS mark.1-55"):
+				Ok.append(ext_name)
 			else:
-				Npl.append(Plug[0])
+				Feil.append(ext_name)
 	if body == 'get_valid_plugins':
-		return sorted(Ypl)
+		return sorted(Ok)
 	else:
 		repl = ''
-		if ltc:
-			repl += u'\nДоступно %d плагинов BlackSmith бота:\n' % len(ltc)
-			repl += ', '.join(sorted(ltc))
-		if tal:
-			repl += u'\nДоступно %d плагинов Talisman бота:\n' % len(tal)
-			repl += ', '.join(sorted(tal))
-		if Npl:
-			repl += u'\nВнимание! Вналичии %d недоступных плагинов:\n' % len(Npl)
-			repl += ', '.join(sorted(Npl))
+		if Ok:
+			repl += u"\nДоступно %d плагинов BlackSmith'а:\n%s" % (len(Ok), ', '.join(sorted(Ok)))
+		if Feil:
+			repl += u"\nВнимание! Вналичии %d недоступных плагинов:\n%s" % (len(Feil), ', '.join(sorted(Feil)))
 		reply(type, source, repl)
 
 def handler_load_plugin(type, source, body):
 	if body:
-		Plugin = '%s.py' % body.lower()
-		if Plugin in handler_plug_list(type, source, 'get_valid_plugins'):
+		ext = '%s.py' % body.lower()
+		if ext in handler_plug_list(type, source, 'get_valid_plugins'):
 			try:
-				execfile('%s/%s' % (PLUGIN_DIR, Plugin), globals())
-				repl = u'Плагин %s был успешно подгружен!' % (Plugin)
+				execfile('%s/%s' % (EXT_DIR, ext), globals())
+				repl = u'Плагин %s был успешно подгружен!' % (ext)
 			except:
-				repl = u'Плагин %s не был подгружен!\nОшибка: %s' % (Plugin, returnExc())
+				repl = u'Плагин %s не был подгружен!\nОшибка: %s' % (ext, returnExc())
 		else:
 			repl = u'Этот плагин не был найден в списке'
 	else:

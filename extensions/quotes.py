@@ -1,4 +1,4 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 # © simpleApps, 2011 - 2012.
 

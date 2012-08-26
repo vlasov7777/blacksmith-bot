@@ -1,7 +1,7 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
+#  BlackSmith mark.1
 #  order_plugin.py
 
 #  Initial Copyright © 2007 Als <Als@exploit.in>
@@ -129,7 +129,7 @@ def handler_order_message(raw, type, source, body):
 						return
 				ORDER_STATS[source[1]][jid]['msgtime'] = time.time()
 
-def handler_order_join(conf, nick, afl, role):
+def handler_order_join(conf, nick, afl, role, status, text):
 	jid = handler_jid(conf+'/'+nick)
 	if nick in GROUPCHATS[conf] and user_level(conf+'/'+nick, conf) <= 10:
 		now = time.time()
@@ -469,10 +469,10 @@ def order_init(conf):
 		delivery(u'Внимание! Не удалось создать order.txt для "%s"!' % (conf))
 	ORDER[conf] = config
 
-register_message_handler(handler_order_message)
-register_join_handler(handler_order_join)
-register_leave_handler(handler_order_leave)
-register_presence_handler(handler_order_presence)
+handler_register("01eh", handler_order_message)
+handler_register("04eh", handler_order_join)
+handler_register("05eh", handler_order_leave)
+handler_register("02eh", handler_order_presence)
 command_handler(handler_order_filt, 20, "order")
 
-register_stage1_init(order_init)
+handler_register("01si", order_init)
