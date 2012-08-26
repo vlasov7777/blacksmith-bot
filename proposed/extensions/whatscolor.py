@@ -1,9 +1,10 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 # (c) simpleApps CodingTeam, 2012.
 
 #-extmanager-depends:module.zip-#
+#-extmanager-extVer:0.99-#
 
 import re
 if not "module.zip" in sys.path:

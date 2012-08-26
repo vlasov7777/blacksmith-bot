@@ -1,7 +1,7 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
+#  BlackSmith mark.1
 #  status_plugin.py
 
 #  Initial Copyright © 2007 Als <Als@exploit.in>
@@ -45,5 +45,5 @@ def status_change(Prs):
 		stmsg = ''
 	USER_STATUS[conf][nick] = {'status': status, 'stmsg': stmsg}
 
-register_presence_handler(status_change)
+handler_register("02eh", status_change)
 command_handler(handler_status, 10, "status")

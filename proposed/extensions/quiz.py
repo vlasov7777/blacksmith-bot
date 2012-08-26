@@ -1,13 +1,14 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
-#  quiz_plugin.py
+#  BlackSmith mark.1
+#  quiz.py
 
 # (c) Gigabyte
 # http://jabbrik.ru
 
 #-extmanager-depends:static/questions.txt-#
+#-extmanager-extVer:2.0-# 
 
 
 QUIZ_FILE = 'static/questions.txt'
@@ -389,7 +390,8 @@ def quiz_file_init(conf):
 	if not check_file(conf, 'quiz.cfg'):
 		delivery(u'Внимание! Не удалось создать quiz.cfg для "%s"!' % (conf))
 
-register_message_handler(handler_quiz_message)
+handler_register("01eh", handler_quiz_message)
+
 command_handler(handler_quiz_help, 10, "quiz")
 command_handler(handler_quiz_answer, 80, "quiz")
 command_handler(handler_quiz_base_del, 100, "quiz")
@@ -400,4 +402,4 @@ command_handler(handler_quiz_hint, 10, "quiz")
 command_handler(handler_quiz_scores, 10, "quiz")
 command_handler(handler_quiz_next, 10, "quiz")
 
-register_stage1_init(quiz_file_init)
+handler_register("01si", quiz_file_init)

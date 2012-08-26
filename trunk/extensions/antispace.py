@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -51,7 +51,7 @@ def antispace_init(conf):
 		delivery(u'Внимание! Не удалось создать antispace.txt для "%s"!' % (conf))
 	ANTISPACE[conf] = state
 
-register_presence_handler(handler_antispace)
+handler_register("02eh", handler_antispace)
 command_handler(handler_antispace_control, 20, "antispace")
 
-register_stage1_init(antispace_init)
+handler_register("01si", antispace_init)

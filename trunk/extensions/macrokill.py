@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -37,7 +37,7 @@ def handler_conflist(type, source, body):
 			pfx = PREFIX[conf]
 		else:
 			pfx = u'нет'
-		if conf in UNAVALABLE:
+		if conf in UNAVAILABLE:
 			ismoder = u'Внимание!! Нет прав!!'
 		else:
 			ismoder = u'модер'
@@ -130,7 +130,7 @@ def handler_topic(type, source, body):
 	if body:
 		body = replace_all(body, {'<': u'«', '>': u'»'})
 		try:
-			JCON.send(xmpp.Message(unicode(source[1]), "", "groupchat", body))
+			jClient.send(xmpp.Message(unicode(source[1]), "", "groupchat", body))
 		except:
 			reply(type, source, u'Не отправляется как-то эта хрень...')
 	else:

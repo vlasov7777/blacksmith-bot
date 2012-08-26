@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -106,4 +106,4 @@ def bottle_init(conf):
 command_handler(handler_bottle, 10, "bottle")
 command_handler(handler_bottle_control, 20, "bottle")
 
-register_stage1_init(bottle_init)
+handler_register("01si", bottle_init)

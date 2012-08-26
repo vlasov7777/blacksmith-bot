@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -120,9 +120,9 @@ def userstat_init(conf):
 	else:
 		delivery(u'Внимание! Не удалось создать userstat.txt для "%s"!' % (conf))
 
-register_presence_handler(handler_userstat)
+handler_register("02eh", handler_userstat)
 command_handler(handler_check_userstat, 20, "userstat")
 command_handler(handler_userstat_here, 10, "userstat")
-register_stage3_init(userstat_save)
+handler_register("03si", userstat_save)
 
-register_stage1_init(userstat_init)
+handler_register("01si", userstat_init)

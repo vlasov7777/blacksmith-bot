@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -70,5 +70,5 @@ def load_servers():
 
 command_handler(handler_antispamer, 30, "antispamer")
 
-register_stage1_init(spamer_state)
-register_stage2_init(load_servers)
+handler_register("01si", spamer_state)
+handler_register("02si", load_servers)

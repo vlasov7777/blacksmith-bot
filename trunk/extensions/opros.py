@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -65,9 +65,9 @@ def opros_exe(starter):
 								OPROS_USERS[jid] = {'vote': False, 'mind': False, 'text':  None}
 								msg(conf_user, u'ВНИМАНИЕ!! Глобальный опрос модераторов (By %s):\n\n%s\nДля ответа напишите: "вариант" <№ варианта> или же выскажитесь словами "вариант*" <высказывание> (можно написать и то и то)' % (starter, topic))
 			try:
-				threading.Timer(1200, opros_exe,(starter,)).start()
+				composeTimer(1200, opros_exe, opros_exe.func_name, (starter,)).start()
 			except:
-				LAST['null'] += 1
+				pass
 
 def handler_opros(type, source, body):
 	if body:

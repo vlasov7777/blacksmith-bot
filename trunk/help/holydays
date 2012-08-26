@@ -1,5 +1,5 @@
 {
-u"handler_hollydays": {
+u"handler_holidays": {
 u"syntax": u'''праздники''',
 
 u"cmd": u'''праздники''',

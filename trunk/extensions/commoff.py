@@ -1,7 +1,7 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
+#  BlackSmith mark.1
 #  commoff_plugin.py
 
 #  Initial Copyright © 2007 Als [Als@exploit.in]
@@ -122,4 +122,4 @@ def get_commoff(conf):
 command_handler(handler_commoff, 20, "commoff")
 command_handler(handler_common, 20, "commoff")
 
-register_stage1_init(get_commoff)
+handler_register("01si", get_commoff)

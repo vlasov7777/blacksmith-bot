@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -26,9 +26,9 @@ def handler_get_vcard(type, source, nick):
 	else:
 		recipient = source[0]
 	vcard_iq = xmpp.Iq(to = recipient, typ = 'get')
-	INFA['outiq'] += 1
+	INFO['outiq'] += 1
 	vcard_iq.addChild('vCard', {}, [], 'vcard-temp')
-	JCON.SendAndCallForResponse(vcard_iq, handler_vcard_answer, {'type': type, 'source': source, 'nick': nick})
+	jClient.SendAndCallForResponse(vcard_iq, handler_vcard_answer, {'type': type, 'source': source, 'nick': nick})
 
 def handler_vcard_answer(coze, stanza, type, source, nick):
 		if stanza:

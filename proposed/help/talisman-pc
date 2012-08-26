@@ -1,0 +1,11 @@
+{
+u"findAndReplace": {
+u"syntax": u'''talisman_ext [параметр]''',
+
+u"cmd": u'''talisman_ext''',
+
+u"examples": [u'''talisman_ext переместить''', u'''talisman_ext уничтожить'''],
+
+u"desc": u'''Перемещение или удаление всех найденных в папке extensions плагинов Talisman-bot'''
+}
+}

@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -35,10 +35,10 @@ def handler_clean(type, source, body):
 				if not GROUPCHATS.has_key(source[1]):
 					return
 				try:
-					JCON.send(zero)
+					jClient.send(zero)
 				except IOError:
 					return
-				INFA['outmsg'] += 1
+				INFO['outmsg'] += 1
 				if (Numb != 23):
 					time.sleep(1.4)
 			if type != 'private':
@@ -194,7 +194,7 @@ def chat_cache_init(conf):
 	CHAT_CACHE[conf] = {'1': '', '2': ''}
 	CHAT_DIRTY[conf] = True
 
-register_message_handler(handler_chat_cache)
+handler_register("01eh", handler_chat_cache)
 command_handler(handler_clean, 15, "collect")
 command_handler(last_chat_cache, 20, "collect")
 command_handler(handler_test, 10, "collect")
@@ -203,6 +203,6 @@ command_handler(handler_admin_say, 20, "collect")
 command_handler(handler_global_message, 100, "collect")
 command_handler(handler_auto_message, 10, "collect")
 command_handler(handler_amsg_blacklist, 100, "collect")
-register_stage0_init(amsg_blacklist_init)
+handler_register("00si", amsg_blacklist_init)
 
-register_stage1_init(chat_cache_init)
+handler_register("01si", chat_cache_init)

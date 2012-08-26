@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -67,7 +67,7 @@ def handler_command_timer(type, source, body):
 								if COMMAND_HANDLERS.has_key(command):
 									NUM = len(TIMERS['tmrs']) + 1
 									handler = COMMAND_HANDLERS[command]
-									TIMERS['tmrs'][NUM] = threading.Timer(timer, execute_handler, (handler, (type, source, Params), command,))
+									TIMERS['tmrs'][NUM] = composeThr(timer, execute_handler, None, (handler, (type, source, Params), command,))
 									try:
 										TIMERS['tmrs'][NUM].start()
 									except:

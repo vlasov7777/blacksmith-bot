@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -7,30 +7,12 @@
 # Coded by: WitcherGeralt [WitcherGeralt@rocketmail.com]
 # http://witcher-team.ucoz.ru/
 
-sByte = [' %s' % (x) for x in ['0 bytes', '0 kb', '0 mb', '0 gb']]
-
 def build_filename(DIR, name):
 	name_ = '%s/%s' % (DIR, name)
 	if not os.path.exists(name_):
 		return name_
 	name = 'copy_%s' % (name)
 	return build_filename(DIR, name)
-
-def Bytes2Tbytes(or_bytes):
-	kbytes, bytes = divmod(or_bytes, 1024)
-	mbytes, kbytes = divmod(kbytes, 1024)
-	gbytes, mbytes = divmod(mbytes, 1024)
-	tbytes, gbytes = divmod(gbytes, 1024)
-	text = u'%d bytes' % (bytes)
-	if or_bytes >= 1024:
-		text = u'%d kb %s' % (kbytes, text)
-	if or_bytes >= 1048576:
-		text = u'%d mb %s' % (mbytes, text)
-	if or_bytes >= 1073741824:
-		text = u'%d gb %s' % (gbytes, text)
-	if or_bytes >= 1099511627776:
-		text = u'%d tb %s' % (tbytes, text)
-	return replace_all(text, sByte, '')
 
 def download_handler(type, source, body):
 	if body:
@@ -63,7 +45,7 @@ def download_handler(type, source, body):
 			else:
 				size = 0
 			if size:
-				repl = u'Файл "%s" (%s) успешно скачан --> %s' % (name, Bytes2Tbytes(size), dname)
+				repl = u'Файл "%s" (%s) успешно скачан --> %s' % (name, byteFormat(size), dname)
 			else:
 				repl = u'Файл "%s" успешно скачан --> %s' % (name, dname)
 			reply(type, source, repl)

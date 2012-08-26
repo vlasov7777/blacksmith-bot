@@ -1,13 +1,13 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  BlackSmith plugin
-#  new_boltun_plugin.py
+#  BlackSmith mark.1
+#  xboltun.py
 
-# Coded: by WitcherGeralt [WitcherGeralt@rocketmail.com]
-# http://witcher-team.ucoz.ru
+#  Copyleft
 
 #-extmanager-depends:static/boltun/ident_base.txt;static/boltun/random_base.txt-#
+#-extmanager-extVer:1.3-#
 
 IDENT_BASE = 'static/boltun/ident_base.txt'
 RAND_BASE = 'static/boltun/random_base.txt'
@@ -82,7 +82,8 @@ def boltun_work_init(conf):
 		FLOOD[conf] = 'on'
 		delivery(u'Внимание! Не удалось создать flood.txt для "%s"!' % (conf))
 
-register_message_handler(boltun_work)
+handler_register("01eh", boltun_work)
+
 command_handler(boltun_control, 20, "xboltun")
 
-register_stage1_init(boltun_work_init)
+handler_register("01si", boltun_work_init)

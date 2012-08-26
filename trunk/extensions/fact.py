@@ -1,7 +1,7 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
+#  BlackSmith mark.1
 #  fact_plugin.py
 
 #  Initial Copyright © 2002-2005 Mike Mintz <mikemintz@gmail.com>

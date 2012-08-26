@@ -1,4 +1,4 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -20,9 +20,9 @@ def handler_features_get(type, source, nick):
 	else:
 		conf_nick = source[0]
 	iq = xmpp.Iq(to = conf_nick, typ = 'get')
-	INFA['outiq'] += 1
+	INFO['outiq'] += 1
 	iq.addChild('query', {}, [], xmpp.NS_DISCO_INFO)
-	JCON.SendAndCallForResponse(iq, handler_features_answer, {'type': type, 'source': source, 'nick': nick})
+	jClient.SendAndCallForResponse(iq, handler_features_answer, {'type': type, 'source': source, 'nick': nick})
 
 def handler_features_answer(coze, stanza, type, source, nick):
 	if stanza:

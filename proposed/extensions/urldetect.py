@@ -1,11 +1,13 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 # © simpleApps, 21.05.2012 (12:38:47)
 # Web site header detector
 
-# BETA! 
+# BETA!
+#-extmanager-extVer:1.5-#
 import re
+import urllib2
 
 def contentTypeParser(opener, data):
 	ContentType = opener.headers.get("Content-Type")
@@ -31,7 +33,9 @@ def urlWatcher(raw, mType, source, body):
 				if url:
 					url = url[0].split()[0].strip(".,\\)\"")
 					if not chkUnicode(url): url = "http://" + IDNA(url)
-					opener = urllib.urlopen(url)
+					reQ = Request(link)
+					reQ.add_header("User-agent", UserAgents["BlackSmith"])
+					opener = urllib2.urlopen(reQ)
 					headers  = opener.headers
 					if "text/html" in headers.get("Content-Type") or url.endswith(".html"):
 						data = opener.read(4500)
@@ -78,6 +82,8 @@ def urlWatcherConfig_load():
 	if initialize_file("dynamic/urlWatcher.txt", str(list())):
 		globals()["urlDetect"] = eval(read_file("dynamic/urlWatcher.txt"))
 
-register_message_handler(urlWatcher)
-register_stage0_init(urlWatcherConfig_load)
+handler_register("01eh", urlWatcher)
+
 command_handler(urlWatcherConfig, 20, "urldetect")
+
+handler_register("00si", urlWatcherConfig_load)

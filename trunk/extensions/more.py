@@ -1,29 +1,16 @@
-#===istalismanplugin===
-# /* coding: utf-8 */
+# BS mark.1-55
+# coding: utf-8
 
-#  BlackSmith plugin
-#  more_plugin.py
+#  BlackSmith mark.1
+#  more.py
 
-#  Initial Copyright © 2009 Als [als-als@ya.ru]
-#  Modifications: WitcherGeralt [WitcherGeralt@rocketmail.com]
+#  Code © (2012) by WitcherGeralt [alkorgun@gmail.com]
 
-MORE = {}
+def command_more(ltype, source, body):
+	if ltype == "public":
+		if MORE.get(source[1]):
+			body = "[&&] %s" % (MORE[source[1]])
+			MORE[source[1]] = ""
+			msg(source[1], body)
 
-def handler_more(type, source, body):
-	if type == 'public' and MORE.has_key(source[1]):
-		if MORE[source[1]]:
-			reply(type, source, MORE[source[1]])
-
-def handler_more_outmsg(target, body, obody):
-	if MORE.has_key(target):
-		if hash(obody) != MORE[target]:
-			if len(obody) > CHAT_MSG_LIMIT:
-				MORE[target] = obody[CHAT_MSG_LIMIT:]
-
-def init_more(conf):
-	MORE[conf] = None
-
-register_outgoing_message_handler(handler_more_outmsg)
-command_handler(handler_more, 10, "more")
-
-register_stage1_init(init_more)
+command_handler(command_more, 10, "more")

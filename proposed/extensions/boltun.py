@@ -1,12 +1,12 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  BlackSmith plugin
-#  boltun_plugin.py
+#  BlackSmith mark.1
+#  boltun.py
 
-# Coded: by WitcherGeralt [WitcherGeralt@rocketmail.com]
-# for http://witcher-team.ucoz.ru/
-# Parts of code: Gigabyte [gigabyte@ngs.ru], 40tman [40tman@qip.ru]
+#  Copyleft
+
+#-extmanager-extVer:2.2-#
 
 BOLTUN_FILE = 'dynamic/boltun.txt'
 
@@ -215,13 +215,14 @@ def boltun_work_init(conf):
 		FLOOD[conf] = 'on'
 		delivery(u'Внимание! Не удалось создать flood.txt для "%s"!' % (conf))
 
-register_message_handler(boltun_work)
+handler_register("01eh", boltun_work)
+
 command_handler(boltun_bot, 100, "boltun")
 command_handler(boltun_rand, 100, "boltun")
 command_handler(boltun_user, 100, "boltun")
 command_handler(boltun_all, 100, "boltun")
 command_handler(boltun_export, 100, "boltun")
 command_handler(boltun_control, 20, "boltun")
-register_stage0_init(boltun_file_init)
 
-register_stage1_init(boltun_work_init)
+handler_register("00si", boltun_file_init)
+handler_register("01si", boltun_work_init)

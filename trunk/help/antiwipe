@@ -1,5 +1,5 @@
 {
-u"handler_antivipe_control": {
+u"handler_antiwipe_control": {
 u"syntax": u'''антивайп [вкл/on/1/выкл/off/0]''',
 
 u"cmd": u'''антивайп''',

@@ -1,14 +1,15 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin[!](recoded for Лютик Bot)
-#  vote_plugin.py
+#  BlackSmith mark.1
+#  vote.py
 
 # Author:
 #  Mike Mintz [mikemintz@gmail.com]
 # Modifications:
 #  Als [Als@exploit.in]
 #  WitcherGeralt [WitcherGeralt@rocketmail.com]
+#-extmanager-extVer:1.3-#
 
 VOTE_FILE = 'dynamic/vote.txt'
 
@@ -334,7 +335,8 @@ def vote_file_init():
 	else:
 		Print('\n\nError: can`t create vote.dat!', color2)
 
-register_join_handler(handler_vote_join)
+handler_register("04eh", handler_vote_join)
+
 command_handler(handler_vote_polloptions, 20, "vote")
 command_handler(handler_poll_start_stop, 20, "vote")
 command_handler(handler_vote_vote, 10, "vote")
@@ -342,4 +344,5 @@ command_handler(handler_vote_pollopinions, 20, "vote")
 command_handler(handler_vote_newpoll, 20, "vote")
 command_handler(handler_vote_pollopinions_control, 20, "vote")
 command_handler(handler_vote_endpoll, 20, "vote")
-register_stage0_init(vote_file_init)
+
+handler_register("00si", vote_file_init)

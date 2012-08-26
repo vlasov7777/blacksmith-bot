@@ -1,12 +1,11 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  BlackSmith plugin
-#  rss_plugin.py
+#  BlackSmith mark.1
+#  rss.py
 
-# Author: Unknown
-# Ported from Neutron and ReCoded by: WitcherGeralt (WitcherGeralt@jabber.ru)
-# http://witcher-team.ucoz.ru/
+#  Copyleft
+#-extmanager-extVer:1.1-# 
 
 from xml.sax import make_parser, handler
 
@@ -252,4 +251,5 @@ command_handler(handler_rss_control, 30, "rss")
 command_handler(handler_rss_channels, 100, "rss")
 command_handler(handler_rss_subscribe, 30, "rss")
 command_handler(handler_rss_info, 30, "rss")
-register_stage0_init(rss_file_init)
+
+handler_register("00si", rss_file_init)

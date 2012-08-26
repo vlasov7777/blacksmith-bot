@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -11,9 +11,9 @@ aliveKeeper = {"iters": 0}
 
 def iQ_ask(victim, callbackFunc, qType):
 	iQ = xmpp.Iq("get", to = victim)
-	INFA["outiq"] += 1
+	INFO["outiq"] += 1
 	iQ.addChild("ping", {}, [], xmpp.NS_PING)
-	JCON.SendAndCallForResponse(iQ, callbackFunc, {"qType": qType})
+	jClient.SendAndCallForResponse(iQ, callbackFunc, {"qType": qType})
 
 def aliveKeeper_ask(qType):
 	if qType == "chat":
@@ -27,7 +27,9 @@ def aliveKeeper_answer(coze, iQ, qType):
 		chat, error = iQ.getFrom().getStripped(), iQ.getErrorCode()
 		if error and error != "405":
 			try:
-				threading.Timer(180, error_join_timer,(chat,)).start()
+				ThrName = "rejoin-%s" % (conf.decode("utf-8"))
+				if ThrName not in ThrNames():
+					composeTimer(360, error_join_timer, ThrName, (chat,)).start()
 			except:
 				pass
 			if qType == "chat":
@@ -51,13 +53,13 @@ def aliveKeeper_worker():
 			break
 		except IOError, e:
 			if e.message == "Disconnected!":
-				sys_exit("Can't get the iQ answer.")
+				sys_exit("Can't get an iQ answer.")
 			else:
 				lytic_crashlog(aliveKeeper_worker)
 		except:
 			lytic_crashlog(aliveKeeper_worker)
 
 def aliveKeeper_init():
-	threading.Thread(target = aliveKeeper_worker, args = (),).start()
+	composeThr(aliveKeeper_worker, aliveKeeper_worker.func_name).start()
 
-register_stage2_init(aliveKeeper_init)
+handler_register("02si", aliveKeeper_init)

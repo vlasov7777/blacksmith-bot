@@ -1,7 +1,7 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
+#  BlackSmith mark.1
 #  version_plugin.py
 
 # Author:
@@ -27,7 +27,7 @@ def command_getVersion(mType, source, args):
 		target = source[0]
 	iq = xmpp.Iq(to = target, typ = "get")
 	iq.addChild("query", {}, [], xmpp.NS_VERSION)
-	JCON.SendAndCallForResponse(iq, answer_version, {"mType": mType, "source": source})
+	jClient.SendAndCallForResponse(iq, answer_version, {"mType": mType, "source": source})
 
 def answer_version(coze, stanza, mType, source):
 	if xmpp.isResultNode(stanza):

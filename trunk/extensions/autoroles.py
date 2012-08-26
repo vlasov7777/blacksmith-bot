@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -183,7 +183,7 @@ def handler_autoroles_resave(conf, key, list):
 	base[key] = list
 	write_file(filename, str(base))
 
-def handler_autoroles_work(conf, nick, afl, role):
+def handler_autoroles_work(conf, nick, afl, role, status, text):
 	jid = handler_jid(conf+'/'+nick)
 	if jid in AMODER[conf]:
 		handler_moder(conf, nick, u'амодер')
@@ -201,9 +201,9 @@ def autoroles_init(conf):
 		delivery(u'Внимание! Не удалось создать autoroles.txt для "%s"!' % (conf))
 	AMODER[conf], AKICK[conf], AVSTR[conf] = amoder, akick, avisitor
 
-register_join_handler(handler_autoroles_work)
+handler_register("04eh", handler_autoroles_work)
 command_handler(handler_amoder, 20, "autoroles")
 command_handler(handler_akick, 20, "autoroles")
 command_handler(handler_avisitor, 20, "autoroles")
 
-register_stage1_init(autoroles_init)
+handler_register("01si", autoroles_init)

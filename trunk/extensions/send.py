@@ -1,7 +1,7 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
+#  BlackSmith mark.1
 #  send_plugin.py
 
 #  Initial Copyright © 2007 Als <Als@exploit.in>
@@ -43,7 +43,7 @@ def handler_send_save(ltype, source, body):
 	else:
 		reply(ltype, source, u'Эй чувак! Очнись! Ты не в чате!')
 
-def handler_send_join(conf, nick, afl, role):
+def handler_send_join(conf, nick, afl, role, status, text):
 	if nick in SEND_CACHE[conf]:
 		for body in SEND_CACHE[conf][nick]:
 			msg(conf+'/'+nick, body)
@@ -58,7 +58,7 @@ def get_send_cache(conf):
 		delivery(u'Внимание! Не удалось создать send.txt для "%s"!' % (conf))
 	SEND_CACHE[conf] = cache
 
-register_join_handler(handler_send_join)
+handler_register("04eh", handler_send_join)
 command_handler(handler_send_save, 10, "send")
 
-register_stage1_init(get_send_cache)
+handler_register("01si", get_send_cache)

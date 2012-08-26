@@ -1,14 +1,15 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
-#  roulette_plugin.py
+#  BlackSmith mark.1
+#  roulette.py
 
 # Author:
 #  dimichxp [dimichxp@gmail.com]
 # Modifications:
 #  Als [Als@exploit.in]
 #  WitcherGeralt [WitcherGeralt@rocketmail.com]
+#-extmanager-extVer:1.3-# 
 
 def handler_roulette_one(type, source, nick):
 	if source[1] in GROUPCHATS:

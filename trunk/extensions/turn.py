@@ -1,4 +1,4 @@
-# BS mark.1 plugin
+# BS mark.1-55 plugin
 # /* coding: utf-8 */
 
 #  Initial Copyright © 2010 - 2011 WitcherGeralt [WitcherGeralt@rocketmail.com]
@@ -74,6 +74,6 @@ def init_Turn_Base(chat):
 def edit_Turn_Base(conf):
 	del TurnBase[conf]
 
-register_stage1_init(init_Turn_Base)
+handler_register("01si", init_Turn_Base)
 command_handler(command_turn, 10, "turn")
-register_message_handler(collect_turnable)
+handler_register("01eh", collect_turnable)

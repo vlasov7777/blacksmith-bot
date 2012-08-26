@@ -1,4 +1,4 @@
-# BS mark.1 plugin
+# BS mark.1-55 plugin
 # /* coding: utf-8 */
 # (c) simpleApps CodingTeam, 2011
 # This program distributed under Apache 2.0 license.

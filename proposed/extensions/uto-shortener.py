@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf8 */
 # BlackSmith Bot Plugin
 # Copyright Url Shortener (by service u.to) © simpleApps CodingTeam (Fri Oct 28 18:54:26 2011)
@@ -7,6 +7,7 @@
 
 
 #-extmanager-depends:module.zip-#
+#-extmanager-extVer:1.0-#
 import re
 sys.path.append("module.zip")
 

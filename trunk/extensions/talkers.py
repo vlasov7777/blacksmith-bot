@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -156,8 +156,8 @@ def talkers_init(conf):
 	else:
 		delivery(u'Внимание! Не удалось создать talkers.txt для "%s"!' % (conf))
 
-register_message_handler(handler_talkers_register)
+handler_register("01eh", handler_talkers_register)
 command_handler(handler_talkers, 11, "talkers")
-register_stage3_init(talkers_save)
+handler_register("03si", talkers_save)
 
-register_stage1_init(talkers_init)
+handler_register("01si", talkers_init)

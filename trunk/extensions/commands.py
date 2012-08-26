@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -25,8 +25,7 @@ def handler_commands(type, source, body):
 							if COMMANDS.has_key(command):
 								if cmd != list[0]:
 									time.sleep(2)
-								with wsmph:
-									call_command_handlers(command, type, source, Parameters, command)
+								call_command_handlers(command, type, source, Parameters, command)
 							else:
 								reply(type, source, u'нет такой команды!')
 						else:

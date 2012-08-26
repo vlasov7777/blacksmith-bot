@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
@@ -92,7 +92,10 @@ def handler_set_access(type, source, Params):
 							elif int(access) < -5:
 								reply(type, source, u'меньше -5 нельзя!')
 							elif access == '0':
-								reply(type, source, u'Доступ "0" выдавать нельзя!')
+								change_local_access(source[1], jidto)
+								change_conf_access(source[1], jidto)
+								reply(type, source, u'Кажись забрал доступ...')
+
 							elif len(splitdata) == 1:
 								if source[1] in CONFACCESS and jidto in CONFACCESS[source[1]]:
 									change_conf_access(source[1], jidto)
@@ -180,4 +183,4 @@ command_handler(handler_view_access, 10, "access")
 command_handler(handler_set_access, 20, "access")
 command_handler(handler_set_access_glob, 100, "access")
 
-register_stage1_init(load_conf_access_levels)
+handler_register("01si", load_conf_access_levels)

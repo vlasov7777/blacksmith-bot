@@ -1,11 +1,13 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman Bot plugin
-#  bomba_plugin.py
+#  BlackSmith mark.1
+#  bomba.py
 
 # Coded by: 40tman (40tman@qip.ru)
 # ReCoded: by WitcherGeralt (WitcherGeralt@jabber.ru)
+
+#-extmanager-extVer:1.3-# 
 
 COLOR = [u'красный', u'зеленый', u'синий', u'голубенький', u'белый', u'желтый', u'серый', u'оранжевый', u'фиолетовый', u'серо-буро-малиновый']
 
@@ -56,5 +58,6 @@ def bomb_msg(raw, type, source, body):
 			handler_kick(source[1], source[2], u'птыдыщь!')
 			del PROVOD[source[2]]
 
-register_message_handler(bomb_msg)
+handler_register("01eh", bomb_msg)
+
 command_handler(bomb, 10, "bomba")

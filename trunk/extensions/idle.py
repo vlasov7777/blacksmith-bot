@@ -1,7 +1,7 @@
-#===istalismanplugin===
+# BS mark.1-55
 # /* coding: utf-8 */
 
-#  Talisman plugin
+#  BlackSmith mark.1
 #  idle_plugin.py
 
 #  Initial Copyright © 2007 Als [Als@exploit.in]
@@ -10,9 +10,9 @@ def handler_uptime_server(type, source, server):
 	if not server:
 		server = SERVER
 	idle_iq = xmpp.Iq(to = server, typ = 'get')
-	INFA['outiq'] += 1
+	INFO['outiq'] += 1
 	idle_iq.addChild('query', {}, [], xmpp.NS_LAST)
-	JCON.SendAndCallForResponse(idle_iq, uptime_server_answer, {'type': type, 'source': source, 'server': server})
+	jClient.SendAndCallForResponse(idle_iq, uptime_server_answer, {'type': type, 'source': source, 'server': server})
 
 def uptime_server_answer(coze, stanza, type, source, server):
 	if stanza:

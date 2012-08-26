@@ -1,4 +1,4 @@
-# BS mark.1
+# BS mark.1-55
 # /* coding: utf-8 */
 
 # BlackSmith Extension Manager
@@ -12,6 +12,7 @@
 import urllib
 
 svnUrl = "http://blacksmith-bot.googlecode.com/svn/proposed/%s/"
+extFile = "extensions.txt"
 
 def urlsplit(url):
 	if url and url.count("/"):
@@ -43,7 +44,12 @@ def getDeps(depList = [], plugin = None):
 		depList = findDeps(read_url(svnUrl % "extensions/%s" % plugin))
 	if depList:
 		for dep in depList:
-			urllib.urlretrieve(svnUrl % dep, saveDeps(dep)) 
+			if dep.endswith(".dir"):
+				Dir = dep[:-4]
+				if not os.path.exists(Dir):
+					os.makedirs(Dir)
+			else:
+				urllib.urlretrieve(svnUrl % dep, saveDeps(dep)) 
 
 def findDeps(data, join = None):
 	match = re.search("#-extmanager-depends:(.*)-#", data)
@@ -53,6 +59,13 @@ def findDeps(data, join = None):
 		if join:
 			return str.join(join, depList)
 		return depList
+
+def findExtVer(data):
+	match = re.search("#-extmanager-extVer:(.*)-#", data)
+	if match:
+		ver = match.group(1)
+		return ver
+	return "1.0"
 
 def extManager(mType, source, args):
 	if args:
@@ -65,7 +78,7 @@ def extManager(mType, source, args):
 
 		if a[0] == u"лист":
 			for x, y in enumerate(extList):
-				answer +=  u"%i. %s.\n" % (x + 1, y)
+				answer +=  u"%i. %s;\n" % (x + 1, y)
 
 		elif a[0] in extList and len(a) > 1:
 			if a[1] in (u"лист", u"инфо", "установить"):
@@ -85,9 +98,12 @@ def extManager(mType, source, args):
 					answer = answer % vars()
 	
 				elif a[1] == u"установить":
+					extensions = eval(read_file("dynamic/%s" % extFile))
 					urllib.urlretrieve(svnUrl % "extensions/%s" % fullName, "extensions/%s" % fullName)
 					urllib.urlretrieve(svnUrl % "help/" + a[0], "help/%s" % a[0])
 					getDeps(depList)
+					extensions[fullName] = findExtVer(read_url(svnUrl % "extensions/%s" % fullName))
+					write_file("dynamic/%s" % extFile, str(extensions))
 					answer = u"Плагин «%s» успешно установлен"
 					try:
 						execfile("./extensions/%s" % fullName, globals())
@@ -99,12 +115,16 @@ def extManager(mType, source, args):
 			elif a[1] == u"удалить":
 				if os.path.exists("./extensions/%s" % fullName):
 					size = 0
+					extensions = eval(read_file("dynamic/%s" % extFile))
 					depList = findDeps(read_file("./extensions/%s" % fullName))
 					try:
 						for x in ("./extensions/%s" % fullName, "./help/%s" % name):
 							size += os.path.getsize(x)
 							os.remove(x)
 						answer += u"Плагин «%(name)s» успешно удалён."
+						if fullName in extensions.keys():
+							del extensions[fullName]
+							write_file("dynamic/%s" % extFile, str(extensions))
 					except:
 						answer += u"Удаление плагина «%(name)s» не удалось."
 							
@@ -120,9 +140,43 @@ def extManager(mType, source, args):
 					answer += " Освобождённое место: %(size)s."
 				else:
 					answer = u"Плагин «%(name)s» не найден!"
-					
-		else:
-			answer = u"Ошибка. Возможно, этого плагина нет в списке или вы указали несуществующий параметр."
+			else:
+				answer = u"Ошибка. Возможно, этого плагина нет в списке или вы указали несуществующий параметр."
+
+		elif a[0] == u"upgrade":
+			extensions = eval(read_file("dynamic/%s" % extFile))
+			toUpdate = dict()
+			for ext in extensions.keys():
+				localVer = "7"#extensions[ext]
+				remoteVer = findExtVer(read_url(svnUrl % "extensions/%s" % ext))
+				if localVer != remoteVer:
+					toUpdate[ext] = remoteVer
+			if toUpdate:
+				answer = "\nОбновлено %d плагинов: " % len(toUpdate) + str.join(", ", toUpdate)
+				jDepList = []
+				for ext in toUpdate.keys():
+					name = ext[:-3]
+					depList = findDeps(read_url(svnUrl % "extensions/%s" % ext))
+					if depList:
+						jDepList.extend(depList)
+					urllib.urlretrieve(svnUrl % "extensions/%s" % ext, "extensions/%s" % ext)
+					urllib.urlretrieve(svnUrl % "help/" + name, "help/%s" % name)
+					getDeps(depList)
+					extensions[ext] = toUpdate[ext]
+				if jDepList:
+					jDepList = str.join(", ", jDepList)
+					answer += "\nТакже были установлены следующие зависимости: %(jDepList)s"
+				answer = answer % vars()
+				write_file("dynamic/%s" % extFile, str(extensions))
+			
 		reply(mType, source, answer % vars())
 
+def extmanager_init(chat):
+	if check_file("", extFile, str(dict())):
+		pass
+	else:
+		delivery(u"Внимание! Не удалось создать extmanager.txt!")
+
 command_handler(extManager, 100, "extmanager")
+
+handler_register("01si", extmanager_init)
