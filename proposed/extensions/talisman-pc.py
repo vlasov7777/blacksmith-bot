@@ -5,7 +5,7 @@
 #  __talisman__.py
 
 #  © simpleApps, 2012
-#-extmanager-extVer:2.2-#
+#-extmanager-extVer:2.3-#
 
 import traceback
 
@@ -216,13 +216,13 @@ def findAndReplace(mType, source, args):
 		if not os.path.exists(PLUGIN_DIR):
 			os.makedirs(PLUGIN_DIR)
 		for plug in plugins:
-			oldpath = os.path.join("extensions", ext)
-			newpath = os.path.join(PLUGIN_DIR, ext)
+			oldpath = os.path.join("extensions", plug)
+			newpath = os.path.join(PLUGIN_DIR, plug)
 			shutli.move(oldpath, newpath)
 		answer = u"Успешно перемещено %d плагинов Talisman-bot." % len(plugins)
 	elif args in ("exterminate", u"уничтожить"):
 		for plug in plugins:
-			addr = os.path.join("extensions", ext)
+			addr = os.path.join("extensions", plug)
 			os.remove(addr)
 		answer = u"Успешно уничтожено %d плагинов Talisman-bot." % len(plugins)
 	reply(mType, source, answer)
