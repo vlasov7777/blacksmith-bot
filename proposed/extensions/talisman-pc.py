@@ -218,7 +218,8 @@ def findAndReplace(mType, source, args):
 		for plug in plugins:
 			oldpath = os.path.join("extensions", plug)
 			newpath = os.path.join(PLUGIN_DIR, plug)
-			shutli.move(oldpath, newpath)
+			shutil.move(oldpath, newpath)
+		del shutil
 		answer = u"Успешно перемещено %d плагинов Talisman-bot." % len(plugins)
 	elif args in ("exterminate", u"уничтожить"):
 		for plug in plugins:
