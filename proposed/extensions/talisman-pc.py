@@ -136,7 +136,7 @@ def load_talisman_plugins():
 	if os.path.exists(PLUGIN_DIR):
 		Print('\n\nLOADING TALISMAN PLUGINS:', color4)
 		Ok, Feil = find_plugins()
-		for ext in All:
+		for ext in Ok:
 			path = os.path.join(PLUGIN_DIR, ext)
 			ext_name = os.path.splitext(ext)[0]
 			globals()["CMD_FLAG"] = True
