@@ -65,10 +65,10 @@ def handler_plug_list(type, source, body):
 
 def handler_load_plugin(type, source, body):
 	if body:
-		ext = '%s.py' % body.lower()
+		ext = body.lower()
 		if ext in handler_plug_list(type, source, 'get_valid_plugins'):
 			try:
-				execfile('%s/%s' % (EXT_DIR, ext), globals())
+				execfile('%s/%s.py' % (EXT_DIR, ext), globals())
 				repl = u'Плагин %s был успешно подгружен!' % (ext)
 			except:
 				repl = u'Плагин %s не был подгружен!\nОшибка: %s' % (ext, returnExc())

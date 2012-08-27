@@ -147,7 +147,7 @@ def extManager(mType, source, args):
 			extensions = eval(read_file("dynamic/%s" % extFile))
 			toUpdate = dict()
 			for ext in extensions.keys():
-				localVer = "7"#extensions[ext]
+				localVer = extensions[ext]
 				remoteVer = findExtVer(read_url(svnUrl % "extensions/%s" % ext))
 				if localVer != remoteVer:
 					toUpdate[ext] = remoteVer
@@ -163,6 +163,7 @@ def extManager(mType, source, args):
 					urllib.urlretrieve(svnUrl % "help/" + name, "help/%s" % name)
 					getDeps(depList)
 					extensions[ext] = toUpdate[ext]
+					execfile("extensions/%s" % ext, globals())
 				if jDepList:
 					jDepList = str.join(", ", jDepList)
 					answer += "\nТакже были установлены следующие зависимости: %(jDepList)s"

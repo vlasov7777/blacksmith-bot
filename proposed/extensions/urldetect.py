@@ -5,7 +5,7 @@
 # Web site header detector
 
 # BETA!
-#-extmanager-extVer:1.5-#
+#-extmanager-extVer:1.6-#
 import re
 import urllib2
 
@@ -33,7 +33,7 @@ def urlWatcher(raw, mType, source, body):
 				if url:
 					url = url[0].split()[0].strip(".,\\)\"")
 					if not chkUnicode(url): url = "http://" + IDNA(url)
-					reQ = Request(link)
+					reQ = urllib2.Request(url)
 					reQ.add_header("User-agent", UserAgents["BlackSmith"])
 					opener = urllib2.urlopen(reQ)
 					headers  = opener.headers
@@ -49,6 +49,8 @@ def urlWatcher(raw, mType, source, body):
 						Date = headers.get("Last-Modified") or ""
 						answer = u"Тип: %s, размер: %s; последнее изменение файла: %s." % (Type, Size, Date)
 					msg(source[1], answer)
+			except urllib2.HTTPError as e:
+				msg(source[1], str(e))
 			except: 
 				lytic_crashlog(urlWatcher, "", u"While parsing \"%s\"." % locals().get("url"))
 
