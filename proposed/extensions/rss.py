@@ -4,7 +4,8 @@
 #  BlackSmith mark.1
 #  rss.py
 
-#  Copyleft
+# Copyright: Unknown author © ????
+# Licensed under GPL v2 (as part of neutron-bot)
 #-extmanager-extVer:1.1-# 
 
 from xml.sax import make_parser, handler

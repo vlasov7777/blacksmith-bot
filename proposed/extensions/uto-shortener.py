@@ -6,10 +6,10 @@
 # See LICENSE.txt for more details
 
 
-#-extmanager-depends:module.zip-#
+#-extmanager-depends:twill.zip-#
 #-extmanager-extVer:1.0-#
 import re
-sys.path.append("module.zip")
+sys.path.append("twill.zip")
 
 ## plugin settings.
 cookies = {"save": True,

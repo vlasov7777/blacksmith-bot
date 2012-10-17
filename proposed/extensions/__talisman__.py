@@ -4,8 +4,9 @@
 #  BlackSmith compatibility with Talisman bot
 #  __talisman__.py
 
-#  © simpleApps, 2012
+# © simpleApps, 2012
 #-extmanager-extVer:2.3-#
+#-extmanager-conflict:talisman-pc.py-#
 
 import traceback
 
@@ -156,7 +157,7 @@ def load_talisman_plugins():
 def get_gch_cfg(gch):
 	pass
 
-def upkeep():
+def upkeep(): # deprecated
 	pass
 
 get_true_jid = handler_jid
@@ -228,7 +229,7 @@ def findAndReplace(mType, source, args):
 		answer = u"Успешно уничтожено %d плагинов Talisman-bot." % len(plugins)
 	reply(mType, source, answer)
 
-command_handler(findAndReplace, 100, "talisman-pc")
+command_handler(findAndReplace, 100, "__talisman__")
 handler_register("00si", load_talisman_plugins)
 
 ## compatibility up to 9000 (over 75%)

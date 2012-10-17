@@ -3,7 +3,7 @@
 
 # (c) simpleApps CodingTeam, 2012.
 
-#-extmanager-depends:module.zip-#
+#-extmanager-depends:twill.zip-#
 #-extmanager-extVer:0.99-#
 
 import re
@@ -38,7 +38,7 @@ def whatColorFill(mType, source, key):
 			if len(key) > 15:
 				key = key[:15]
 			import twill # We think that it is valid choice because our lovin parser have many dependies :(
-			twill.commands.agent(load_uagent(twill)) 
+			twill.commands.agent(load_uagent(twill))  # :( and we so lazy for write POST-request by standart python urils
 			twill.commands.go(whatColorSite)
 			twill.commands.fv("1", "query", key)
 			twill.commands.submit()

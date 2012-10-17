@@ -27,6 +27,9 @@ BlackSmith - это многофункциональный бот для jabber-
 
 Необходимо иметь интерпретатор python не ниже версии 2.6 (Python 3 версии не поддерживается).
 
+Официально бот поддерживает только POSIX-like Операционные Системы (Linux-based, *BSD, Mac, etc...)
+
+
 1)  Переименуйте "_source.py" в "source.py" в папке "static". Отредактируйте source.py.
 2)  Запустите BlackSmith.py или launcher.py.
 3)  Из ростера с Jabber ID администратора командуйте "джойн chat[at]conference.tld"

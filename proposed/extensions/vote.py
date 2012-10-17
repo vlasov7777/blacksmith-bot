@@ -9,7 +9,7 @@
 # Modifications:
 #  Als [Als@exploit.in]
 #  WitcherGeralt [WitcherGeralt@rocketmail.com]
-#-extmanager-extVer:1.3-#
+#-extmanager-extVer:1.4-#
 
 VOTE_FILE = 'dynamic/vote.txt'
 
@@ -56,7 +56,7 @@ def handler_vote_newpoll(type, source, Params):
 	if source[1] in POLLINGS:
 		del POLLINGS[source[1]]
 	if Params:
-		globals()['POLLINGS'] = {source[1]: {'started': False, 'finished': False, 'creator': {'jid': jid, 'nick': source[2]}, 'opinions': {}, 'question': Params, 'options': {'closed': False, 'nicks': False, 'admedit': False, 'time': {'time': 0, 'start': 0}}, 'tick': None, 'jids':{}}}
+		POLLINGS[source[1]] = {'started': False, 'finished': False, 'creator': {'jid': jid, 'nick': source[2]}, 'opinions': {}, 'question': Params, 'options': {'closed': False, 'nicks': False, 'admedit': False, 'time': {'time': 0, 'start': 0}}, 'tick': None, 'jids':{}}
 		reply(type, source, u'Голосование создано!\nЧтобы добавить пункты напиши "пункт+ твой_пункт". Удалить - "пункт- номер пункта".\nОпции голосования - команда "голосование*". Начать голосование - команда "голосование+". Посмотреть текущие результаты - команда "мнения". Окончить голосование - команда "итоги".\nЕсли что-то непонятно, то прочитай хелп по командам из категории "голосование"!')
 		vote_save(source[1])
 	else:
@@ -65,8 +65,8 @@ def handler_vote_newpoll(type, source, Params):
 def handler_vote_pollopinions_control(type, source, body):
 	if body:
 		if source[1] in POLLINGS:
-			args = body.split(' ')[0].strip()
-			Params = body[(body.find(' ') + 1):].strip()
+			args = body.split()[0].strip()
+			Params = body[(body.find(args) + len(args)):].strip()
 			jid = handler_jid(source[0])
 			if args == '+' or args == u'адд':
 				if POLLINGS[source[1]]['started']:
@@ -129,7 +129,7 @@ def handler_vote_polloptions(type, source, Params):
 			started = POLLINGS[source[1]]['started']
 			if Params:
 				if jid in ADLIST or POLLINGS[source[1]]['creator']['jid'] == jid or POLLINGS[source[1]]['options']['admedit'] == True and has_access(jid, 20, source[1]):
-					Params = Params.split(' ')
+					Params = Params.split()
 					if len(Params) != 2:
 						reply(type, source, u'синтакс инвалид')
 					elif Params[0] == 'closed':
@@ -233,8 +233,8 @@ def handler_vote_join(conf, nick, afl, role):
 
 def handler_poll_start_stop(type, source, body):
 	if body:
-		args = body.split(' ')[0].strip()
-		Params = body[(body.find(' ') + 1):].strip()
+		args = body.split()[0].strip()
+		Params = body[(body.find(args) + len(args)):].strip()
 		jid = handler_jid(source[0])
 		if args == 'start' or args == u'стоп':
 			if source[1] not in POLLINGS:
@@ -331,7 +331,7 @@ def vote_results(conf):
 
 def vote_file_init():
 	if initialize_file(VOTE_FILE):
-		globals()['POLLINGS'] = eval(read_file(VOTE_FILE))
+		POLLINGS.update(eval(read_file(VOTE_FILE)))
 	else:
 		Print('\n\nError: can`t create vote.dat!', color2)
 

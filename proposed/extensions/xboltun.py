@@ -7,7 +7,7 @@
 #  Copyleft
 
 #-extmanager-depends:static/boltun/ident_base.txt;static/boltun/random_base.txt-#
-#-extmanager-extVer:1.3-#
+#-extmanager-extVer:1.4-#
 
 IDENT_BASE = 'static/boltun/ident_base.txt'
 RAND_BASE = 'static/boltun/random_base.txt'
@@ -26,7 +26,7 @@ FLOOD = {}
 
 def handler_get_reply(fraza):
 	fi = open(IDENT_BASE, 'r')
-	INFA['fr'] += 1
+	INFO['fr'] += 1
 	while True:
 		line = fi.readline()
 		if not line:
@@ -40,7 +40,7 @@ def handler_get_reply(fraza):
 			return otvet
 	col, iters = random.randrange(1, BASE_LINES), 0
 	fr = open(RAND_BASE, 'r')
-	INFA['fr'] += 1
+	INFO['fr'] += 1
 	while True:
 		rand_base_fraza = fr.readline()
 		iters += 1
