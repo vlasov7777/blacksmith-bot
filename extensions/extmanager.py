@@ -67,6 +67,14 @@ def findExtVer(data):
 		return ver
 	return "1.0"
 
+def findConflicts(data):
+	match = re.search("#-extmanager-conflict:(.*)-#", data)
+	if match:
+		rawConflicts = match.group(1)
+		if rawConflicts.count(";"):
+			return rawConflicts.split(";")
+		return [rawConflicts]
+
 def extManager(mType, source, args):
 	if args:
 		answer = str()
@@ -82,19 +90,25 @@ def extManager(mType, source, args):
 
 		elif a[0] in extList and len(a) > 1:
 			if a[1] in (u"лист", u"инфо", "установить"):
-				depList = findDeps(read_url(svnUrl % "extensions/%s" % fullName))
+				data = read_url(svnUrl % "extensions/%s" % fullName)
+				depList = findDeps(data)
+				conflicts = findConflicts(data)
 				if a[1] == u"инфо":
 					pluginInfo = eval(read_url(svnUrl % ("help/" + a[0])).decode("utf-8"))
 					commandList = [pluginInfo[x]["cmd"] for x in pluginInfo.keys()]
 					if depList:
 						jDepList = str.join(", ", depList)
 						sizeOf = byteFormat(getDepsSize(depList) + getSize(svnUrl % "extensions/%s" % fullName))
+					if conflicts:
+						conflictList = str.join(", ", conflicts)
 					commandList = str.join(", ", commandList)
 					answer =\
 						"\nПлагин: %(name)s.\nСодержит команды: %(commandList)s."
 					if depList:
 						answer +=\
 							"\nДля плагина требуется: %(jDepList)s, после установки будет занятно примерно %(sizeOf)s."
+					if conflicts:
+						answer += " Также будут удалены: %(conflictList)s."
 					answer = answer % vars()
 	
 				elif a[1] == u"установить":
@@ -104,6 +118,12 @@ def extManager(mType, source, args):
 					getDeps(depList)
 					extensions[fullName] = findExtVer(read_url(svnUrl % "extensions/%s" % fullName))
 					write_file("dynamic/%s" % extFile, str(extensions))
+					for x in conflicts:
+						if os.path.exists(x):
+							try:
+								os.remove(x)
+							except: 
+								pass
 					answer = u"Плагин «%s» успешно установлен"
 					try:
 						execfile("./extensions/%s" % fullName, globals())
@@ -173,9 +193,7 @@ def extManager(mType, source, args):
 		reply(mType, source, answer % vars())
 
 def extmanager_init(chat):
-	if check_file("", extFile, str(dict())):
-		pass
-	else:
+	if not check_file("", extFile, str(dict())):
 		delivery(u"Внимание! Не удалось создать extmanager.txt!")
 
 command_handler(extManager, 100, "extmanager")

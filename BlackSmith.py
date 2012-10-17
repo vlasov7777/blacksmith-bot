@@ -343,9 +343,9 @@ def sThread_Run(Thr, handler, command = None):
 				except:
 					lytic_crashlog(handler, command)
 		else:
-			lytic_crashlog(Thread_Run, command)
+			lytic_crashlog(sThread_Run, command)
 	except:
-		lytic_crashlog(Thread_Run, command)
+		lytic_crashlog(sThread_Run, command)
 
 def sThread(name, handler, list = (), command = None):
 	sThread_Run(composeThr(handler, name, list, command), handler, command)

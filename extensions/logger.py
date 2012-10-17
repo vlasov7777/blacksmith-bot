@@ -16,7 +16,7 @@ Months, Days = ("", u"Январь", u"Февраль", u"Март", u"Апре�
 
 logAfl = {
 	"none": u"посетитель",
-	"member": u"зарегестрированный пользователь",
+	"member": u"зарегистрированный пользователь",
 	"admin": u"администратор",
 	"owner": u"владелец"
 			}
@@ -262,9 +262,15 @@ def logSetStateMain(mType, source, argv):
 				LoggerCfg["enabled"] = True
 				write_file(logConfigFile, str(LoggerCfg))
 				handler_register("01si", logFileInit)
-				init_logger()
 				for chat in GROUPCHATS.keys():
 					execute_handler(logFileInit, (chat,))
+				handler_register("04eh", logWriteJoined)
+				handler_register("05eh", logWriteLeave)
+				handler_register("01eh", logWriteMessage)
+				handler_register("07eh", logWriteARole)
+				handler_register("06eh", logWriteNickChange)
+				handler_register("08eh", logWriteStatusChange)
+				command_handler(logSetState, 30, "logger")
 				reply(mType, source, u"Включил логгер.")
 			else:
 				reply(mType, source, u"Уже включено.")
