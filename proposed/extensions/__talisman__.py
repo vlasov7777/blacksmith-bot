@@ -6,7 +6,7 @@
 
 # © simpleApps, 2012
 #-extmanager-extVer:2.3-#
-#-extmanager-conflict:talisman-pc.py-#
+#-extmanager-conflict:extensions/talisman-pc.py-#
 
 import traceback
 
