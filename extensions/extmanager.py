@@ -192,10 +192,10 @@ def extManager(mType, source, args):
 			
 		reply(mType, source, answer % vars())
 
-def extmanager_init(chat):
-	if not check_file("", extFile, str(dict())):
+def extmanager_init():
+	if not initialize_file(extFile, "{}"):
 		delivery(u"Внимание! Не удалось создать extmanager.txt!")
 
 command_handler(extManager, 100, "extmanager")
 
-handler_register("01si", extmanager_init)
+handler_register("02si", extmanager_init)

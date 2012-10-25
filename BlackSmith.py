@@ -34,8 +34,8 @@ try:
 	os.chdir(os.path.dirname(__file__))
 except OSError:
 	print "#! Incorrect launch!"
-	time.sleep(5)
-	
+	time.sleep(6)
+
 sys.path.insert(0, "library.zip")
 
 from enconf import *
@@ -46,7 +46,6 @@ INFO = {'start': 0, 'msg': 0, 'prs': 0, 'iq': 0, 'outmsg': 0, 'outiq': 0,
 		'cmd': 0, 'thr': 0, 'fr': 0, 'fw': 0, 'fcr': 0, 'cfw': 0, 'errs': 0}
 RSTR = {'AUTH': [], 'BAN': [], 'VN': 'off'}
 LAST = {'time': 0, 'cmd': 'start'}
-STOP = {'mto': 0, 'jids': {}}
 
 ## Colored stdout.
 color0 = chr(27) + "[0m"
@@ -127,6 +126,7 @@ Handlers = {
 	"03eh": [], "04eh": [],
 	"05eh": [], "06eh": [],
 	"07eh": [], "08eh": [],
+	"09eh": [],
 	"00si": [], "01si": [],
 	"02si": [], "03si": []
 				}
@@ -144,7 +144,9 @@ Handlers = {
 
 COMMAND_HANDLERS = {}
 ## Dictionaries, lists.
+cPrefs = ("!", "@", "#", ".", "*", "?", "`")
 MORE = {}
+Flood = {}
 ADLIST = []
 ANSWER = {}
 PREFIX = {}
@@ -180,7 +182,7 @@ if os.name == "nt":
 elif os.name == "posix":
 	from platform import dist
 	if dist()[0]:
-		os_name = "POSIX (%s with %s, %s)" % (dist()[0], 
+		os_name = "POSIX (%s with %s, %s)" % (dist()[0],
 											  os.uname()[0], os.uname()[2])
 	else:
 		os_name = "POSIX (%s, %s)" % (os.uname()[0], os.uname()[2])
@@ -420,7 +422,7 @@ def join_chats():
 			CONFS = {}
 			lytic_crashlog(read_file)
 			Print("\nChatrooms file corrupted! Load failed.", color2)
-		if CONFS: 
+		if CONFS:
 			Print('\n\nThere are %d rooms in list:' % len(CONFS.keys()), color4)
 			for conf in CONFS.keys():
 				BOT_NICKS[conf] = CONFS[conf]['nick']
@@ -639,7 +641,7 @@ def send_join_presece(conf, nick, code = None):
 	jClient.send(Presence)
 
 def join_groupchat(conf, nick, code = None):
-	call_efunctions("01si", (conf,))
+	call_sfunctions("01si", (conf,))
 	if conf not in GROUPCHATS:
 		GROUPCHATS[conf] = {}
 	if conf not in STATUS:
@@ -671,7 +673,7 @@ def delivery(body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
 	INFO['outmsg'] += 1
-	if not INFO.get("creporter"): 
+	if not INFO.get("creporter"):
 		return
 	try:
 		jClient.send(xmpp.Message(BOSS, body, 'chat'))
@@ -695,7 +697,7 @@ def msg(target, body):
 			body = handler_rebody(target, body, ltype)
 	INFO['outmsg'] += 1
 	jClient.send(xmpp.Message(target, body.strip(), ltype))
-		
+
 def reply(ltype, source, body):
 	if not isinstance(body, unicode):
 		body = body.decode('utf-8', 'replace')
@@ -714,7 +716,7 @@ def change_bot_status(conf, text, status):
 	Presence = xmpp.protocol.Presence('%s/%s' % (conf, handler_botnick(conf)))
 	Presence.setStatus(text)
 	Presence.setShow(status)
-	Presence.setTag('c', namespace = xmpp.NS_CAPS, attrs = {'node': Caps, 'ver': CapsVer})
+#	Presence.setTag('c', namespace = xmpp.NS_CAPS, attrs = {'node': Caps, 'ver': CapsVer})
 	jClient.send(Presence)
 
 def handler_iq_send(conf, item_name, item, afrls, afrl, rsn = None):
@@ -800,75 +802,43 @@ def roster_timer(roster_user):
 	if roster_user not in (RSTR['AUTH'] + RSTR['BAN']):
 		roster_ban(roster_user)
 
-def feil_message(fromjid, instance, bot_nick, body, error):
-	if error == '500':
-		time.sleep(0.6)
-		msg(fromjid, body)
-	elif error == '406':
-		send_join_presece(instance, bot_nick)
-		time.sleep(0.6)
-		msg(fromjid, body)
-
-def kill_flooder(flooder, roster, nick, instance):
-	change_global_access(flooder, -100)
-	if roster:
-		delivery(u'Внимание! %s флудит мне в ростер!' % (flooder))
-	else:
-		botnick = handler_botnick(instance)
-		handler_kick(instance, nick, '%s: flooder!' % (botnick))
-	try:
-		composeTimer(360, change_global_access, None, (flooder, -5)).start()
-	except:
-		pass
-
-def flood_timer(fromjid, instance, nick):
-	STOP['mto'] += 1
-	if STOP['mto'] >= 4:
-		if instance in GROUPCHATS or instance.count('@conf'):
-			flooder, roster = handler_jid(fromjid), False
+def CheckFlood():
+	Flood.append(time.time())
+	if len(Flood) >= 4:
+		if (Flood[-1] - Flood[0]) <= 8:
+			Flood = [Flood.pop()]
+			raise xmpp.NodeProcessed()
 		else:
-			flooder, roster = instance, True
-		if flooder not in STOP['jids']:
-			STOP['jids'][flooder] = 1
-			time.sleep(6)
-			STOP['jids'][flooder] -= 1
-		else:
-			STOP['jids'][flooder] += 1
-			if flooder not in ADLIST and STOP['jids'][flooder] >= 4:
-				if flooder.count('@') and flooder.count('.'):
-					kill_flooder(flooder, roster, nick, instance)
-					time.sleep(6)
-					del STOP['jids'][flooder]
-				else:
-					botnick = handler_botnick(instance)
-					handler_kick(fromjid, nick, '%s: flooder!' % (botnick))
-					time.sleep(6)
-					del STOP['jids'][flooder]
-			else:
-				time.sleep(6)
-				STOP['jids'][flooder] -= 1
-		STOP['mto'] -= 1
-	else:
-		time.sleep(4)
-		STOP['mto'] -= 1
+			Flood.pop(0)
 
 def MESSAGE_PROCESSING(client, stanza):
-	fromjid = stanza.getFrom()
+	source = stanza.getFrom()
 	INFO['msg'] += 1
-	instance = fromjid.getStripped().lower()
-	if user_level(fromjid, instance) <= -100:
+	instance = source.getStripped().lower()
+	if user_level(source, instance) <= -100:
 		raise xmpp.NodeProcessed()
+	isConf = (instance in GROUPCHATS)
+	if not isConf and not has_access(source, 80, instance):
+		if RSTR['VN'] == 'off':
+			raise xmpp.NodeProcessed()
+		CheckFlood(disp)
 	if instance in UNAVAILABLE and not MSERVE:
 		raise xmpp.NodeProcessed()
 	if stanza.getTimestamp():
 		raise xmpp.NodeProcessed()
-	bot_nick, nick = handler_botnick(instance), fromjid.getResource()
+	bot_nick = handler_botnick(instance)
+	nick = source.getResource()
 	if bot_nick == nick:
 		raise xmpp.NodeProcessed()
-	body = stanza.getBody() or str()
+	Subject = stanza.getSubject()
+	body = stanza.getBody()
 	if body:
 		body = body.strip()
-	if instance not in GROUPCHATS and instance not in ADLIST:
+	elif Subject:
+		body = Subject.strip()
+	if not body:
+		raise xmpp.NodeProcessed()
+	if not isConf and instance not in ADLIST:
 		if not instance.count('@conf'):
 			if instance in RSTR['BAN'] or RSTR['VN'] == 'off':
 				raise xmpp.NodeProcessed()
@@ -876,59 +846,69 @@ def MESSAGE_PROCESSING(client, stanza):
 				sThread("rIQ", roster_check, (instance, body))
 				raise xmpp.NodeProcessed()
 	if len(body) > INC_MSG_LIMIT:
-		body = body[:INC_MSG_LIMIT]+('[...] limit %d symbols' % (INC_MSG_LIMIT))
-	ltype = stanza.getType()
-	if ltype == 'groupchat':
-		if instance in GROUPCHATS and nick in GROUPCHATS[instance]:
-			GROUPCHATS[instance][nick]['idle'] = time.time()
-		type = 'public'
-	elif ltype == 'error':
-		if instance in GROUPCHATS:
-			feil_message(fromjid, instance, bot_nick, body, stanza.getErrorCode())
+		body = "%s[...] %d symbols limit." % (body[:INC_MSG_LIMIT].strip(), INC_MSG_LIMIT)
+	stype = stanza.getType()
+	if stype == 'error':
+		code = stanza.getErrorCode()
+		if code in ('500', '406'):
+			if code == '406':
+				if not isConf:
+					raise xmpp.NodeProcessed()
+				send_join_presece(instance, bot_nick)
+				time.sleep(0.6)
+			msg(source, body)
 		raise xmpp.NodeProcessed()
+	if Subject:
+		call_efunctions("09eh", (instance, nick, Subject, body))
 	else:
-		type = 'private'
-	try:
-		composeThr(flood_timer, "ftimer", (fromjid, instance, nick)).start()
-	except:
-		pass
-	command, Parameters, cbody, rcmd, combody = '', '', '', '', body
-	for key in [bot_nick+key for key in (':',',','>')]:
-		combody = combody.replace(key, '')
-	combody = combody.strip()
-	if not combody:
-		raise xmpp.NodeProcessed()
-	if STOP['mto'] >= 4:
-		raise xmpp.NodeProcessed()
-	rcmd = combody.split()[0].lower()
-	if instance in COMMOFF and rcmd in COMMOFF[instance]:
-		raise xmpp.NodeProcessed()
-	cbody = MACROS.expand(combody, [fromjid, instance, nick])
-	if instance in MACROS.macrolist.keys():
-		cmds = (MACROS.gmacrolist.keys() + MACROS.macrolist[instance].keys())
-	else:
-		cmds = MACROS.gmacrolist.keys()
-	if not cbody:
-		raise xmpp.NodeProcessed()
-	command = cbody.split()[0].lower()
-	if instance in PREFIX and rcmd not in cmds:
-		NotPfx = Prefix_state(body, bot_nick)
-		if NotPfx or ltype == 'chat':
-			if not COMMANDS.has_key(command) and command[:1] in ("!", "@", "#", ".", "*", "?", "`"):
-				command = command[1:]
+		if stype != 'groupchat':
+			if (stanza.getTag('request')):
+				answer = xmpp.Message(source)
+				answer.setTag('received', namespace = xmpp.NS_RECEIPTS)
+				answer.setID(stanza.getID())
+				jClient.send(answer)
+			type = 'private'
 		else:
-			command = command_Prefix(instance, command)
-	if instance in COMMOFF and command in COMMOFF[instance]:
-		raise xmpp.NodeProcessed()
-	if cbody.count(chr(32)):
-		Parameters = cbody[(cbody.find(' ') + 1):].strip()
-	if COMMANDS.has_key(command):
-		INFO['cmd'] += 1
-		LAST['cmd'] = u'Помощь по командам: "хелп" (последнее действие - "%s")' % (command)
-		call_command_handlers(command, type, [fromjid, instance, nick], unicode(Parameters), rcmd)
-		LAST['time'] = time.time()
-	else:
-		call_efunctions("01eh", (stanza, type, [fromjid, instance, nick], body))
+			type = 'public'
+			if isConf and nick in GROUPCHATS[instance]:
+				GROUPCHATS[instance][nick]['idle'] = time.time()
+		command, Parameters, combody = '', '', body
+		for app in [bot_nick+key for key in (':', ',', '>')]:
+			if combody.startswith(app):
+				combody = combody[len(app):].lstrip()
+				break
+		if not combody:
+			raise xmpp.NodeProcessed()
+		cmb = combody.split(None, 1)
+		cmd = (cmb.pop(0)).lower()
+		if instance in COMMOFF and cmd in COMMOFF[instance]:
+			raise xmpp.NodeProcessed()
+		combody = MACROS.expand(combody, [source, instance, nick])
+		if instance in MACROS.macrolist.keys():
+			cmds = MACROS.gmacrolist.keys() + MACROS.macrolist[instance].keys()
+		else:
+			cmds = MACROS.gmacrolist.keys()
+		if not combody:
+			raise xmpp.NodeProcessed()
+		command = combody.split()[0].lower()
+		if instance in PREFIX and cmd not in cmds:
+			NotPfx = Prefix_state(body, bot_nick)
+			if NotPfx or stype == 'chat':
+				if not COMMANDS.has_key(command) and command.startswith(cPrefs):
+					command = command[1:]
+			else:
+				command = command_Prefix(instance, command)
+		if instance in COMMOFF and command in COMMOFF[instance]:
+			raise xmpp.NodeProcessed()
+		if COMMANDS.has_key(command):
+			if cmb:
+				Parameters = (cmb.pop(0)).rstrip()
+			INFO['cmd'] += 1
+			LAST['cmd'] = u'Помощь по командам: "хелп" (последнее действие - "%s")' % (command)
+			call_command_handlers(command, type, [source, instance, nick], Parameters, cmd)
+			LAST['time'] = time.time()
+		else:
+			call_efunctions("01eh", (stanza, type, [source, instance, nick], body))
 
 def status_code_change(items, conf, nick):
 	for item in items:
@@ -1169,7 +1149,7 @@ def Dispatch_handler(Timeout = 8):
 		jClient.iter(Timeout)
 	except xmpp.Conflict:
 		Print('\n\nError: XMPP Conflict!', color2)
-		call_efunctions("03si")
+		call_sfunctions("03si")
 		os._exit(0)
 	except (xmpp.SystemShutdown, IOError):
 		while not jClient.isConnected():
@@ -1189,14 +1169,14 @@ def Dispatch_fail():
 	Print("\n\n#-# Dispatch fail!", color2)
 	delivery("Внимание! При парсинге станзы произошла критическая ошибка!"\
 				+ "\n" + error)
-	sys_exit(format_exc())
+##	sys_exit(format_exc())
 
 def sys_exit(exit_reason = 'SUICIDE'):
 	Print('\n\n%s' % (exit_reason), color2)
 	if jClient.isConnected():
 		send_unavailable(exit_reason)
 	if (time.time() - INFO['start']) >= 30:
-		call_efunctions("03si")
+		call_sfunctions("03si")
 	Exit('\n\nRESTARTING...\n\nPress Ctrl+C to exit', 0, 30)
 
 class NoIqAnswer(Exception):
@@ -1229,12 +1209,12 @@ def main():
 	globals()['RUNTIMES'] = {'START': CACHE['START'], 'REST': CACHE['REST']}
 	starting_actions()
 	Connect()
-	call_efunctions("00si")
+	call_sfunctions("00si")
 	join_chats()
 	Print('\n\nBlackSmith is ready to work!\n\n', color3)
 	INFO['start'] = time.time()
 	composeThr(ClearMemory, ClearMemory.func_name).start()
-	call_efunctions("02si")
+	call_sfunctions("02si")
 	Iters, Timeout = calc_Timeout() #'
 	while True:
 		if INFO["errs"] > 6:

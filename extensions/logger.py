@@ -39,6 +39,8 @@ logCfg = {}
 logNicks = {}
 logSynchronize = {}
 
+logger_compile_link = re.compile("((http[s]?|ftp)://[^\s'\"<>]+)")
+
 DefaultLogHeader = u'''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dt">
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
@@ -109,8 +111,9 @@ def logWrite(chat, state, body, nick = None):
 		if logFile:
 			timestamp = time.strftime("%H:%M:%S", Time)
 			body = xmpp.XMLescape(body)
-			body = re.sub(r"(www\.(?!\.)|[a-z][a-z0-9+.-]*://)[^\s<>'\"]+[^!,\.\s<>\)'\"\]]", lambda obj: "<a href=\"{0}\">{0}</a>".format(obj.group(0)), body) #'
-			body = body.replace(chr(10), "<br/>")
+			body = logger_compile_link.sub(lambda obj: "<a href=\"{0}\">{0}</a>".format(obj.group(0)), body) #'
+			body = body.replace(chr(10), "<br />")
+			body = body.replace(chr(9), "&#9;")
 			logFile.write(chr(10))
 			if state == "subject":
 				logFile.write('<span class="topic">%s</span><br />' % body)
@@ -142,14 +145,16 @@ def coloredNick(chat, nick):
 	return x
 
 def logWriteMessage(stanza, mType, source, body):
-	if GROUPCHATS.has_key(source[1]) and mType == "public" and logCfg[source[1]]["enabled"]:
-		if stanza.getSubject():
-			Time = time.time()
-			if (Time - Subjs[source[1]]['time']) > 20:
-				Subjs[source[1]] = {'body': body, 'time': Time}
-				logWrite(source[1], "subject", body)
-		else:
-			logWrite(source[1], "msg", body, source[2])
+	if GROUPCHATS.has_key(source[1]) and logCfg[source[1]]["enabled"] and mType == "public" and source[2]:
+		logWrite(source[1], "msg", body, source[2])
+
+def logWriteSubject(chat, nick, subject, body):
+	Time = time.time()
+	if (Time - Subjs[chat]['time']) > 20:
+		Subjs[chat] = {'body': body, 'time': Time}
+		if nick:
+			body = "%s set subject:\n%s" % (nick.strip(), subject.strip())
+		logWrite(chat, "subject", body)
 
 def logWriteJoined(chat, nick, afl, role, status, text):
 	if GROUPCHATS.has_key(chat) and logCfg[chat]["enabled"]:
@@ -238,6 +243,7 @@ def init_logger():
 			handler_register("04eh", logWriteJoined)
 			handler_register("05eh", logWriteLeave)
 			handler_register("01eh", logWriteMessage)
+			handler_register("09eh", logWriteSubject)
 			handler_register("07eh", logWriteARole)
 			handler_register("06eh", logWriteNickChange)
 			handler_register("08eh", logWriteStatusChange)
@@ -267,6 +273,7 @@ def logSetStateMain(mType, source, argv):
 				handler_register("04eh", logWriteJoined)
 				handler_register("05eh", logWriteLeave)
 				handler_register("01eh", logWriteMessage)
+				handler_register("09eh", logWriteSubject)
 				handler_register("07eh", logWriteARole)
 				handler_register("06eh", logWriteNickChange)
 				handler_register("08eh", logWriteStatusChange)
@@ -282,6 +289,10 @@ def logSetStateMain(mType, source, argv):
 				for handler in Handlers["01eh"]:
 					if name == handler.func_name:
 						Handlers["01eh"].remove(handler)
+				name = logWriteSubject.func_name
+				for handler in Handlers["09eh"]:
+					if name == handler.func_name:
+						Handlers["09eh"].remove(handler)
 				name = logWriteNickChange.func_name
 				for handler in Handlers["06eh"]:
 					if name == handler.func_name:

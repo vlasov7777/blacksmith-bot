@@ -123,7 +123,7 @@ for filename in sorted(os.listdir(Dir)):
 	for line in lines:
 		line = line.strip("\r").strip("\n").rstrip()
 		if line.count("# |-|-| lytic bot |-|-|"):
-			line = "# BS mark.1"
+			line = "# BS mark.1-55"
 			print "#-# Replaced header of %s." % filename
 		if line.count("# -*- coding: utf-8 -*-"):
 			line = "# /* coding: utf-8 */"
