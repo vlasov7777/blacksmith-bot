@@ -1,14 +1,14 @@
 # caps\bot ver\core mod\bot rev\caps ver
 
-Caps = 'http://simpleapps.ru/caps#blacksmith-m.1'
+Caps = "http://simpleapps.ru/caps#blacksmith-m.1"
 BOT_VER = 1
-CORE_MODE = 55
-BOT_REV = 134
+CORE_MODE = 57
+BOT_REV = 141
 
-if os.access('.svn/entries', os.R_OK):
+if os.access(".svn/entries", os.R_OK):
 	try:
-		BOT_REV = int(file('.svn/entries').readlines()[3].strip())
+		BOT_REV = int(file(".svn/entries").readlines()[3].strip())
 	except: 
 		pass
 		
-CapsVer = '%d.%d' % (BOT_VER, CORE_MODE)
+CapsVer = "%d.%d" % (BOT_VER, CORE_MODE)

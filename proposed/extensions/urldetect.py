@@ -5,20 +5,21 @@
 # Web site header detector
 
 # BETA!
-#-extmanager-extVer:1.7-#
+#-extmanager-extVer:2.1-#
 import re
 import urllib2
 
-comp_link = re.compile("(http[s]?://[^ \t\n\r\f\v]+)")
-comp_charset = re.compile("(.+?);[ ]?charset=(.+?)")
-comp_charset_alt = re.compile("charset=['\"]?(.*?)['\"\/\>]?")
+comp_link = re.compile("(http[s]?://[^\s'\"<>]+)")
+comp_charset = re.compile("(.+);[ ]?charset=(.+)")
+comp_charset_alt = re.compile("charset=['\"]?(.+?)[\s'\"/>]+?")
+
 
 def contentTypeParser(opener, data):
 	Charset, Type = None, opener.headers.get("Content-Type")
  	try:
 		if Type and Type.count(";"):
 			Type, Charset = comp_charset.search(Type).groups()
-			Charset = Charset.lower()
+			Charset = Charset.strip("'\"").lower()
 			if Charset == "unicode":
 				Charset = "utf-8"
 		if not (Charset and Type == "text/html") or opener.url.endswith((".html", ".htm")):
@@ -36,12 +37,24 @@ def urlWatcher(raw, mType, source, body):
 				url = comp_link.search(body)
 				if url:
 					url = url.group(1).strip("'.,\\)\"")
-					if not chkUnicode(url): url = "http://" + IDNA(url)
+					if not chkUnicode(url): 				 ## RE is not a good way. It use many cpu time. 
+						protocol, _ = url.split("://")
+						raw = _.split("/", 1)
+						if len(raw) > 1:
+							domain, page = raw
+							page = "/" + page
+						else:
+							domain, page = raw[0], ""
+						if not chkUnicode(domain):
+							domain = IDNA(domain)
+						if not chkUnicode(page):
+							page = urllib.quote(str(page))
+						url = u"%s://%s%s" % (protocol, domain, page)
 					reQ = urllib2.Request(url)
 					reQ.add_header("User-agent", UserAgents["BlackSmith"])
 					opener = urllib2.urlopen(reQ)
 					headers  = opener.headers
-					if "text/html" in headers.get("Content-Type") or url.endswith(".html"):
+					if "text/html" in headers.get("Content-Type") or url.endswith((".html", ".htm")):
 						data = opener.read(4500)
 						Type, Charset = contentTypeParser(opener, data)
 						title = getTag("title", data)
@@ -51,9 +64,11 @@ def urlWatcher(raw, mType, source, body):
 						Type = headers.get("Content-Type") or ""
 						Size = byteFormat(int(headers.get("Content-Length") or 0))
 						Date = headers.get("Last-Modified") or ""
-						answer = u"Тип: %s, размер: %s; последнее изменение файла: %s." % (Type, Size, Date)
+						if Date: 
+							Date = "; последнее изменение файла: %s." % Date
+						answer = u"Тип: %(Type)s, размер: %(Size)s%(Date)s" % vars()
 					msg(source[1], answer)
-			except urllib2.HTTPError as e:
+			except (urllib2.HTTPError, urllib2.URLError) as e:
 				msg(source[1], str(e))
 			except: 
 				lytic_crashlog(urlWatcher, "", u"While parsing \"%s\"." % locals().get("url"))

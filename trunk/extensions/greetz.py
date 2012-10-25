@@ -45,7 +45,7 @@ def handler_greet(type, source, body):
 		else:
 			reply(type, source, u'Инвалид синтакс!')
 	else:
-		reply(type, source, u'Отвали мудак!')
+		reply(type, source, u'Отвали!')
 
 def atjoin_greetz(conf, nick, afl, role, status, text):
 	if (GROUPCHATS[conf][nick]['joined'] - INFO['start']) >= 20:

@@ -4,10 +4,7 @@
 #  BlackSmith plugin
 #  admin_plugin.py
 
-# Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
-# http://witcher-team.ucoz.ru/
-
-PRFX_LIST = ["!", "@", "#", ".", "*", "?", "`"]
+# Coded by WitcherGeralt
 
 def handler_set_prefix(type, source, prefix):
 	if source[1] in GROUPCHATS:
@@ -19,12 +16,12 @@ def handler_set_prefix(type, source, prefix):
 					reply(type, source, u'Теперь нет префикса!')
 				else:
 					reply(type, source, u'И так нет префикса!')
-			elif prefix in PRFX_LIST:
+			elif prefix in cPrefs:
 				PREFIX[source[1]] = prefix
 				write_file('dynamic/%s/prefix.txt' % (source[1]), '"%s"' % (prefix))
 				reply(type, source, u'Знак "%s" отныне является здесь префиксом.' % (prefix))
 			else:
-				reply(type, source, u'Недоступный префикс! Доступные: '+', '.join(PRFX_LIST))
+				reply(type, source, u'Недоступный префикс! Доступные: '+', '.join(cPrefs))
 		elif source[1] in PREFIX:
 			reply(type, source, u'Знак "%s" является префиксом здесь.' % (PREFIX[source[1]]))
 		else:
@@ -135,8 +132,8 @@ def handler_admin_restart(type, source, reason):
 		msg(conf, status)
 	time.sleep(6)
 	send_unavailable(status)
-	call_efunctions("03si")
-	Exit('\n\nRESTARTING...', 0, 5)
+	call_sfunctions("03si")
+	Exit('\n\nRESTARTING...', 0, 6)
 
 def handler_admin_exit(type, source, reason):
 	status = u'Выключение... Command from %s' % (source[2])
@@ -146,10 +143,8 @@ def handler_admin_exit(type, source, reason):
 		msg(conf, status)
 	time.sleep(6)
 	send_unavailable(status)
-	call_efunctions("03si")
-	try: os.kill(os.getppid(), 9)
-	except: pass
-	Exit('\n\n--> BOT STOPPED', 1, 10)
+	call_sfunctions("03si")
+	Exit('\n\n--> BOT STOPPED', 1, 12)
 
 def handler_error_stat(type, source, body):
 	if body:
@@ -268,7 +263,6 @@ command_handler(handler_timeup_info, 20, "admin")
 command_handler(handler_botup_info, 20, "admin")
 command_handler(handler_command_stat, 10, "admin")
 command_handler(crashReport_cfg, 100, "admin")
-
 
 handler_register("00si", crashReport_cfg_loader)
 handler_register("01si", load_conf_prefix)
