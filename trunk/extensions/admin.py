@@ -260,7 +260,7 @@ command_handler(handler_admin_restart, 100, "admin")
 command_handler(handler_admin_exit, 100, "admin")
 command_handler(handler_error_stat, 100, "admin")
 command_handler(handler_timeup_info, 20, "admin")
-command_handler(handler_botup_info, 20, "admin")
+command_handler(handler_botup_info, 11, "admin")
 command_handler(handler_command_stat, 10, "admin")
 command_handler(crashReport_cfg, 100, "admin")
 

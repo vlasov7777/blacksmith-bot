@@ -169,8 +169,8 @@ def get_gch_info(gch, info):
 
 add_gch = save_conflist
 
-def change_bot_status(gch, status, show, auto = 0):
-	pass
+##def change_bot_status(gch, status, show, auto = 0):
+##	pass
 
 def change_access_temp(gch, source, level = 0):
 	pass

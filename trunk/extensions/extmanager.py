@@ -118,12 +118,16 @@ def extManager(mType, source, args):
 					getDeps(depList)
 					extensions[fullName] = findExtVer(read_url(svnUrl % "extensions/%s" % fullName))
 					write_file("dynamic/%s" % extFile, str(extensions))
-					for x in conflicts:
-						if os.path.exists(x):
-							try:
-								os.remove(x)
-							except: 
-								pass
+					if conflicts:
+						for x in conflicts:
+								if os.path.exists(x):
+									try:
+										os.remove(x)
+										conflicts.remove(x)
+									except:
+										pass
+								else:
+									conflicts.remove(x)
 					answer = u"Плагин «%s» успешно установлен"
 					try:
 						execfile("./extensions/%s" % fullName, globals())
@@ -131,6 +135,9 @@ def extManager(mType, source, args):
 					except:
 						answer += u", однако подгрузка не удалась: \n%s" % (returnExc())
 					answer = answer % name
+					if conflicts:
+						conflicts = str.join(", ", conflicts)
+						answer += u" Также, не удалось устранить следующие конфликты: %(conflicts)s."
 
 			elif a[1] == u"удалить":
 				if os.path.exists("./extensions/%s" % fullName):
