@@ -243,21 +243,27 @@ def command_fullban(mType, source, body):
 					reply(mType, source, u"Этот пользователь уже глобально забанен.")
 					return
 				else:
+					number = len(GROUPCHATS.keys())
 					BanBase[jid] = {"date": time.strftime("%d.%m.%Y (%H:%M:%S)"),
+     								"number": number,
      								"reason": reason}
 					write_file(BanBaseFile, str(BanBase))
 				for conf in GROUPCHATS.keys():
 					handler_banjid(conf, jid, reason)
-				answer = u"Сделано."
+				answer = u"«%s» успешно забанен в %d конференциях." % (jid, number)
 			else:
-				answer = u"Это не JID и юзеров с таким ником здесь не было."
+				answer = u"Это не ник или юзеров с таким ником здесь не было."
 		elif BanBase:
-			answer = str()
+			answer = "\n[#] [JID] [Причина] [Кол-во чатов]\n"
 			num = 0
 			for jid in BanBase.keys():
-				date, reason = BanBase[jid].values()
+				if BanBase[jid].values() > 2:
+					date, reason, number = BanBase[jid].values()
+				else:
+					date, reason = BanBase[jid].values()
+					number = 0
 				num += 1
-				answer +=  u"\n%i. %s (%s) [%s]." % (num, jid, reason, date)
+				answer +=  u"\n%i. %s (%s) %s [%d]" % (num, jid, reason, date, number)
 		else:
 			answer = u"В базе фуллбана пусто."
 		reply(mType, source, answer)
@@ -272,9 +278,9 @@ def command_fullunban(mType, source, jid):
 				handler_unban(conf, jid)
 			reply(mType, source, u'Сделано.')
 		else:
-			reply(mType, source, u'Хрень пишешь! Это не жид!')
+			reply(mType, source, u'Не вижу JID.')
 	else:
-		reply(mType, source, u'кого разбанивать то?')
+		reply(mType, source, u'Кого разбанивать-то?')
 
 def banbase_init():
 	if initialize_file(BanBaseFile, `{}`):

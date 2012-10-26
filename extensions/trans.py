@@ -92,7 +92,7 @@ def gTransHandler(mType, source, args):
 	if args and len(args.split()) > 2:
 		(fLang, tLang, text) = args.split(None, 2)
 		if tLang == "ar":
-			reply(mType, source, u"I'm want to LIVE!")
+			reply(mType, source, u"I want to LIVE!")
 			return
 		reply(mType, source, u"Перевод %s => %s:\n%s" % (fLang, tLang, gTrans(fLang, tLang, text)))
 	else:
