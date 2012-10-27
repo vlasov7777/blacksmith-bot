@@ -61,13 +61,6 @@ from urllib2 import quote
 
 uagent = "Opera/9.60 (J2ME/MIDP; Opera Mini/4.2.13337/724; U; ru)"
 
-def uHTML(text):
-	from HTMLParser import HTMLParser
-	text = text.replace("<br>", "\n").replace("</br>", "\n").replace("<br />", "\n")
-	text = HTMLParser().unescape(text)
-	del HTMLParser
-	return text
-
 def gTrans(fLang, tLang, text):
 	url = "http://translate.google.ru/m?hl=ru&sl=%(fLang)s&tl=%(tLang)s&ie=UTF-8&prev=_m&q=%(text)s"
 	text = quote(text.encode("utf-8"))
