@@ -216,7 +216,8 @@ def handler_vote_endpoll_tick(conf):
 	msg(conf, u'РЕЗУЛЬТАТЫ ГОЛОСОВАНИЯ'+vote_results(conf))
 	vote_save(conf)
 
-def handler_vote_join(conf, nick, afl, role):
+
+def handler_vote_join(conf, nick, afl, role, status, text):
 	if conf in POLLINGS:
 		jid = handler_jid(conf+'/'+nick)
 		if POLLINGS[conf]['finished']:
