@@ -12,7 +12,7 @@
 import urllib
 
 svnUrl = "http://blacksmith-bot.googlecode.com/svn/proposed/%s/"
-extFile = "extensions.txt"
+extFile = "dynamic/extensions.txt"
 
 def urlsplit(url):
 	if url and url.count("/"):
@@ -112,12 +112,12 @@ def extManager(mType, source, args):
 					answer = answer % vars()
 	
 				elif a[1] == u"установить":
-					extensions = eval(read_file("dynamic/%s" % extFile))
+					extensions = eval(read_file(extFile))
 					urllib.urlretrieve(svnUrl % "extensions/%s" % fullName, "extensions/%s" % fullName)
 					urllib.urlretrieve(svnUrl % "help/" + a[0], "help/%s" % a[0])
 					getDeps(depList)
 					extensions[fullName] = findExtVer(read_url(svnUrl % "extensions/%s" % fullName))
-					write_file("dynamic/%s" % extFile, str(extensions))
+					write_file(extFile, str(extensions))
 					if conflicts:
 						for x in conflicts:
 								if os.path.exists(x):
@@ -142,7 +142,7 @@ def extManager(mType, source, args):
 			elif a[1] == u"удалить":
 				if os.path.exists("./extensions/%s" % fullName):
 					size = 0
-					extensions = eval(read_file("dynamic/%s" % extFile))
+					extensions = eval(read_file(extFile))
 					depList = findDeps(read_file("./extensions/%s" % fullName))
 					try:
 						for x in ("./extensions/%s" % fullName, "./help/%s" % name):
@@ -151,7 +151,7 @@ def extManager(mType, source, args):
 						answer += u"Плагин «%(name)s» успешно удалён."
 						if fullName in extensions.keys():
 							del extensions[fullName]
-							write_file("dynamic/%s" % extFile, str(extensions))
+							write_file(extFile, str(extensions))
 					except:
 						answer += u"Удаление плагина «%(name)s» не удалось."
 							
@@ -171,7 +171,7 @@ def extManager(mType, source, args):
 				answer = u"Ошибка. Возможно, этого плагина нет в списке или вы указали несуществующий параметр."
 
 		elif a[0] == u"upgrade":
-			extensions = eval(read_file("dynamic/%s" % extFile))
+			extensions = eval(read_file(extFile))
 			toUpdate = dict()
 			for ext in extensions.keys():
 				localVer = extensions[ext]
@@ -195,7 +195,7 @@ def extManager(mType, source, args):
 					jDepList = str.join(", ", jDepList)
 					answer += "\nТакже были установлены следующие зависимости: %(jDepList)s"
 				answer = answer % vars()
-				write_file("dynamic/%s" % extFile, str(extensions))
+				write_file(extFile, str(extensions))
 			
 		reply(mType, source, answer % vars())
 
