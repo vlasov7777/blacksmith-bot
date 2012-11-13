@@ -10,8 +10,7 @@ td, body {color: #4BD7FF; font:11pt none sans-serif; background: url('./img/Chat
 -moz-background-size: cover;
 -o-background-size: cover;
 background-size: cover;
-filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='./img/ChatLog.jpg', sizingMethod='scale');
--ms-filter: "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='./img/ChatLog.jpg', sizingMethod='scale')"; cursor:url('./img/left_ptr.png'), auto}
+cursor:url('./img/left_ptr.png'), auto}
 a:link {text-decoration:underline; color:#2F9FFF; cursor:url("./img/pointing_hand.png"), pointer}
 a:active {text-decoration:underline; color:#2F9FFF ; cursor:url('./img/pointing_hand.png'), pointer}
 a:visited {text-decoration:underline; color:#2F9FFF; cursor:url('./img/pointing_hand.png'), pointer}

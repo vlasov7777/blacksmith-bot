@@ -18,7 +18,7 @@ def handler_antispamer(type, source, body):
 			reply(type, source, u'OK. Начинаю банить...')
 			reason = u'спамерский сервер (%s/%s: antispamer plugin)' % (handler_botnick(source[1]), source[2])
 			for jid in SPAMSERVERS.split(';'):
-				handler_banjid(source[1], jid, reason)
+				outcast(source[1], jid, reason)
 				time.sleep(0.6)
 			ban_time = time.strftime('%d.%m.%Y (%H:%M:%S) GMT', time.gmtime())
 			SPAMSERVINFO['banned'][source[1]] = ban_time
@@ -27,7 +27,7 @@ def handler_antispamer(type, source, body):
 		elif body in [u'унбан', 'unban']:
 			reply(type, source, u'OK. Начинаю амнистию...')
 			for jid in SPAMSERVERS.split(';'):
-				handler_unban(source[1], jid)
+				none(source[1], jid)
 				time.sleep(0.6)
 			SPAMSERVINFO['banned'][source[1]] = "None"
 			write_file(filename, "None")

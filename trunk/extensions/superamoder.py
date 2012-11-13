@@ -46,7 +46,7 @@ def setBossToModer(conf, nick, afl, role, status, text):
 	if not role == 'moderator':
 		jid = handler_jid(conf+'/'+nick)
 		if jid in ADLIST and not conf in BossToModer_exc:
-			handler_moder(conf, nick, u'BOSS BlackSmith всегда модер!')
+			moderator(conf, nick, u'BOSS BlackSmith всегда модер!')
 
 command_handler(BossToModer_cfg, 30, "superamoder")
 handler_register("04eh", setBossToModer)

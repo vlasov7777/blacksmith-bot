@@ -12,11 +12,11 @@ def command_comaccess(type, source, body):
 		command = body.lower()
 		if command in COMMANDS:
 			access = COMMANDS[command]['access']
-			reply(type, source, u'Доступ к команде "'+command+'" = '+str(access))
+			reply(type, source, u"Доступ к команде «%s» — %s." % (command, str(access)))
 		else:
-			reply(type, source, u'нет такой команды')
+			reply(type, source, u'Нет такой команды.')
 	else:
-		reply(type, source, u'Команды "None" не существует! lol')
+		reply(type, source, u'И что?')
 
 def command_help(type, source, body):
 	if body:
@@ -33,16 +33,16 @@ def command_help(type, source, body):
 					mess = fr['desc']
 					mess += u'\nИспользование: '+fr['syntax']+u'\nПримеры:'
 					for example in fr['examples']:
-						mess += '\n  >>  '+example
-					mess += u'\nНеобходимый уровень доступа: '+str(COMMANDS[command]['access'])
+						mess += '\n    • '+example
+					mess += u'\nМинимальный уровень доступа: '+str(COMMANDS[command]['access'])
 				except:
 					mess = u'нет хелпа'
 			else:
 				mess = u'Нет такой команды, чтобы узнать точный список напиши "комлист"'
 		else:
-			mess = u'Команды длинне 24х символов точно не существует!'
+			mess = u'Команды длиннее 24-х символов не существует!'
 	else:
-		mess = u'Для просмотра команд напишите "комлист"'
+		mess = u'Для просмотра списка команд, напишите «комлист».'
 	reply(type, source, mess)
 
 def command_comlist(type, source, body):

@@ -7,51 +7,46 @@
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 # http://witcher-team.ucoz.ru/
 
-ANTISPACE = {}
-
 def handler_antispace(Prs):
-	conf = Prs.getFrom().getStripped()
-	if ANTISPACE[conf] != 'off':
+	chat = Prs.getFrom().getStripped()
+	if chat in Antispace:
 		code = Prs.getStatusCode()
 		if code == '303':
 			nick = Prs.getNick()
 		else:
 			nick = Prs.getFrom().getResource()
 		if nick.count(' '):
-			handler_kick(conf, nick, u'Пробелы в нике запрещены!')
+			kick(conf, nick, u'Пробелы в нике запрещены!')
 
 def handler_antispace_control(type, source, body):
 	if source[1] in GROUPCHATS:
 		if body:
 			body = body.lower()
-			filename = 'dynamic/'+source[1]+'/antispace.txt'
-			if body in [u'вкл', 'on', '1']:
-				ANTISPACE[source[1]] = 'on'
-				write_file(filename, "'on'")
-				reply(type, source, u'антиспэйс включен')
-			elif body in [u'выкл', 'off', '0']:
-				ANTISPACE[source[1]] = 'off'
-				write_file(filename, "'off'")
-				reply(type, source, u'антиспэйс выключен')
+			filename = 'dynamic/antispace.txt'
+			if body in (u'вкл', '1') and source[1] not in Antispace:
+				Antispace.append(source[1])
+				write_file(filename, str(Antispace))
+				reply(type, source, u'Теперь включено.')
+			elif body in [u'выкл', '0'] and source[1] in Antispace:
+				Antispace.remove(source[1])
+				write_file(filename, str(Antispace))
+				reply(type, source, u'Выключил.')
 			else:
-				reply(type, source, u'читай помощь по команде')
+				reply(type, source, u'Либо что-то не то с параметрами, либо «антиспейс» уже имеет такое значение.')
+		elif source[1] in Antispace:
+			reply(type, source, u'Включено.')
 		else:
-			if ANTISPACE[source[1]] == 'off':
-				reply(type, source, u'сейчас антиспэйс выключен')
-			else:
-				reply(type, source, u'сейчас антиспэйс включен')
+			reply(type, source, u'Не включено.')
 	else:
-		reply(type, source, u'только в чате мудак!')
+		reply(type, source, u'Только для чатов!')
 
-def antispace_init(conf):
-	if check_file(conf, 'antispace.txt', "'off'"):
-		state = eval(read_file('dynamic/'+conf+'/antispace.txt'))
+def antispace_init():
+	if initialize_file("dynamic/antispace.txt", "[]"):
+		globals()["Antispace"] = eval(read_file('dynamic/antispace.txt'))
 	else:
-		state = 'off'
+		globals()["Antispace"] = []
 		delivery(u'Внимание! Не удалось создать antispace.txt для "%s"!' % (conf))
-	ANTISPACE[conf] = state
 
-handler_register("02eh", handler_antispace)
 command_handler(handler_antispace_control, 20, "antispace")
-
-handler_register("01si", antispace_init)
+handler_register("02si", antispace_init)
+handler_register("02eh", handler_antispace)

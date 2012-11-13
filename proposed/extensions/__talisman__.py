@@ -200,18 +200,20 @@ def dcHnd():
 
 start = main
 
-order_kick = handler_kick
+order_kick = kick
 
-order_visitor = handler_visitor
+order_visitor = visitor
 
-order_ban = handler_ban
+order_ban = outcast
 
-order_unban = handler_unban
+order_unban = none
 
 def findAndReplace(mType, source, args):
 	plugins = find_plugins("extensions")[0] # find talisman plugins in bs extensions
 	args = args.strip()
 	answer = str()
+	if not args:
+		answer = u"А параметры?"
 	if args in ("move", u"переместить"):
 		import shutil
 		if not os.path.exists(PLUGIN_DIR):

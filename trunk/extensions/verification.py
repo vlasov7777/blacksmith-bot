@@ -19,7 +19,7 @@ def handler_verification(conf, nick, afl, role, status, text):
 				OTVET[conf] = {}
 			QA = random.choice(QUESTIONS.keys())
 			OTVET[conf][jid] = {'ansver': QUESTIONS[QA]['answer'], 'col': 0}
-			handler_visitor(conf, nick, u'%s: Авторизация...' % (handler_botnick(conf)))
+			visitor(conf, nick, u'%s: Авторизация...' % (handler_botnick(conf)))
 			msg(conf+'/'+nick, u'Привет! Это IQ проверка, чтобы получить голос %s, у тебя три попытки!' % (QUESTIONS[QA]['question']))
 
 def handler_verification_answer(raw, type, source, body):
@@ -29,11 +29,11 @@ def handler_verification_answer(raw, type, source, body):
 			if jid in OTVET[source[1]]:
 				if OTVET[source[1]][jid]['ansver'] == body.lower():
 					del OTVET[source[1]][jid]
-					handler_participant(source[1], source[2], u'Авторизация пройдена!')
+					participant(source[1], source[2], u'Авторизация пройдена!')
 					reply(type, source, u'Ок, признаю - ты не бот')
 				elif OTVET[source[1]][jid]['col'] >= 3:
 					del OTVET[source[1]][jid]
-					handler_kick(source[1], source[2], u'%s: Не прошел авторизацию!' % (handler_botnick(source[1])))
+					kick(source[1], source[2], u'%s: Не прошел авторизацию!' % (handler_botnick(source[1])))
 				else:
 					OTVET[source[1]][jid]['col'] += 1
 					reply(type, source, u'Включи мозг! Неправильно!')

@@ -77,7 +77,7 @@ def handler_admin_rejoin(type, source, body):
 		conf = (body.split()[0]).lower()
 	else:
 		conf = source[1]
-	reason = 'Command "rejoin" from %s' % (source[2])
+	reason = u"Command «rejoin» from «%s»." % (source[2])
 	if body.count(' '):
 		reason += '\nReason: %s' % body[(body.find(' ') + 1):].strip()
 	chats = eval(read_file(GROUPCHATS_FILE))
@@ -91,7 +91,7 @@ def handler_admin_rejoin(type, source, body):
 		else:
 			reply(type, source, u'Не смог перезайти в -> "%s"' % (conf))
 	else:
-		reply(type, source, u'Меня в "%s" нет и не было!' % (conf))
+		reply(type, source, u'Меня нет в «%s».' % (conf))
 
 def handler_admin_leave(type, source, body):
 	if body:
@@ -126,10 +126,11 @@ def handler_admin_leave(type, source, body):
 
 def handler_admin_restart(type, source, reason):
 	status = u'Перезагрузка... Command from %s' % (source[2])
-	if reason:
-		status += '\nReason: %s' % (reason)
-	for conf in GROUPCHATS.keys():
-		msg(conf, status)
+	if reason.strip() != u"тихо":
+		if reason:
+			status += '\nReason: %s' % (reason)
+	 	for conf in GROUPCHATS.keys():
+			msg(conf, status)
 	time.sleep(6)
 	send_unavailable(status)
 	call_sfunctions("03si")
@@ -137,10 +138,11 @@ def handler_admin_restart(type, source, reason):
 
 def handler_admin_exit(type, source, reason):
 	status = u'Выключение... Command from %s' % (source[2])
-	if reason:
-		status += '\nReason: %s' % (reason)
-	for conf in GROUPCHATS.keys():
-		msg(conf, status)
+	if reason.strip() != u"тихо":
+		if reason:
+			status += '\nReason: %s' % (reason)
+		for conf in GROUPCHATS.keys():
+			msg(conf, status)
 	time.sleep(6)
 	send_unavailable(status)
 	call_sfunctions("03si")
@@ -155,16 +157,16 @@ def handler_error_stat(type, source, body):
 				try:
 					error = unicode(read_file(error))
 					if type == 'public':
-						reply(type, source, u'Глянь в приват')
+						reply(type, source, u'Глянь в приват.')
 					msg(source[0], error)
 				except:
-					reply(type, source, u'Нечитаема! Попробуй посмотреть в крэшлогах')
+					reply(type, source, u'Нечитаема! Попробуй посмотреть в крэшлогах.')
 			else:
-				reply(type, source, u'Ошибки №%s не существует!' % (body))
+				reply(type, source, u'Ошибки #%s не существует!' % (body))
 		else:
-			reply(type, source, u'Как "%s" может быть номером ошибки если это вообще не число?' % (body))
+			reply(type, source, u'Как ни крути, «%s» не похоже ни на число, ни на номер ошибки.' % (body))
 	else:
-		reply(type, source, u'Всего произошло %d ошибок' % len(ERRORS.keys()))
+		reply(type, source, u'Всего произошло %d ошибок.' % len(ERRORS.keys()))
 
 def handler_timeup_info(type, source, body):
 	Now_time = time.time()
@@ -173,7 +175,7 @@ def handler_timeup_info(type, source, body):
 	if restarts:
 		rest = (u'\nПоследняя сессия: %s\nВсего %d перезагрузок: ' % (timeElapsed(Now_time - INFO['start']), restarts))+', '.join(sorted(RUNTIMES['REST']))
 	else:
-		rest = u' - Работаю без перезагрузок!'
+		rest = u' — Работаю без перезагрузок!'
 	reply(type, source, start+rest)
 
 def handler_botup_info(type, source, body):
@@ -205,7 +207,7 @@ def handler_command_stat(type, source, body):
 	if body:
 		command = body.lower()
 		if command in COMMSTAT:
-			repl = u'Статистика по команде "%s":\nВсего использовали - %s раз (%s юзеров)' % (command, str(COMMSTAT[command]['col']), str(len(COMMSTAT[command]['users'])))
+			repl = u'Статистика по команде «%s»:\nВсего использовали: %s раз (%s юзеров)' % (command, str(COMMSTAT[command]['col']), str(len(COMMSTAT[command]['users'])))
 		else:
 			repl = u'Нет статистики по этой "команде"'
 	else:
@@ -213,8 +215,7 @@ def handler_command_stat(type, source, body):
 		for command in COMMSTAT:
 			if COMMSTAT[command]['col']:
 				list.append([COMMSTAT[command]['col'], len(COMMSTAT[command]['users']), command])
-		list.sort()
-		list.reverse()
+		list = sorted(list, reverse = True)
 		repl, col = u'\n[№][Команда][Использований][Юзеров использовало]', 0
 		for item in list:
 			col = col + 1

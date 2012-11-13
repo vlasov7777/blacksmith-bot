@@ -30,6 +30,12 @@ def contentTypeParser(opener, data):
 		Charset = "utf-8"
 	return (Type, Charset) 
 
+def ChrReplacer(text):
+	for character in xrange(32):
+		if character not in (9, 10, 13):
+			text = text.replace(unichr(character), "")
+	return text
+
 def urlWatcher(raw, mType, source, body):
 	if mType == "public" and (source[1] in urlDetect) and has_access(source[0], 11, source[1]):
 		if len(body) < 500:
@@ -59,7 +65,7 @@ def urlWatcher(raw, mType, source, body):
 						Type, Charset = contentTypeParser(opener, data)
 						title = getTag("title", data)
 						title = title.decode(Charset)
-						answer = u"Заголовок: %s" % uHTML(title).replace("\n", "")
+						answer = u"Заголовок: %s" % uHTML(title).replace("\n", "").encode("utf-8")
 					else:
 						Type = headers.get("Content-Type") or ""
 						Size = byteFormat(int(headers.get("Content-Length") or 0))
@@ -67,7 +73,7 @@ def urlWatcher(raw, mType, source, body):
 						if Date: 
 							Date = "; последнее изменение файла: %s." % Date
 						answer = u"Тип: %(Type)s, размер: %(Size)s%(Date)s" % vars()
-					msg(source[1], answer)
+					msg(source[1], ChrReplacer(answer))
 			except (urllib2.HTTPError, urllib2.URLError) as e:
 				msg(source[1], str(e))
 			except: 
