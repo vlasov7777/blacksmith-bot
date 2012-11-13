@@ -34,7 +34,7 @@ def handler_afl_list(type, source, body):
 						query.addChild('item', {'affiliation': afl})
 						iq.addChild(node = query)
 						jClient.SendAndCallForResponse(iq, list_search_answer, {'id': id, 'afl': afl, 'name': list[1]})
-					reply(type, source, u'ответ жди в привате через 32 секунды')
+					reply(type, source, u'Ответ ожидай в привате через ~32 секунды.')
 					time.sleep(32)
 					answer = ''
 					for x in AFLIST_SEARCH[id].keys():
@@ -48,7 +48,7 @@ def handler_afl_list(type, source, body):
 					if answer:
 						msg(source[0], answer)
 					else:
-						reply(type, source, u'ничего не нашел')
+						reply(type, source, u'Ничего не найдено :(.')
 				else:
 					reply(type, source, u'инвалид синтакс')
 			else:
@@ -63,11 +63,11 @@ def handler_afl_list(type, source, body):
 					iq.addChild(node = query)
 					jClient.SendAndCallForResponse(iq, handler_list_answer, {'type': type, 'source': source, 'afl': afl})
 				else:
-					reply(type, source, u'чего?')
+					reply(type, source, u'Что-что?')
 		else:
-			reply(type, source, u'ты точно ничего не забыл?')
+			reply(type, source, u'Что-то не то...')
 	else:
-		reply(type, source, u'ты не в чате мундос')
+		reply(type, source, u'Мы не в чате!')
 
 def list_search_answer(coze, stanza, id, afl, name):
 	if AFLIST_SEARCH.has_key(id):
@@ -99,7 +99,7 @@ def handler_list_answer(coze, stanza, type, source, afl):
 							col += 1
 							if afl == 'outcast':
 								if jid in ADLIST:
-									handler_unban(source[1], jid)
+									none(source[1], jid)
 							list += '\n'+str(col)+'. '+jid
 							reasonTag = item.getTag("reason")
 							if reasonTag:
@@ -111,12 +111,12 @@ def handler_list_answer(coze, stanza, type, source, afl):
 						reply(type, source, u'глянь в приват')
 					reply('private', source, list)
 				else:
-					reply(type, source, u'пусто')
+					reply(type, source, u'Пусто.')
 			else:
-				reply(type, source, u'что-то не вышло')
+				reply(type, source, u'Что-то не вышло...')
 		else:
-			reply(type, source, u'аблом')
+			reply(type, source, u'Не судьба :(.')
 	else:
-		reply(type, source, u'что-то не вышло')
+		reply(type, source, u'Что-то не вышло.')
 
 command_handler(handler_afl_list, 20, "afl-list")

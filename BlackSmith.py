@@ -43,7 +43,7 @@ import xmpp, macros, simplejson
 
 ## Stats.
 INFO = {'start': 0, 'msg': 0, 'prs': 0, 'iq': 0, 'outmsg': 0, 'outiq': 0,
-		'cmd': 0, 'thr': 0, 'fr': 0, 'fw': 0, 'fcr': 0, 'cfw': 0, 'errs': 0}
+		'cmd': 0, 'thr': 0, 'fr': 0, 'fw': 0, 'fcr': 0, 'cfw': 0, 'errs': 0, "zc": 0}
 RSTR = {'AUTH': [], 'BAN': [], 'VN': 'off'}
 LAST = {'time': 0, 'cmd': 'start'}
 
@@ -690,7 +690,7 @@ def msg(target, body):
 		ltype = 'groupchat'
 		if len(body) > CHAT_MSG_LIMIT:
 			MORE[target] = body[CHAT_MSG_LIMIT:].strip()
-			body = (u'%s[...]\n\n** Лимит %d знаков! Продолжение по команде "далее".' % (body[:CHAT_MSG_LIMIT].strip(), CHAT_MSG_LIMIT))
+			body = (u'%s[...]\n\n*** Лимит %d знаков! Продолжение по команде «далее».' % (body[:CHAT_MSG_LIMIT].strip(), CHAT_MSG_LIMIT))
 	else:
 		ltype = 'chat'
 		if len(body) > PRIV_MSG_LIMIT:
@@ -716,52 +716,52 @@ def change_bot_status(conf, text, status):
 	Presence = xmpp.protocol.Presence('%s/%s' % (conf, handler_botnick(conf)))
 	Presence.setStatus(text)
 	Presence.setShow(status)
-#	Presence.setTag('c', namespace = xmpp.NS_CAPS, attrs = {'node': Caps, 'ver': CapsVer})
+	Presence.setTag('c', namespace = xmpp.NS_CAPS, attrs = {'node': Caps, 'ver': CapsVer})
 	jClient.send(Presence)
 
-def handler_iq_send(conf, item_name, item, afrls, afrl, rsn = None):
-	stanza = xmpp.Iq(to = conf, typ = 'set')
-	INFO['outiq'] += 1
-	query = xmpp.Node('query')
+def IQSender(chat, attr, data, afrls, role, text = str(), handler = ()):
+	stanza = xmpp.Iq(to = chat, typ = "set")
+	query = xmpp.Node("query")
 	query.setNamespace(xmpp.NS_MUC_ADMIN)
-	afl_role = query.addChild('item', {item_name: item, afrls: afrl})
-	if rsn:
-		afl_role.setTagData('reason', rsn)
+	arole = query.addChild("item", {attr: data, afrls: role})
+	if text:
+		arole.setTagData("reason", text)
 	stanza.addChild(node = query)
-	jClient.send(stanza)
+	if not handler:
+		jClient.send(stanza)
+	else:
+		handler, args = handler
+		jClient.SendAndCallForResponse(stanza, handler, args)
+	INFO["outiq"] += 1
 
-def handler_unban(conf, jid):
-	handler_iq_send(conf, 'jid', jid, 'affiliation', 'none')
+## Affiliations.
+def outcast(chat, jid, text = str(), handler = ()):
+	IQSender(chat, "jid", jid, "affiliation", "outcast", text, handler)
 
-def handler_banjid(conf, jid, reason):
-	handler_iq_send(conf, 'jid', jid, 'affiliation', 'outcast', reason)
+def none(chat, jid, text = str(), handler = ()):
+	IQSender(chat, "jid", jid, "affiliation", "none", text, handler)
 
-def handler_ban(conf, nick, reason):
-	handler_iq_send(conf, 'nick', nick, 'affiliation', 'outcast', reason)
+def member(chat, jid, text = str(), handler = ()):
+	IQSender(chat, "jid", jid, "affiliation", "member", text, handler)
 
-def handler_none(conf, nick, reason):
-	handler_iq_send(conf, 'nick', nick, 'affiliation', 'none', reason)
+def admin(chat, jid, text = str(), handler = ()):
+	IQSender(chat, "jid", jid, "affiliation", "admin", text, handler)
 
-def handler_member(conf, nick, reason):
-	handler_iq_send(conf, 'nick', nick, 'affiliation', 'member', reason)
+def owner(chat, jid, text = str(), handler = ()):
+	IQSender(chat, "jid", jid, "affiliation", "owner", text, handler)
 
-def handler_admin(conf, nick, reason):
-	handler_iq_send(conf, 'nick', nick, 'affiliation', 'admin', reason)
+## Roles.
+def kick(chat, nick, text = str(), handler = ()):
+	IQSender(chat, "nick", nick, "role", "none", text, handler)
 
-def handler_owner(conf, nick, reason):
-	handler_iq_send(conf, 'nick', nick, 'affiliation', 'owner', reason)
+def visitor(chat, nick, text = str(), handler = ()):
+	IQSender(chat, "nick", nick, "role", "visitor", text, handler)
 
-def handler_kick(conf, nick, reason):
-	handler_iq_send(conf, 'nick', nick, 'role', 'none', reason)
+def participant(chat, nick, text = str(), handler = ()):
+	IQSender(chat, "nick", nick, "role", "participant", text, handler)
 
-def handler_visitor(conf, nick, reason):
-	handler_iq_send(conf, 'nick', nick, 'role', 'visitor', reason)
-
-def handler_participant(conf, nick, reason):
-	handler_iq_send(conf, 'nick', nick, 'role', 'participant', reason)
-
-def handler_moder(conf, nick, reason):
-	handler_iq_send(conf, 'nick', nick, 'role', 'moderator', reason)
+def moderator(chat, nick, text = str(), handler = ()):
+	IQSender(chat, "nick", nick, "role", "moderator", text, handler)
 
 def roster_check(instance, body):
 	if instance not in ANSWER:
@@ -1146,7 +1146,11 @@ def calc_Timeout():
 
 def Dispatch_handler(Timeout = 8):
 	try:
-		jClient.iter(Timeout)
+		Cycle = jClient.iter(Timeout)
+		if not Cycle:
+			INFO["zc"] += 1
+			if INFO["zc"] > 15:
+				raise IOError("Disconnected!")
 	except xmpp.Conflict:
 		Print('\n\nError: XMPP Conflict!', color2)
 		call_sfunctions("03si")
@@ -1154,6 +1158,7 @@ def Dispatch_handler(Timeout = 8):
 	except (xmpp.SystemShutdown, IOError):
 		while not jClient.isConnected():
 			Print("\n#-# Reconnecting.", color2)
+			INFO["zc"] = 0
 			Connect()
 			try_sleep(6)
 		join_chats()

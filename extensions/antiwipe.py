@@ -6,11 +6,11 @@
 
 #  Copyleft
 
-TRUSTED_SERVERS = ['jabber.ru', 'xmpp.ru', # add 2ch.so maybe
-					'gtalk.com', 'gmail.com',
-					'jabbers.ru', 'xmpps.ru',
-					'jabberon.ru', 'jabbrik.ru'
-					'talkonaut.com', 'jabber.org']
+GoodServers =  ["jabber.ru", "xmpp.ru", # add 2ch.so maybe
+				"gtalk.com", "gmail.com",
+				"jabbers.ru", "xmpps.ru",
+				"jabberon.ru", "jabbrik.ru"
+				"talkonaut.com", "jabber.org", "gajim.org"]
 
 AWIPE = {}
 
@@ -30,7 +30,7 @@ def wipeCleaner():
 						del desc["susps"][jid]
 				for jid, Time__ in desc["ban"].items():
 					if Time - Time__ > 3599:
-						handler_unban(chat, jid)
+						none(chat, jid)
 						time.sleep(0.4)
 						Time += 0.4
 						del desc["ban"][jid]
@@ -62,28 +62,28 @@ def handle_wipers(chat, nick, afl, role, status, text):
 					AWIPE[chat]["ltime"] = Time
 					server = findServer(jid)
 					if (findServer(joined[Numb - 2]) == server) and (findServer(joined[Numb - 3]) == server):
-						if server not in (TRUSTED_SERVERS + [findServer(chat)]):
-							handler_banjid(chat, server, u"%s: Подозрение на вайп-атаку!" % handler_botnick(chat))
+						if server not in (GoodServers + [findServer(chat)]):
+							outcast(chat, server, u"%s: Подозрение на вайп-атаку!" % handler_botnick(chat))
 							for anyone, desc in GROUPCHATS[chat].items():
 								usr_jid = handler_jid(chat + "/" + anyone)
 								if findServer(usr_jid) == server and desc["ishere"]:
-									handler_kick(chat, anyone, u"%s: Подозрение на вайп-атаку!" % botnick)
+									kick(chat, anyone, u"%s: Подозрение на вайп-атаку!" % botnick)
 									AWIPE[chat]["del"].append(jid)
 						else:
 							for anyone, desc in GROUPCHATS[chat].items():
 								usr_jid = handler_jid(chat + "/" + anyone)
 								if findServer(usr_jid) == server and desc["ishere"]:
-									handler_kick(chat, anyone, u"%s: Подозрение на вайп-атаку!" % botnick)
+									kick(chat, anyone, u"%s: Подозрение на вайп-атаку!" % botnick)
 									if AWIPE[chat]["susps"].has_key(usr_jid):
 										AWIPE[chat]["susps"][usr_jid] = 1 # Suspicious guys and number of their joins
 									else:
 										AWIPE[chat]["susps"][usr_jid] += 1
 					else:
-						handler_banjid(chat, jid, u"%s: Подозрение на вайп-атаку! (бан на час)" % handler_botnick(chat))
+						outcast(chat, jid, u"%s: Подозрение на вайп-атаку! (бан на час)" % handler_botnick(chat))
 						AWIPE[chat]["ban"][jid] = Time
 						AWIPE[chat]["del"].append(jid)
 					if AWIPE[chat]["susps"].get(jid, 0) > 6:
-						handler_banjid(chat, jid, u"%s: Подозрение на вайп-атаку! (бан на час)" % handler_botnick(chat))
+						outcast(chat, jid, u"%s: Подозрение на вайп-атаку! (бан на час)" % handler_botnick(chat))
 						AWIPE[chat]["ban"][jid] = Time
 						AWIPE[chat]["del"].append(jid)
 						if AWIPE[chat]["susps"].has_key(jid): 

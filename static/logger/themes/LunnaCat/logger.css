@@ -1,9 +1,16 @@
 /* BlackSmith Bot logger Theme
  	Based on Psi+ theme "LunnaCat" by majik
  	Theme uses cursors from KDE Oxygen theme, that distributed under GPL license
-	Port (c) simpleApps, 2010 - 2011 */
+	Port (c) simpleApps, 2010 - 2012 */
 
-td, body {color: #4BD7FF; font:11pt none sans-serif; background: url("./ChatLog.png") no-repeat right bottom fixed; background-color: #001415; cursor:url('./left_ptr.png'), auto}
+td, body {color: #4BD7FF; font:11pt none sans-serif; background: url("./ChatLog.png") no-repeat right bottom fixed;
+-webkit-background-size: cover;
+-moz-background-size: cover;
+-o-background-size: cover;
+background-size: cover;
+background-color: #001415; 
+cursor:url('./left_ptr.png'), auto}
+
 a:link {text-decoration:underline; color:#2F9FFF; cursor:url("./pointing_hand.png"), pointer}
 a:active {text-decoration:underline; color:#2F9FFF ; cursor:url('./pointing_hand.png'), pointer}
 a:visited {text-decoration:underline; color:#2F9FFF; cursor:url('./pointing_hand.png'), pointer}

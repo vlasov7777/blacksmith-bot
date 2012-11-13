@@ -13,6 +13,9 @@ ORDERS = {'time': 1, 'presence': 1, 'len': 1, 'like': 0, 'caps': 0, 'prsstlen': 
 ORDER_STATS = {}
 ORDER = {}
 
+Order_compile_link = re.compile("(?:http[s]?|ftp|svn)://[^\s'\"<>]+", 64)
+Order_compile_chat = re.compile("[^\s]+?@(?:conference|muc|chat|room)\.[\w-]+?\.[\w-]+", 64)
+
 def order_check_obscene_words(body):
 	body = ' %s ' % body.lower()
 	for item in OBSCENE2.split('/'):
@@ -28,7 +31,7 @@ def order_check_time_flood(conf, jid, nick):
 			ORDER_STATS[conf][jid]['devoice']['time'] = time.time()
 			ORDER_STATS[conf][jid]['devoice']['cnd'] = 1
 			ORDER_STATS[conf][jid]['msg'] = 0
-			handler_kick(conf, nick, u'%s: слишком быстро отправляешь' % handler_botnick(conf))
+			kick(conf, nick, u'%s: слишком быстро отправляешь' % handler_botnick(conf))
 			return True
 		return False
 
@@ -36,7 +39,7 @@ def order_check_len_flood(mlen, body, conf, jid, nick):
 	if len(body) > mlen:
 		ORDER_STATS[conf][jid]['devoice']['time'] = time.time()
 		ORDER_STATS[conf][jid]['devoice']['cnd'] = 1
-		handler_kick(conf, nick, u'%s: флуд' % handler_botnick(conf))
+		kick(conf, nick, u'%s: флуд' % handler_botnick(conf))
 		return True
 	return False
 
@@ -44,7 +47,7 @@ def order_check_obscene(body, conf, jid, nick):
 	if order_check_obscene_words(body):
 		ORDER_STATS[conf][jid]['devoice']['time'] = time.time()
 		ORDER_STATS[conf][jid]['devoice']['cnd'] = 1
-		handler_kick(conf, nick, u'%s: нецензурно' % handler_botnick(conf))
+		kick(conf, nick, u'%s: нецензурно' % handler_botnick(conf))
 		return True
 	return False
 
@@ -59,7 +62,7 @@ def order_check_caps(body, conf, jid, nick):
 	if col >= len(body) / 2 and col > 9:
 		ORDER_STATS[conf][jid]['devoice']['time'] = time.time()
 		ORDER_STATS[conf][jid]['devoice']['cnd'] = 1
-		handler_kick(conf, nick, u'%s слишком много капса' % handler_botnick(conf))
+		kick(conf, nick, u'%s слишком много капса' % handler_botnick(conf))
 		return True
 	return False
 
@@ -84,31 +87,24 @@ def order_check_like(body, conf, jid, nick):
 						ORDER_STATS[conf][jid]['devoice']['time'] = time.time()
 						ORDER_STATS[conf][jid]['devoice']['cnd'] = 1
 						ORDER_STATS[conf][jid]['msg'] = 0
-						handler_kick(conf, nick, u'%s: мессаги слишком похожи' % handler_botnick(conf))
+						kick(conf, nick, u'%s: мессаги слишком похожи' % handler_botnick(conf))
 						return True
 			ORDER_STATS[conf][jid]['msgbody'] = body.split()
 	else:
 		ORDER_STATS[conf][jid]['msgbody'] = body.split()
 	return False
 
-def handler_reklama_check(body):
+def tiser_checker(body):
 	body = body.lower()
-	c1, c2 = 0, 0
-	for x in ["@", "conf", "ence"]:
-		if body.count(x):
-			c1 += 1
-	for x in ["http", "//", "www"]:
-		if body.count(x):
-			c2 += 1
-	if c1 == 3 or c2 > 1:
+	if Order_compile_link.search(body) or Order_compile_chat.search(body):
 		return True
 	return False
 
 def handler_order_message(raw, type, source, body):
 	if source[1] in GROUPCHATS and user_level(source[0], source[1]) <= 10:
 		if source[2] != '':
-			if ORDER[source[1]].get('adver') and handler_reklama_check(body):
-				handler_kick(source[1], source[2], u'%s: рекламируй свои канцтовары в другом месте' % handler_botnick(source[1]))
+			if ORDER[source[1]].get('adver') and tiser_checker(body):
+				kick(source[1], source[2], u"%s: Реклама запрещена." % handler_botnick(source[1]))
 				return
 			jid = handler_jid(source[0])
 			if source[1] in ORDER_STATS and jid in ORDER_STATS[source[1]]:
@@ -140,11 +136,11 @@ def handler_order_join(conf, nick, afl, role, status, text):
 				if now-ORDER_STATS[conf][jid]['devoice']['time'] > 300:
 					ORDER_STATS[conf][jid]['devoice']['cnd'] = 0
 				else:
-					handler_visitor(conf, nick, u'%s: право голоса снято за предыдущие нарушения' % handler_botnick(conf))
+					visitor(conf, nick, u'%s: право голоса снято за предыдущие нарушения' % handler_botnick(conf))
 			if ORDER[conf]['kicks']['cond'] == 1:
 				kcnt = ORDER[conf]['kicks']['cnt']
 				if ORDER_STATS[conf][jid]['kicks'] > kcnt:
-					handler_ban(conf, nick, u'%s: слишком много киков' % handler_botnick(conf))
+					ban(conf, nick, u'%s: слишком много киков' % handler_botnick(conf))
 					return
 			if ORDER[conf]['fly']['cond'] == 1:
 				lastprs = ORDER_STATS[conf][jid]['prstime']['fly']
@@ -156,11 +152,11 @@ def handler_order_join(conf, nick, afl, role, status, text):
 						fmode = ORDER[conf]['fly']['mode']
 						ftime = ORDER[conf]['fly']['time']
 						if fmode == 'ban':
-							handler_ban(conf, nick, u'%s: хватит летать' % handler_botnick(conf))
+							ban(conf, nick, u'%s: хватит летать' % handler_botnick(conf))
 							time.sleep(ftime)
-							handler_unban(conf, jid)
+							none(conf, jid)
 						else:
-							handler_kick(conf, nick, u'%s: хватит летать' % handler_botnick(conf))
+							kick(conf, nick, u'%s: хватит летать' % handler_botnick(conf))
 							return
 				else:
 					ORDER_STATS[conf][jid]['prs']['fly'] = 0
@@ -211,10 +207,10 @@ def handler_order_presence(Prs):
 								ORDER_STATS[conf][jid]['prs']['status'] += 1
 								if ORDER_STATS[conf][jid]['prs']['status'] > 7:
 									ORDER_STATS[conf][jid]['prs']['status'] = 0
-									handler_kick(conf, nick, u'%s: презенс-флуд' % handler_botnick(conf))
+									kick(conf, nick, u'%s: презенс-флуд' % handler_botnick(conf))
 									return
 						if ORDER[conf].get("nicklen") and len(nick) > ORDER[conf].get("nicklen"):
-							handler_kick(conf, nick, u'Слишком длинный ник!')
+							kick(conf, nick, u'Слишком длинный ник!')
 						else:
 							cmd_nick = nick.split()[0].strip()
 							if conf in PREFIX:
@@ -226,7 +222,7 @@ def handler_order_presence(Prs):
 							else:
 								cmds = (COMMANDS.keys() + MACROS.gmacrolist.keys())
 							if item in cmds or nick.count("%"):
-								handler_kick(conf, nick, u'Твой ник под запретом!')
+								kick(conf, nick, u'Твой ник под запретом!')
 
 						if ORDER[conf]['obscene']:
 							if order_check_obscene(nick, conf, jid, nick):

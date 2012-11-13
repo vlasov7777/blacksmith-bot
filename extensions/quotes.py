@@ -41,7 +41,7 @@ def itHappens(mType, source, body):
 	reply(mType, source, data)
 
 
-## TODO: Fix it. Rewrite to RE. (mrDoctorWHo)
+## TODO: Fix it. Rewrite to RE. (mrDoctorWho)
 def bashAbyss(type, source, args):
 	try:
 		target = read_url('http://bash.org.ru/abysstop', UserAgents["BlackSmith"])
@@ -106,11 +106,33 @@ def Fomenko(mType, source, body):
 		radky = u'не могу пропарсить сайт'
 	reply(mType, source, radky)
 
+def command_Chuck(mType, source, body):
+	if body and check_number(body):
+		Ask = "/quote/%d" % int(body)
+	else:
+		Ask = "/random"
+	try:
+		data = read_url("http://chucknorrisfacts.ru/%s" % Ask, UserAgents["BlackSmith"])
+	except urllib2.HTTPError, exc:
+		answer = str(exc)
+	except:
+		answer = u"Не могу получить доступ к странице."
+	else:
+		data = data.decode("cp1251")
+		comp = re.compile("<a href=/quote/(\d+?)>.+?<blockquote>(.+?)</blockquote>", 16)
+		data = comp.search(data)
+		if data:
+			answer = stripTags(uHTML(u"Факт #%s:\n%s" % data.groups()))
+		else:
+			answer = u"Проблемы с разметкой..."
+	reply(mType, source, answer)
+
+command_handler(command_Chuck, 10, "quotes")
 command_handler(Fomenko, 10, "quotes")
 command_handler(JQuotes, 10, "quotes")
 command_handler(pyOrg, 10, "quotes")
 command_handler(bashOrg, 0, "quotes")
 command_handler(itHappens, 10, "quotes")
 command_handler(AnecDote, 10, "quotes")
-command_handler(bashAbyss, 0, "quotes")
+# command_handler(bashAbyss, 0, "quotes")
 command_handler(afor, 10, "quotes")

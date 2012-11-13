@@ -186,11 +186,11 @@ def handler_autoroles_resave(conf, key, list):
 def handler_autoroles_work(conf, nick, afl, role, status, text):
 	jid = handler_jid(conf+'/'+nick)
 	if jid in AMODER[conf]:
-		handler_moder(conf, nick, u'амодер')
+		moder(conf, nick, u'амодер')
 	elif jid in AKICK[conf]:
-		handler_kick(conf, nick, u'акик')
+		kick(conf, nick, u'акик')
 	elif jid in AVSTR[conf]:
-		handler_visitor(conf, nick, u'авизитор')
+		visitor(conf, nick, u'авизитор')
 
 def autoroles_init(conf):
 	if check_file(conf, 'autoroles.txt', str({'amoder': [], 'akick': [], 'avisitor': []})):
