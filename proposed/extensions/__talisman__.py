@@ -5,7 +5,7 @@
 #  __talisman__.py
 
 # © simpleApps, 2012
-#-extmanager-extVer:2.3-#
+#-extmanager-extVer:2.4-#
 #-extmanager-conflict:extensions/talisman-pc.py-#
 
 import traceback
@@ -41,7 +41,6 @@ STAGE1_INIT = Handlers["01si"]
 STAGE2_INIT = Handlers["02si"]
 
 ACCBYCONFFILE = CONFACCESS
-GREETZ = {}
 GCHCFGS = {}
 
 CMD_FLAG = False

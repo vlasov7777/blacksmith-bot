@@ -85,11 +85,13 @@ def extManager(mType, source, args):
 		extList = [x[:-3] for x in extList]
 
 		if a[0] == u"лист":
+			answer = u"\nВсего доступно %d плагинов:\n" % len(extList)
 			for x, y in enumerate(extList):
 				answer +=  u"%i. %s;\n" % (x + 1, y)
+			answer = answer.rstrip("\n;") + "."
 
 		elif a[0] in extList and len(a) > 1:
-			if a[1] in (u"лист", u"инфо", "установить"):
+			if a[1] in (u"инфо", "установить"):
 				data = read_url(svnUrl % "extensions/%s" % fullName)
 				depList = findDeps(data)
 				conflicts = findConflicts(data)
@@ -162,24 +164,31 @@ def extManager(mType, source, args):
 								if not os.path.isdir(dep):
 									os.remove(dep)
 						depList = str.join(", ", depList)
-						answer += u" Также были удалены: %(depList)s."
+						answer += u"\nТакже были удалены: %(depList)s."
 					size = byteFormat(size)
-					answer += " Освобождённое место: %(size)s."
+					answer += "\nОсвобождённое дисковое пространство: %(size)s."
 				else:
 					answer = u"Плагин «%(name)s» не найден!"
 			else:
 				answer = u"Ошибка. Возможно, этого плагина нет в списке или вы указали несуществующий параметр."
 
 		elif a[0] == u"upgrade":
+			answer = u"Обновлять нечего."
 			extensions = eval(read_file(extFile))
 			toUpdate = dict()
+			fail, ok = [], []
 			for ext in extensions.keys():
 				localVer = extensions[ext]
-				remoteVer = findExtVer(read_url(svnUrl % "extensions/%s" % ext))
+				try:
+					remoteVer = findExtVer(read_url(svnUrl % "extensions/%s" % ext))
+				except Exception:
+					remoteVer = localVer
+					fail.append(ext)
+
 				if localVer != remoteVer:
 					toUpdate[ext] = remoteVer
 			if toUpdate:
-				answer = "\nОбновлено %d плагинов: " % len(toUpdate) + str.join(", ", toUpdate)
+				answer = "\nОбновлено %d плагинов: "
 				jDepList = []
 				for ext in toUpdate.keys():
 					name = ext[:-3]
@@ -190,10 +199,18 @@ def extManager(mType, source, args):
 					urllib.urlretrieve(svnUrl % "help/" + name, "help/%s" % name)
 					getDeps(depList)
 					extensions[ext] = toUpdate[ext]
-					execfile("extensions/%s" % ext, globals())
+					try:
+						execfile("extensions/%s" % ext, globals())
+						ok.append(ext)
+					except:
+						fail.append(ext)
+
+				answer = answer % len(ok) + str.join(", ", ok) + "."
 				if jDepList:
 					jDepList = str.join(", ", jDepList)
-					answer += "\nТакже были установлены следующие зависимости: %(jDepList)s"
+					answer += "\nТакже были установлены следующие зависимости: %(jDepList)s."
+				if fail:
+					answer += "\n• Не удалось найти или подгрузить следующие плагины: %s." % (str.join(", ", fail))
 				answer = answer % vars()
 				write_file(extFile, str(extensions))
 			

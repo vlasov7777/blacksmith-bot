@@ -47,19 +47,19 @@ def handler_greet(type, source, body):
 	else:
 		reply(type, source, u'Отвали!')
 
-def atjoin_greetz(conf, nick, afl, role, status, text):
-	if (GROUPCHATS[conf][nick]['joined'] - INFO['start']) >= 20:
-		jid = handler_jid(conf+'/'+nick)
-		if jid in GREETZ[conf]:
-			msg(conf, '%s: %s' % (nick, GREETZ[conf][jid]))
+def atjoin_greetz(chat, nick, afl, role, status, text):
+	if (GROUPCHATS[chat][nick]['joined'] - INFO['start']) >= 20:
+		jid = handler_jid(chat+'/'+nick)
+		if jid in GREETZ.get(chat):
+			msg(chat, '%s: %s' % (nick, GREETZ[chat][jid]))
 
-def greetz_init(conf):
-	if check_file(conf, 'greetz.txt'):
-		list = eval(read_file('dynamic/'+conf+'/greetz.txt'))
+def greetz_init(chat):
+	if check_file(chat, 'greetz.txt'):
+		list = eval(read_file('dynamic/'+chat+'/greetz.txt'))
 	else:
 		list = {}
-		delivery(u'Внимание! Не удалось создать greetz.txt для "%s"!' % (conf))
-	GREETZ[conf] = list
+		delivery(u'Внимание! Не удалось создать greetz.txt для "%s"!' % (chat))
+	GREETZ[chat] = list
 
 command_handler(handler_greet, 20, "greetz")
 handler_register("04eh", atjoin_greetz)
