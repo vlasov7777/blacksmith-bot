@@ -5,7 +5,7 @@
 #  __talisman__.py
 
 # © simpleApps, 2012
-#-extmanager-extVer:2.4-#
+#-extmanager-extVer:2.4.2-#
 #-extmanager-conflict:extensions/talisman-pc.py-#
 
 import traceback
@@ -135,17 +135,16 @@ def find_plugins(dir = PLUGIN_DIR):
 def load_talisman_plugins():
 	if os.path.exists(PLUGIN_DIR):
 		Print('\n\nLOADING TALISMAN PLUGINS:', color4)
-		Ok, Feil = find_plugins()
-		for ext in Ok:
+		All = find_plugins()
+		Ok, Feil = [], []
+		for ext in All[0]:
 			path = os.path.join(PLUGIN_DIR, ext)
 			ext_name = os.path.splitext(ext)[0]
-			globals()["CMD_FLAG"] = True
 			try:
 				execfile(path, globals()); Ok.append(ext_name)
 			except:
 				print_exc()
 				Feil.append(ext_name)
-			globals()["CMD_FLAG"] = False
 		if Ok:
 			Print('\n\nLoaded %d Talisman plugins:\n%s' % (len(Ok), ', '.join(sorted(Ok))), color3)
 		if Feil:
