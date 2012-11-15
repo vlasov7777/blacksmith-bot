@@ -186,7 +186,7 @@ def handler_autoroles_resave(conf, key, list):
 def handler_autoroles_work(conf, nick, afl, role, status, text):
 	jid = handler_jid(conf+'/'+nick)
 	if jid in AMODER[conf]:
-		moder(conf, nick, u'амодер')
+		moderator(conf, nick, u'амодер')
 	elif jid in AKICK[conf]:
 		kick(conf, nick, u'акик')
 	elif jid in AVSTR[conf]:
