@@ -4,8 +4,8 @@ u"syntax": u'''превед [ник/жид] [=] [нет/none/show/*/привет
 
 u"cmd": u'''превед''',
 
-u"examples": [u'''превед guy = something''', u'''превед guy@jabber.aq = anything''', u'''превед guy = none'''],
+u"examples": [u'''превед guy = something''', u'''превед guy@jabber.aq = anything''', u'''превед guy = none — удалит приветствие.'''],
 
-u"desc": u'''Добавляет приветствие для определённого ника или жида'''
+u"desc": u'''Добавляет приветствие для определённого ника или Jabber ID'''
 }
 }

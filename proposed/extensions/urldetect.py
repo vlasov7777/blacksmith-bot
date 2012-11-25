@@ -5,7 +5,7 @@
 # Web site header detector
 
 # BETA!
-#-extmanager-extVer:2.1-#
+#-extmanager-extVer:2.3-#
 import re
 import urllib2
 
@@ -13,6 +13,7 @@ comp_link = re.compile("(http[s]?://[^\s'\"<>]+)")
 comp_charset = re.compile("(.+);[ ]?charset=(.+)")
 comp_charset_alt = re.compile("charset=['\"]?(.+?)[\s'\"/>]+?")
 
+urlDetect = []
 
 def contentTypeParser(opener, data):
 	Charset, Type = None, opener.headers.get("Content-Type")
@@ -22,6 +23,8 @@ def contentTypeParser(opener, data):
 			Charset = Charset.strip("'\"").lower()
 			if Charset == "unicode":
 				Charset = "utf-8"
+			if Charset.count("."):
+				Charset = Charset.split(".")[1]
 		if not (Charset and Type == "text/html") or opener.url.endswith((".html", ".htm")):
 			Charset = comp_charset_alt.search(data).group(1)
 	except:
@@ -43,7 +46,7 @@ def urlWatcher(raw, mType, source, body):
 				url = comp_link.search(body)
 				if url:
 					url = url.group(1).strip("'.,\\)\"")
-					if not chkUnicode(url): 				 ## RE is not a good way. It use many cpu time. 
+					if not chkUnicode(url):
 						protocol, _ = url.split("://")
 						raw = _.split("/", 1)
 						if len(raw) > 1:
@@ -102,7 +105,7 @@ def urlWatcherConfig(mType, source, args):
 		else: 
 			answer = u"Только для чатов."
 	else:
-		answer = u"что?"
+		answer = u"Что?"
 	reply(mType, source, answer)
 
 def urlWatcherConfig_load():
