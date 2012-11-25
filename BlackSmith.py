@@ -144,7 +144,6 @@ Handlers = {
 
 COMMAND_HANDLERS = {}
 ## Dictionaries, lists.
-cPrefs = ("!", "@", "#", ".", "*", "?", "`")
 MORE = {}
 Flood = {}
 ADLIST = []
@@ -163,6 +162,7 @@ CONFACCESS = {}
 GLOBACCESS = {}
 GROUPCHATS = {}
 UNAVAILABLE = []
+cPrefs = ("!", "@", "#", ".", "*", "?", "`")
 
 MACROS = macros.Macros()
 
@@ -821,7 +821,7 @@ def MESSAGE_PROCESSING(client, stanza):
 	if not isConf and not has_access(source, 80, instance):
 		if RSTR['VN'] == 'off':
 			raise xmpp.NodeProcessed()
-		CheckFlood(disp)
+		CheckFlood(client)
 	if instance in UNAVAILABLE and not MSERVE:
 		raise xmpp.NodeProcessed()
 	if stanza.getTimestamp():

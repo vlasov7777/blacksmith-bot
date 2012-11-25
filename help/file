@@ -1,13 +1,12 @@
 {
 u"handler_file_create": {
-u"syntax": u'''файл <директория>/<директория>/<имя файла>.<расширение>''',
+u"syntax": u'''файл <директория>/<имя файла>.<расширение>''',
 
 u"cmd": u'''файл''',
 
-u"examples": [u'''файл static/superstatic/megastatic.txt''', u'''файл dynamic/x.py''', u'''файл dynamic/flood.txt {"witcher@conference.jabber.ru": "off"}'''],
+u"examples": [u'''файл static/superstatic/megastatic.txt''', u'''файл dynamic/x.py''', u'''файл dynamic/flood.txt {"simpleapps@conference.jabber.ru": "off"}'''],
 
-u"desc": u'''Создаёт файл в заданной директории с заданным именем и заранным расширением, при указании второго параметра он будет записан в файл, без него фал будет создан со стандартной data -> "{}"
-By WitcherGeralt
-http://witcher-team.ucoz.ru/'''
+u"desc": u'''Создаёт файл в заданной директории с заданным именем и заранным расширением.
+При указании второго параметра он будет записан в файл, без него фал будет создан со стандартным содержимым -> "{}"'''
 }
 }

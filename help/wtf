@@ -34,7 +34,7 @@ u"syntax": u'''??эксп [глоб/global/конференция]''',
 
 u"cmd": u'''??эксп''',
 
-u"examples": [u'''??эксп глоб''', u'''??эксп witcher@conference.jabber.ru'''],
+u"examples": [u'''??эксп глоб''', u'''??эксп simpleapps@conference.jabber.ru'''],
 
 u"desc": u'''Записывает указанную базу в "человеческом виде"'''
 },

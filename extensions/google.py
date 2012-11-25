@@ -61,7 +61,7 @@ def command_google(mType, source, body):
 					ls.append(desc.get("title", ""))
 					ls.append(desc.get("content", ""))
 					ls.append(desc.get("unescapedUrl", ""))
-					answer = uHTML(str.join(chr(10), ls))
+					answer = stripTags(uHTML(str.join(chr(10), ls)))
 					if list:
 						gCache.append((source_, 1, list))
 						answer += u"\n\n** Ещё %d результатов (командуй «гугл *»)." % len(list)

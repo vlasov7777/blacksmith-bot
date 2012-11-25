@@ -61,4 +61,4 @@ def command_YandexMarket(mType, source, body):
 	if locals().has_key("answer"):
 		reply(mType, source, u"%s\n*** Информация предоставлена сервисом market.yandex.ru" % answer)
 
-command_handler(command_YandexMarket, 10, "yandexMarket")
+command_handler(command_YandexMarket, 10, "yandexmarket")
