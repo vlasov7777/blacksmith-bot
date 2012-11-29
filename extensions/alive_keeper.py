@@ -10,15 +10,23 @@
 aliveKeeper = {"iters": 0}
 
 def iQ_ask(victim, callbackFunc, qType):
+	aliveKeeper["iters"] += 1
 	iQ = xmpp.Iq("get", to = victim)
 	INFO["outiq"] += 1
 	iQ.addChild("ping", {}, [], xmpp.NS_PING)
 	jClient.SendAndCallForResponse(iQ, callbackFunc, {"qType": qType})
+	if aliveKeeper["iters"] > 5:
+		Print("\n#! Warn: Attempt to get IQ #%d failed." % aliveKeeper["iters"], color2)
+		try:
+			aliveKeeper["iters"] = 0
+			jClient.disconnect()
+		except:
+			pass
 
 def aliveKeeper_ask(qType):
 	if qType == "chat":
 		for chat in GROUPCHATS.keys():
-			iQ_ask(chat+"/"+handler_botnick(chat), aliveKeeper_answer, qType)
+			iQ_ask(chat + "/" + handler_botnick(chat), aliveKeeper_answer, qType)
 	elif qType == "roster":
 		iQ_ask("%s@%s" % (USERNAME, SERVER), aliveKeeper_answer, qType)
 
@@ -38,24 +46,34 @@ def aliveKeeper_answer(coze, iQ, qType):
 				Print("\n#-# Warn: no answer from me. Lags?", color2)
 				aliveKeeper["iters"] += 1
 			if aliveKeeper["iters"] > 5:
-				raise NoIqAnswer
+				Print("\n#! Warn: Attempt to get IQ #%d failed." % aliveKeeper["iters"], color2)
+				try:
+					aliveKeeper["iters"] = 0
+					jClient.disconnect()
+				except:
+					pass
 		else:
 			aliveKeeper["iters"] = 0
 	else:
 		aliveKeeper["iters"] += 1
 
 def aliveKeeper_worker():
+	time.sleep(20)
 	while True:
-		time.sleep(60)
+		time.sleep(30)
 		try:
 			aliveKeeper_ask("chat")
 		except KeyboardInterrupt:
 			break
 		except IOError, e:
 			if e.message == "Disconnected!":
-				sys_exit("Can't get an iQ answer.")
+				try:
+					aliveKeeper["iters"] = 0
+					jClient.disconnect()
+				except:
+					pass
 			else:
-				lytic_crashlog(aliveKeeper_worker)
+				raise
 		except:
 			lytic_crashlog(aliveKeeper_worker)
 

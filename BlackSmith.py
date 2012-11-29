@@ -171,10 +171,7 @@ Sequence = threading.Semaphore()
 from sTools import *
 ## os info.
 if os.name == "nt":
-	if not ntDetect().lower().count("windows"):
-		isOS = ntDetect()
-	else:
-		isOS = "Windows"
+	isOS = ntDetect()
 	from platform import win32_ver
 	os_name = " ".join([isOS, win32_ver()[0], win32_ver()[2]])
 	del win32_ver
@@ -249,6 +246,7 @@ def lytic_crashlog(handler, command = None, comment = None):
 	filename = (DIR+'/error[%s]%s.crash') % (str(INFO['cfw'] + 1), time.strftime('[%H.%M.%S][%d.%m.%Y]'))
 	ERRORS[Number] = filename
 	try:
+		INFO['cfw'] += 1
 		if not os.path.exists(DIR):
 			os.mkdir(DIR, 0755)
 		write_file(filename, error_body)
@@ -1165,6 +1163,7 @@ def Dispatch_handler(Timeout = 8):
 	except xmpp.StreamError:
 		pass
 	except KeyboardInterrupt:
+		print "INTRRUPTED"
 		sys_exit('Interrupt (Ctrl+C)')
 
 def Dispatch_fail():
@@ -1172,20 +1171,15 @@ def Dispatch_fail():
 	error = format_exc()
 	write_file("__main__.crash", error, "a")
 	Print("\n\n#-# Dispatch fail!", color2)
-	delivery("Внимание! При парсинге станзы произошла критическая ошибка!"\
-				+ "\n" + error)
-##	sys_exit(format_exc())
 
-def sys_exit(exit_reason = 'SUICIDE'):
-	Print('\n\n%s' % (exit_reason), color2)
+def sys_exit(Reason = ""):
+	Print('\n\n%s' % (Reason), color2)
 	if jClient.isConnected():
-		send_unavailable(exit_reason)
+		send_unavailable(Reason)
 	if (time.time() - INFO['start']) >= 30:
 		call_sfunctions("03si")
 	Exit('\n\nRESTARTING...\n\nPress Ctrl+C to exit', 0, 30)
 
-class NoIqAnswer(Exception):
-	pass
 
 ## Main.
 def main():
@@ -1228,8 +1222,6 @@ def main():
 			Iters, Timeout = calc_Timeout()
 		try:
 			Dispatch_handler(Timeout)
-		except NoIqAnswer:
-			sys_exit("Can't get the iQ answer.")
 		except IOError:
 			sys_exit(format_exc())
 		except:

@@ -5,8 +5,15 @@
 
 import sys, os, re
 
-Dir_0 = os.path.dirname(sys.argv[0])
-os.chdir(Dir_0)
+if not hasattr(sys, "argv") or not sys.argv[0]:
+	sys.argv = ["."]
+
+try:
+	Dir_0 = os.path.abspath(sys.argv[0])
+	os.chdir(os.path.dirname(Dir_0))
+except OSError:
+	print "#! Incorrect launch!"
+	time.sleep(6)
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
