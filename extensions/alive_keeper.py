@@ -58,11 +58,14 @@ def aliveKeeper_answer(coze, iQ, qType):
 		aliveKeeper["iters"] += 1
 
 def aliveKeeper_worker():
-	time.sleep(20)
+	time.sleep(100)
 	while True:
-		time.sleep(30)
+		time.sleep(50)
 		try:
-			aliveKeeper_ask("chat")
+			if jClient.isConnected():
+				aliveKeeper_ask("chat")
+			else:
+				continue
 		except KeyboardInterrupt:
 			break
 		except IOError, e:
