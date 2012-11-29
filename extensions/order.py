@@ -140,7 +140,7 @@ def handler_order_join(conf, nick, afl, role, status, text):
 			if ORDER[conf]['kicks']['cond'] == 1:
 				kcnt = ORDER[conf]['kicks']['cnt']
 				if ORDER_STATS[conf][jid]['kicks'] > kcnt:
-					ban(conf, nick, u'%s: слишком много киков' % handler_botnick(conf))
+					outcast(conf, nick, u'%s: слишком много киков' % handler_botnick(conf))
 					return
 			if ORDER[conf]['fly']['cond'] == 1:
 				lastprs = ORDER_STATS[conf][jid]['prstime']['fly']
@@ -152,7 +152,7 @@ def handler_order_join(conf, nick, afl, role, status, text):
 						fmode = ORDER[conf]['fly']['mode']
 						ftime = ORDER[conf]['fly']['time']
 						if fmode == 'ban':
-							ban(conf, nick, u'%s: хватит летать' % handler_botnick(conf))
+							outcast(conf, nick, u'%s: хватит летать' % handler_botnick(conf))
 							time.sleep(ftime)
 							none(conf, jid)
 						else:
