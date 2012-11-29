@@ -16,7 +16,7 @@ def handler_antispace(Prs):
 		else:
 			nick = Prs.getFrom().getResource()
 		if nick.count(' '):
-			kick(conf, nick, u'Пробелы в нике запрещены!')
+			kick(chat, nick, u'Пробелы в нике запрещены!')
 
 def handler_antispace_control(type, source, body):
 	if source[1] in GROUPCHATS:
@@ -45,7 +45,7 @@ def antispace_init():
 		globals()["Antispace"] = eval(read_file('dynamic/antispace.txt'))
 	else:
 		globals()["Antispace"] = []
-		delivery(u'Внимание! Не удалось создать antispace.txt для "%s"!' % (conf))
+		delivery(u'Внимание! Не удалось создать antispace.txt!')
 
 command_handler(handler_antispace_control, 20, "antispace")
 handler_register("02si", antispace_init)

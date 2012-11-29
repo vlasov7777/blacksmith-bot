@@ -24,7 +24,7 @@ def handler_roulette_one(type, source, nick):
 			nick = source[2]
 		if user_level(source[1]+'/'+nick, source[1]) < 15:
 			if random.randrange(1, 3) == 2:
-				handler_kick(source[1], source[2], u'мозги забрызгали стены...')
+				kick(source[1], source[2], u'мозги забрызгали стены...')
 			else:
 				reply(type, source, u'пронесло...')
 		else:

@@ -45,7 +45,7 @@ def bomb(type, source, args):
 
 def bomb_start(conf, nick):
 	if nick in PROVOD and GROUPCHATS[conf][nick]['ishere']:
-		handler_kick(conf, nick, u'птыдыщь!')
+		kick(conf, nick, u'птыдыщь!')
 		del PROVOD[nick]
 
 def bomb_msg(raw, type, source, body):
@@ -55,7 +55,7 @@ def bomb_msg(raw, type, source, body):
 			reply(type, source, u'бомба обезврежена!')
 			del PROVOD[source[2]]
 		else:
-			handler_kick(source[1], source[2], u'птыдыщь!')
+			kick(source[1], source[2], u'птыдыщь!')
 			del PROVOD[source[2]]
 
 handler_register("01eh", bomb_msg)

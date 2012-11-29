@@ -52,7 +52,7 @@ def handle_wipers(chat, nick, afl, role, status, text):
 	if chat not in UNAVAILABLE:
 		Time = time.time()
 		jid = handler_jid("%s/%s" % (chat, nick))
-		if (time.time() - INFO['start']) > 59 and jid not in ADLIST and AWIPE.has_key(chat) and afl == 'none':
+		if (time.time() - INFO['start']) > 59 and jid not in ADLIST and AWIPE.get(chat) and afl == 'none':
 			if (Time - AWIPE[chat]['ltime']) < 19:
 				AWIPE[chat]["jids"].append(jid)
 				joined = AWIPE[chat]["jids"]
@@ -109,12 +109,12 @@ def handler_antiwipe_control(type, source, body):
 				if ThrName not in ThrNames():
 					composeTimer(60, wipeCleaner, ThrName).start()
 			elif body in [u'выкл', 'off', '0']:
-				AWIPE[source[1]] = {"enabled": False}
+				del AWIPE[source[1]]
 				write_file(filename, "False")
 				reply(type, source, u'Функция антивайпа отключена!')
 			else:
 				reply(type, source, u'Читай помощь по команде!')
-		elif source[1] in UNAVALABLE:
+		elif source[1] in UNAVAILABLE:
 			reply(type, source, u'Если бот не админ - антивайп неработоспособен...')
 		elif source[1] in AWIPE:
 			reply(type, source, u'Функция антивайпа включена!')
