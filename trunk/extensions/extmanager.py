@@ -119,13 +119,14 @@ def extManager(mType, source, args):
 					urllib.urlretrieve(svnUrl % "help/" + a[0], "help/%s" % a[0])
 					getDeps(depList)
 					extensions[fullName] = findExtVer(read_url(svnUrl % "extensions/%s" % fullName))
-					write_file(extFile, str(extensions))
+					
 					if conflicts:
 						for x in conflicts:
 								if os.path.exists(x):
 									try:
 										os.remove(x)
 										conflicts.remove(x)
+										del extensions[x] #!
 									except:
 										pass
 								else:

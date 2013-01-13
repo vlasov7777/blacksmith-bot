@@ -59,13 +59,11 @@ Langs = {'en': u'Английский',
 import re
 from urllib2 import quote
 
-uagent = "Opera/9.60 (J2ME/MIDP; Opera Mini/4.2.13337/724; U; ru)"
-
 def gTrans(fLang, tLang, text):
 	url = "http://translate.google.ru/m?hl=ru&sl=%(fLang)s&tl=%(tLang)s&ie=UTF-8&prev=_m&q=%(text)s"
 	text = quote(text.encode("utf-8"))
 	try:
-		html = read_url(url % vars(), uagent)
+		html = read_url(url % vars(), UserAgents["OperaMini"])
 		return uHTML(re_search(html, 'class="t0">', "</div>"))
 	except Exception, e:
 		return "%s: %s" % (e.__class__.__name__, e.message)
@@ -84,9 +82,6 @@ def gAutoTrans(mType, source, text):
 def gTransHandler(mType, source, args):
 	if args and len(args.split()) > 2:
 		(fLang, tLang, text) = args.split(None, 2)
-		if tLang == "ar":
-			reply(mType, source, u"I want to LIVE!")
-			return
 		reply(mType, source, u"Перевод %s => %s:\n%s" % (fLang, tLang, gTrans(fLang, tLang, text)))
 	else:
 		answer = u"\nДоступные языки:\n"

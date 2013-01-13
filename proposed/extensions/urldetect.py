@@ -25,8 +25,10 @@ def contentTypeParser(opener, data):
 				Charset = "utf-8"
 			if Charset.count("."):
 				Charset = Charset.split(".")[1]
-		if not (Charset and Type == "text/html") or opener.url.endswith((".html", ".htm")):
-			Charset = comp_charset_alt.search(data).group(1)
+		elif (not Charset and Type == "text/html") or opener.url.endswith((".html", ".htm")):
+			Charset = comp_charset_alt.search(data)
+			if Charset:
+				Charset = Charset.group(1)
 	except:
 		lytic_crashlog(contentTypeParser, "", u"During the search encoding on %s." % opener.url)
 	if not Charset:
@@ -56,7 +58,7 @@ def urlWatcher(raw, mType, source, body):
 							domain, page = raw[0], ""
 						if not chkUnicode(domain):
 							domain = IDNA(domain)
-						if not chkUnicode(page):
+						if not chkUnicode(page, "~#?%&=,:;"):
 							page = urllib.quote(str(page))
 						url = u"%s://%s%s" % (protocol, domain, page)
 					reQ = urllib2.Request(url)
@@ -83,27 +85,24 @@ def urlWatcher(raw, mType, source, body):
 				lytic_crashlog(urlWatcher, "", u"While parsing \"%s\"." % locals().get("url"))
 
 def urlWatcherConfig(mType, source, args):
-	if args:
-		if mType == "public":
-			args = args.strip()
-			if args == "1":
-				if source[1] in urlDetect:
-					answer = u"Уже включено."
-				else:
-					urlDetect.append(source[1])
-					write_file("dynamic/urlWatcher.txt", str(urlDetect))
-					answer = u"Включил автодетект ссылок."
-			elif args == "0":
-				if source[1] in urlDetect:
-					urlDetect.remove(source[1])
-					write_file("dynamic/urlWatcher.txt", str(urlDetect))
-					answer = u"Выключил автодетек ссылок."
-				else:
-					 answer = u"Не включено."
+	if args:	
+		args = args.strip()
+		if args == "1":
+			if source[1] in urlDetect:
+				answer = u"Уже включено."
 			else:
-				answer = u"Неизвестный параметр."
-		else: 
-			answer = u"Только для чатов."
+				urlDetect.append(source[1])
+				write_file("dynamic/urlWatcher.txt", str(urlDetect))
+				answer = u"Включил автодетект ссылок."
+		elif args == "0":
+			if source[1] in urlDetect:
+				urlDetect.remove(source[1])
+				write_file("dynamic/urlWatcher.txt", str(urlDetect))
+				answer = u"Выключил автодетек ссылок."
+			else:
+				 answer = u"Не включено."
+		else:
+			answer = u"Неизвестный параметр."
 	else:
 		answer = u"Что?"
 	reply(mType, source, answer)

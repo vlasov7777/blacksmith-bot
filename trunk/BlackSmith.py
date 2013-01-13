@@ -109,13 +109,16 @@ def PASS_GENERATOR(codename, Number):
 		codename += random.choice(symbols)
 	return codename
 
-try:
-	execfile(GENERAL_CONFIG_FILE)
-	BOSS_PASS = (PASS_GENERATOR("", eval(BOSS_PASS[7:])) if BOSS_PASS.startswith("/random") else BOSS_PASS)
-	execfile('static/versions.py')
-	reload(sys).setdefaultencoding('utf-8')
-except Exception, e:
-	Exit(e.message, 1, 12)
+if os.path.exists(GENERAL_CONFIG_FILE):
+	try:
+		execfile(GENERAL_CONFIG_FILE)
+		BOSS_PASS = (PASS_GENERATOR("", eval(BOSS_PASS[7:])) if BOSS_PASS.startswith("/random") else BOSS_PASS)
+		execfile('static/versions.py')
+		reload(sys).setdefaultencoding('utf-8')
+	except Exception, e:
+		Exit(e.message, 1, 12)
+else:
+	Exit("\n#! General config file not found! Exiting.")
 
 if BOT_OS == 'nt':
 	os.system('Title BlackSmith - %s' % (Caps))
@@ -819,7 +822,7 @@ def MESSAGE_PROCESSING(client, stanza):
 	if not isConf and not has_access(source, 80, instance):
 		if RSTR['VN'] == 'off':
 			raise xmpp.NodeProcessed()
-		CheckFlood(client)
+		CheckFlood()
 	if instance in UNAVAILABLE and not MSERVE:
 		raise xmpp.NodeProcessed()
 	if stanza.getTimestamp():
