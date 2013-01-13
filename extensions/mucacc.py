@@ -18,8 +18,14 @@ def mucAccHandler(mType, source, body, func):
 		if body:
 			args = body.split(None, 1)
 			nick = args[0].strip()
-			jid = handler_jid(u"%s/%s" % (source[1], nick))
-			if jid not in ADLIST:
+			if nick.count(".") or nick in GROUPCHATS[source[1]]:
+				if nick in GROUPCHATS[source[1]]:
+					jid = handler_jid(u"%s/%s" % (source[1], nick))
+				else:
+					jid = nick
+			if (jid in ADLIST and func.func_name in ("outcast", "kick")) and (jid not in (handler_jid(u"%s/%s" % (source[1], source[2]), source[2]))):
+				return reply(mType, source, u"Не стоит этого делать.")
+			else:
 				if len(args) > 1:
 					reason = args[1].strip()
 				else:
@@ -28,8 +34,6 @@ def mucAccHandler(mType, source, body, func):
 					func(source[1], jid, reason, (handle_AflRl, {"mType": mType, "source": source}))
 				else:
 					func(source[1], nick, reason, (handle_AflRl, {"mType": mType, "source": source}))
-			else:
-				reply(mType, source, u"Не стоит этого делать.")
 		else:
 			reply(mType, source, u"Некого.")
 	else:

@@ -393,7 +393,7 @@ def logSetState(mType, source, argv):
 					logWrite(chat, "status", u"*** Логирование конференции приостановлено")
 					reply(mType, source, u"Выключил логирование «%s»." % chat)
 				else:
-					reply(mType, source, u"«%s» не логируется.")
+					reply(mType, source, u"«%s» не логируется." % chat)
 			elif a0 in (u"тема", "темы"):
 				if argv:
 					if logThemes.has_key(argv[0]):
