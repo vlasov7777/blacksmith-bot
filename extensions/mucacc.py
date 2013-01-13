@@ -23,17 +23,17 @@ def mucAccHandler(mType, source, body, func):
 					jid = handler_jid(u"%s/%s" % (source[1], nick))
 				else:
 					jid = nick
-			if (jid in ADLIST and func.func_name in ("outcast", "kick")) and (jid not in (handler_jid(u"%s/%s" % (source[1], source[2]), source[2]))):
-				return reply(mType, source, u"Не стоит этого делать.")
-			else:
-				if len(args) > 1:
-					reason = args[1].strip()
+				if (jid in ADLIST and func.func_name in ("outcast", "kick")) and (jid not in (handler_jid(u"%s/%s" % (source[1], source[2]), source[2]))):
+					return reply(mType, source, u"Не стоит этого делать.")
 				else:
-					reason = source[2]
-				if func.func_name in ("outcast", "none", "member", "admin", "owner"):
-					func(source[1], jid, reason, (handle_AflRl, {"mType": mType, "source": source}))
-				else:
-					func(source[1], nick, reason, (handle_AflRl, {"mType": mType, "source": source}))
+					if len(args) > 1:
+						reason = args[1].strip()
+					else:
+						reason = source[2]
+					if func.func_name in ("outcast", "none", "member", "admin", "owner"):
+						func(source[1], jid, reason, (handle_AflRl, {"mType": mType, "source": source}))
+					else:
+						func(source[1], nick, reason, (handle_AflRl, {"mType": mType, "source": source}))
 		else:
 			reply(mType, source, u"Некого.")
 	else:
