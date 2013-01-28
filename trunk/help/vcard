@@ -1,11 +1,11 @@
 {
-u"handler_get_vcard": {
-u"syntax": u'''вкард [ник]''',
+u"command_vcard": {
+u"syntax": u'''вкард [ник/jid]''',
 
 u"cmd": u'''вкард''',
 
-u"examples": [u'''вкард guy''', u'''вкард'''],
+u"examples": [u'''вкард mrDoctorWho''', u'''вкард mrdoctorwho@jabber.ru'''],
 
-u"desc": u'''Показывает vCard указанного пользователя.'''
+u"desc": u'''Показывает визитную карточку (VCard) указанного пользователя.'''
 }
 }

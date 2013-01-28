@@ -14,11 +14,13 @@ def command_chkMinecraftServer(mType, source, argv):
 		argv = argv.split()[:2]
 		addr, port = str(), 25565
 		if len(argv) == 1:
+			print 1
 			addr = argv[0]
+			if ":" in addr:
+				addr, port = addr.split(":")
 		elif len(argv) > 1:
+			print 2
 			addr, port = argv
-		elif argv[0].count(":"):
-			addr, port = argv[0].split(":")
 		else:
 			reply(mType, source, answer)
 			return

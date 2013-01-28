@@ -43,7 +43,7 @@ def command_chkServer(mType, source, argv):
 		addr, port = str(), str()
 		if len(argv) > 1:
 			addr, port = argv
-		elif argv[0].count(":"):
+		elif ":" in argv[0]:
 			addr, port = argv[0].split(":")
 		else: 
 			reply(mType, source, answer)

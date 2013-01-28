@@ -553,27 +553,18 @@ def formatWord(Numb, ls):
 		edge = ls[int(str(Numb)[-1])]
 	return edge
 
-def timeElapsed(seconds):
-	minutes, seconds = divmod(int(seconds), 60)
-	hours, minutes = divmod(minutes, 60)
-	days, hours = divmod(hours, 24)
-	months, days = divmod(days, 30)
-	years, months = divmod(months, 12)
-	if seconds:
-		text = u'%d секунд%s' % (seconds, formatWord(seconds, (u"а", u"ы", u"")))
-	else:
-		text = u''
-	if minutes:
-		text = u'%d минут%s %s' % (minutes, formatWord(minutes, (u"а", u"ы", u"")), text)
-	if hours:
-		text = u'%d час%s %s' % (hours, formatWord(hours, (u"", u"а", u"ов")), text)
-	if days:
-		text = u'%d %s %s' % (days, formatWord(days, (u"день", u"дня", u"дней")), text)
-	if months:
-		text = u'%d месяц%s %s' % (months, formatWord(months, (u"", u"а", u"ев")), text)
-	if years:
-		text = u'%d %s %s' % (years, formatWord(years, (u"год", u"года", u"лет")), text)
-	return text.rstrip()
+def timeElapsed(Time):
+	ext, ls = [], [("Year", None), ("Month", 12), ("Day", 30.4375), ("Hour", 24), ("Minute", 60), ("Second", 60)]
+	while ls:
+		lr = ls.pop()
+		if lr[1]:
+			(Time, Rest) = divmod(Time, lr[1])
+		else:
+			Rest = Time
+		if Rest >= 1.0:
+			ext.insert(0, "%d %s%s" % (Rest, lr[0], ("s" if Rest >= 2 else "")))
+		if not (ls and Time):
+			return str.join(chr(32), ext)
 
 def ClearMemory():
 	while True:
@@ -823,9 +814,7 @@ def MESSAGE_PROCESSING(client, stanza):
 		if RSTR['VN'] == 'off':
 			raise xmpp.NodeProcessed()
 		CheckFlood()
-	if instance in UNAVAILABLE and not MSERVE:
-		raise xmpp.NodeProcessed()
-	if stanza.getTimestamp():
+	if (instance in UNAVAILABLE and not MSERVE) or stanza.getTimestamp():
 		raise xmpp.NodeProcessed()
 	bot_nick = handler_botnick(instance)
 	nick = source.getResource()

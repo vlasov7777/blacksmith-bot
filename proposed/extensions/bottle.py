@@ -8,6 +8,9 @@
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 # http://witcher-team.ucoz.ru/
 
+#-extmanager-depends:static/bottle.txt-#
+#-extmanager-extVer:1.1-#
+
 def handler_bottle(type, source, player):
 	if type == 'public':
 		if not player:

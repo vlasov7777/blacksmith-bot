@@ -298,12 +298,12 @@ def command_chkTeeworldsServer(mType, source, argv):
 		addr, port = str(), 8308
 		if len(argv) == 1:
 			addr = argv[0]
+			if ":" in addr:
+				addr, port = addr.split(":")
 		elif len(argv) == 2:
 			addr, arg =  argv
 		else:
 			return reply(mType, source, answer)
-		if argv[0].count(":"):
-			addr, port = argv[0].split(":")
 
 		port = int(port)
 		try:

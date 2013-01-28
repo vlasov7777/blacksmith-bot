@@ -75,14 +75,14 @@ def handle_wipers(chat, nick, afl, role, status, text):
 								if findServer(usr_jid) == server and desc["ishere"]:
 									kick(chat, anyone, u"%s: Подозрение на вайп-атаку!" % botnick)
 									if AWIPE[chat]["susps"].has_key(usr_jid):
-										AWIPE[chat]["susps"][usr_jid] = 1 # Suspicious guys and number of their joins
+										AWIPE[chat]["susps"][usr_jid] = 1 # Suspicious guys and number of their joinsс
 									elif usr_jid in AWIPE[chat]["susps"]:
 										AWIPE[chat]["susps"][usr_jid] += 1
 					else:
 						outcast(chat, jid, u"%s: Подозрение на вайп-атаку! (бан на час)" % handler_botnick(chat))
 						AWIPE[chat]["ban"][jid] = Time
 						AWIPE[chat]["del"].append(jid)
-					if AWIPE[chat]["susps"].get(jid, 0) > 6:
+					if AWIPE[chat]["susps"].get(jid, 0) > 2:
 						outcast(chat, jid, u"%s: Подозрение на вайп-атаку! (бан на час)" % handler_botnick(chat))
 						AWIPE[chat]["ban"][jid] = Time
 						AWIPE[chat]["del"].append(jid)

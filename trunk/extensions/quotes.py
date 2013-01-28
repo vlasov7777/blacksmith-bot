@@ -20,7 +20,7 @@ def bashOrg(type, source, body):
 		data = re.search('<span id="v\d+?" class="rating">(\d+?)</span>(?:.|\s)+?<a href="/quote/\d+?" class="id">#(\d+?)</a>\s*?</div>\s+?<div class="text">((?:.|\s)+?)</div>', data, 16)
 		if data:
 			rate, id, data = data.groups()
-			answer = uHTML(u"Цитата: #%s (Рейтинг: %s)\n%s" % (id, rate, data.decode("cp1251")))
+			answer = uHTML(u"\nЦитата: #%s (Рейтинг: %s)\n%s" % (id, rate, data.decode("cp1251")))
 		else:
 			answer = u"Ошибка."
 		reply(type, source, answer)
@@ -41,24 +41,24 @@ def itHappens(mType, source, body):
 	reply(mType, source, data)
 
 
-## TODO: Fix it. Rewrite to RE. (mrDoctorWho)
-def bashAbyss(type, source, args):
+## by Snapi-Snup autor
+def bashAbyss(mType, source, args):
 	try:
-		target = read_url('http://bash.org.ru/abysstop', UserAgents["BlackSmith"])
-		id=`random.randrange(1, 25)`
-		od = re.search('<b>'+id+':',target)
-		q1 = target[od.end():]
-		q1 = q1[:re.search('\n</div>',q1).start()]
-		od = re.search('<div>',q1)
-		message = q1[od.end():]
-		message = message[:re.search('</div>',message).start()]	         
-		reply(type,source, uHTML(message.decode('cp1251')))
-	except:
-		reply(type,source, returnExc())
+		rawhtml = read_url('http://bash.org.ru/abysstop', UserAgents["BlackSmith"])
+		elements = re.findall("<div class=\"text\">(.+?)</div>", rawhtml, re.DOTALL)
+		if elements:
+			rawquote = random.choice(elements)
+			message = "\n" + uHTML(stripTags(rawquote.decode("cp1251")))
+		else:
+			message = u"Что-то пусто..."
+	except Exception:
+		message = u"Что-то не так: %s" % str(returnExc())
+	reply(mType, source, message)
+
 
 def JQuotes(mType, source, body):
 	if body and body.isdigit():
-		url = "http://jabber-quotes.ru/api/read/?id=%d" % body
+		url = "http://jabber-quotes.ru/api/read/?id=%d" % int(body)
 	else:
 		url = "http://jabber-quotes.ru/api/read/?id=random"
 	data = read_url(url, UserAgents["BlackSmith"])
@@ -70,7 +70,7 @@ def JQuotes(mType, source, body):
 def pyOrg(type, source, body):
 	try:
 		data = re_search(read_link('http://python.org/'), '<h2 class="news">', '</div>')
-		data, repl = strip_tags.sub('', uHTML(data)), "\n"
+		data, repl = stripTags(uHTML(data)), "\n"
 		for line in data.splitlines():
 			if line.strip():
 				repl += '%s\n' % (line)
@@ -82,7 +82,7 @@ def afor(type, source, body):
 	try:
 		data = re_search(read_url('http://skio.ru/quotes/humour_quotes.php',
 			 UserAgents["BlackSmith"]), '<form id="qForm" method="post"><div align="center">', '</div>')
-		data = strip_tags.sub('', uHTML(data))
+		data = stripTags(uHTML(data))
 		reply(type, source, data.decode('cp1251'))
 	except Exception:
 		reply(type, source, returnExc())
@@ -134,5 +134,5 @@ command_handler(pyOrg, 10, "quotes")
 command_handler(bashOrg, 0, "quotes")
 command_handler(itHappens, 10, "quotes")
 command_handler(AnecDote, 10, "quotes")
-# command_handler(bashAbyss, 0, "quotes")
+command_handler(bashAbyss, 0, "quotes")
 command_handler(afor, 10, "quotes")
