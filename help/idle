@@ -1,21 +1,21 @@
 {
-u"handler_userinfo_idle": {
+u"command_idle": {
 u"syntax": u'''жив [ник]''',
 
 u"cmd": u'''жив''',
 
-u"examples": [u'''жив mr.chuvac'''],
+u"examples": [u'''жив WitcherGeralt'''],
 
-u"desc": u'''Показывает сколько времени неактивен юзер.'''
+u"desc": u'''Показывает, сколько времени неактивен пользователь.'''
 },
 
-u"handler_uptime_server": {
+u"command_uptime": {
 u"syntax": u'''аптайм [сервер]''',
 
 u"cmd": u'''аптайм''',
 
-u"examples": [u'''аптайм jabber.aq'''],
+u"examples": [u'''аптайм jabber.ru'''],
 
-u"desc": u'''Показывает аптайм определённого сервера.'''
+u"desc": u'''Показывает время работы определённого сервера.'''
 }
 }

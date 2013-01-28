@@ -4,7 +4,7 @@
 #  BlackSmith mark.1
 #  logger.py
 
-# © 2011-2012 simpleApps (http://simpleapps.ru)
+# © 2011-2013 simpleApps (http://simpleapps.ru)
 # Thanks to: WitcherGeralt (alkorgun@gmail.com)
 
 logConfigFile = "dynamic/logstate.txt"
@@ -61,20 +61,34 @@ LoggerCfg = {"theme": "LunnaCat", "enabled": False, "timetype": "local", "dir": 
 
 Subjs = {}
 
+def logGetDate(Time):
+	if LoggerCfg["timetype"] == "local":
+		func = time.localtime
+	else:
+		func = time.gmtime
+	get_date = lambda date: tuple(func(date))[:3]
+	year, month, day = Time[:3]
+	try:
+		date = time.mktime(time.struct_time((year, month, day, 6, 0, 0, 0, 0, 0)))
+	except:
+		year_p = month_p = day_p = year_n = month_n = day_n = 0
+	else:
+		year_p, month_p, day_p = get_date(date - 86400)
+		year_n, month_n, day_n = get_date(date + 86400)
+	return {"prev": "{0}/{1:02}/{2:02}".format(year_p, month_p, day_p),
+			"next": "{0}/{1:02}/{2:02}".format(year_n, month_n, day_n)}
+		
+
 def getLogFile(chat, Time):
-	mon = str(Time.tm_mon) if (Time.tm_mon > 9) else ("0%d" % Time.tm_mon)
+	mon = "{0:02}".format(Time.tm_mon)
 	logDir = chkFile("%s/%s/%d/%s" % (LoggerCfg["dir"], chat, Time.tm_year, mon))
 	if not os.path.isdir(logDir):
 		try:
 			os.makedirs(logDir)
 		except:
 			return False
-	prev, next = (Time.tm_mday - 1, Time.tm_mday  + 1)
-	if prev <= 9:
-		prev = "0%d" % prev
-	if next <= 9:
-		next = "0%d" % next
-	day = str(Time.tm_mday) if (Time.tm_mday > 9) else ("0%d" % Time.tm_mday)
+	prev, next = logGetDate(Time).values()
+	day = "{0:02}".format(Time.tm_mday)
 	logFileName = "%s/%s.html" % (logDir, day)
 	if os.path.isfile(logFileName):
 		logFile = open(logFileName, "a")
@@ -110,9 +124,10 @@ def logWrite(chat, state, body, nick = None):
 		logFile = getLogFile(chat, Time)
 		if logFile:
 			timestamp = time.strftime("%H:%M:%S", Time)
+			if nick: nick = xmpp.XMLescape(nick)
 			body = xmpp.XMLescape(body)
 			body = logger_compile_link.sub(lambda obj: "<a href=\"{0}\">{0}</a>".format(obj.group(0)), body) #'
-			body = body.replace(chr(10), "<br />")
+			body = body.replace(chr(10), "<br>")
 			body = body.replace(chr(9), "&#9;")
 			logFile.write(chr(10))
 			if state == "subject":

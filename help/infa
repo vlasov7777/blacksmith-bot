@@ -1,11 +1,11 @@
 {
-u"handler_SG_infa": {
-u"syntax": u'''инфа [сервер]''',
+u"command_server_stats": {
+u"syntax": u'''сервстат [сервер]''',
 
-u"cmd": u'''инфа''',
+u"cmd": u'''сервстат''',
 
-u"examples": [u'''инфа xmpp.ru'''],
+u"examples": [u'''сервстат xmpp.ru'''],
 
-u"desc": u'''Возвращает статистику о сервере.'''
+u"desc": u'''Запрашивает статистику сервера.'''
 }
 }
