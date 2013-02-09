@@ -41,9 +41,7 @@ def answer_server_stats_get(some, stanza, mType, source):
 	reply(mType, source, answer)
 
 
-command_handler(command_server_stats, 10, "infa")
-
-
+## VCard.
 VcardDesc = {"NICKNAME": "Nick",
 			"GIVEN": "Name",
 			"FAMILY": "Surname",
@@ -112,15 +110,14 @@ def vcard_answer(something, stanza, mType, source):
 	if locals().has_key("answer"):
 		reply(mType, source, answer)
 
-command_handler(command_vcard, 10, "vcard")
 
-
+## Version.
 def command_getVersion(mType, source, args):
 	if args:
 		args = args.lstrip()
-		if args in GROUPCHATS.get(source[1], {}):
+		if args in GROUPCHATS.get(source[1], []):
 			target = "%s/%s" % (source[1], args)
-		elif "@" in args and "." in args:
+		elif "." in args:
 			target = args
 		else:
 			return reply(mType, source, u"«%s» — сейчас нет в чате и на JabberID это не похоже." % args)
@@ -152,8 +149,8 @@ def answer_version(coze, stanza, mType, source):
 		answer = u"Нет ответа."
 	reply(mType, source, answer)
 
-command_handler(command_getVersion, 10, "version")
 
+## Uptime & Idle.
 def command_uptime(mType, source, server):
 	if not server:
 		server = SERVER
@@ -192,6 +189,101 @@ def idle_answer(spam, stanza, mType, source, instance, typ):
 	reply(mType, source, answer)
 
 
-command_handler(command_uptime, 10, "idle")
-command_handler(command_idle, 10, "idle")
+## Disco.
+def command_disco(mType, source, body):
+	if body:
+		desc = {"mType": mType, "source": source, "body": None, "limit": 16}
+		ls = body.split(None, 2)
+		server = (ls.pop(0)).lower()
+		if ls:
+			limit = ls.pop(0)
+			if isNumber(limit):
+				limit = int(limit)
+				if limit > 2:
+					if stype == Types[0]:
+						if limit > 256:
+							limit = 256
+					elif limit > 24:
+						limit = 24
+					desc["limit"] = limit
+				if ls:
+					desc["body"] = ls.pop(0)
+			else:
+				desc["body"] = body[len(server):].strip()
+		iq = xmpp.Iq("get", to = server)
+		iq.addChild("query", namespace = xmpp.NS_DISCO_ITEMS)
+		jClient.SendAndCallForResponse(iq, disco_answer, desc)
+	else:
+		reply(mType, source, u"Данная команда подразумевает использование параметров.")
 
+compile_disco = re.compile("^(.+?)\((\d+?)\)$", 16)
+
+def disco_answer(some, stanza, mType, source, body, limit):
+	if xmpp.isResultNode(stanza):
+		confs, ls = [], []
+		for node in stanza.getQueryChildren():
+			if node and node != "None":
+				jid = str(node.getAttr("jid"))
+				name = node.getAttr("name")
+				node = node.getAttr("node")
+				if name:
+					if body and not (body in jid or body in name):
+						continue
+					data = compile_disco.search(name)
+					if data:
+						name, numb = data.groups()
+						confs.append((int(numb), jid, name[:48].strip()))
+						continue
+					if node:
+						items = (jid, name[:48].strip(), node)
+					elif jid.endswith(name):
+						items = (name[:48].strip(),)
+					else:
+						items = (jid, name[:48].strip())
+				elif node:
+					if body and body not in jid:
+						continue
+					items = (jid, node)
+				else:
+					if body and body not in jid:
+						continue
+					items = (jid,)
+				ls.append(items)
+		if confs or ls:
+			confs.sort(reverse = True)
+			ls.sort()
+			number = 0
+			result = []
+			for numb, jid, name in confs:
+				number += 1
+				if number > limit:
+					break
+				result.append("%s (%d) [%s]" % (name, numb, jid))
+			for items in ls:
+				number += 1
+				if number > limit:
+					break
+				ln = len(items)
+				if ln == 3:
+					result.append("%s - %s (%s)" % items)
+				elif ln == 2:
+					result.append("%s - %s" % items)
+				else:
+					result.append(items[0])
+			answer = "\->\n" + str.join(chr(10), ["%d) %s" % (numb, line) for numb, line in enumerate(result, 1)])
+			rlen = len(ls) + len(confs)
+			if rlen:
+				answer += "\n\n** Всего %d пунктов." % (rlen)
+		else:
+			answer = "Нет результата."
+	else:
+		answer = "Нет ответа"
+	reply(mType, source, answer)
+
+
+command_handler(command_idle, 10, "get_iq")
+command_handler(command_uptime, 10, "get_iq")
+command_handler(command_vcard, 10, "get_iq")
+command_handler(command_disco, 10, "get_iq")
+command_handler(command_server_stats, 10, "get_iq")
+command_handler(command_getVersion, 10, "get_iq")

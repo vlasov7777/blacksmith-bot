@@ -56,6 +56,6 @@ def handler_send_invite(type, source, body):
 		else:
 			reply(type, source, u'Чего нада!?')
 	else:
-		reply(type, source, u'Ты реально тупиш!')
+		reply(type, source, u'Только для чатов!')
 
 command_handler(handler_send_invite, 20, "invite")

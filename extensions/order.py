@@ -152,7 +152,7 @@ def handler_order_join(conf, nick, afl, role, status, text):
 						fmode = ORDER[conf]['fly']['mode']
 						ftime = ORDER[conf]['fly']['time']
 						if fmode == 'ban':
-							outcast(conf, nick, u'%s: хватит летать' % handler_botnick(conf))
+							outcast(conf, jid, u'%s: хватит летать' % handler_botnick(conf))
 							time.sleep(ftime)
 							none(conf, jid)
 						else:

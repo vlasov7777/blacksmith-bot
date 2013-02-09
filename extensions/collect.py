@@ -27,9 +27,7 @@ def handler_clean(type, source, body):
 		if CHAT_DIRTY[source[1]]:
 			CHAT_DIRTY[source[1]] = False
 			if type != 'private':
-				message = random.choice([u'чистка...', u'Работа по антиупарыванию конфы в разгаре!', 'вычищаю конференцию', 'отсылаю пустые мессаги (не правда ли дебильная работа?)'])
-				status = 'dnd'
-				change_bot_status(source[1], message, status)
+				change_bot_status(source[1], u"Чистка...", "dnd")
 			zero = xmpp.Message(to = source[1], typ = "groupchat")
 			for Numb in xrange(24):
 				if not GROUPCHATS.has_key(source[1]):
@@ -86,14 +84,21 @@ def last_chat_cache(type, source, body):
 		reply(type, source, list)
 
 def handler_test(type, source, body):
-	if time.localtime()[1]==4 and time.localtime()[2]==1:
+	if time.localtime()[1:3] == (4, 1):
 		testfr = [u"КОТЭ ОПАСНОСТЕ!!11", u"ТЕЛОИД11111", 
 				u"ГОЛАКТЕГО ОПАСНОСТЕ1111", u"ПЫЫщщщщщЩЩЬ!!111", u"АДИНАДИН!!!!"
 				u"ЪЖСЛО111", u"ЧАКЕ НЕГОДУЕ......", u"ОНОТОЛЕ СЕРЧАЕ.", u"КОТЭ РАДУЕ!1", u"ПИПЛ ШОкЕ11"]
+		answer = random.choice(testfr)
 	else:
-		testfr = [u'Что?', u'Провален, твой IQ = 90!', u'Пассед', u'Ща те такой тест устрою!', u'- Тест на дебила выключен, ты опоздал', u'Во ***! Нах разбудил! Мне снилась прекрасная Isida...', u'Сейчас, сейчас! Протестим твою репу на удароустойчивость!']
+		testfr = {0: u"Всё в порядке! (Ошибок нет)",
+				  1: u"Что-то сломалось... (1 ошибка)",
+				  2: u"Что-то сломалось дважды... (2 ошибки)",
+				  3: u"Что-то сломалось дважды и ещё раз сломалось... (3 ошибки) (!)",
+				  4: u"Плоховато мне, перезапуститься бы... (4 ошибки) (!!)",
+				  "more": u"Сегодня явно не мой день (%d ошибок) (!!!)"}
+		answer = testfr.get(INFO["errs"], testfr["more"])
 		
-	reply(type, source, (random.choice(testfr))+(' (Bot PID: %s)' % str(BOT_PID)))
+	reply(type, source, answer + (' (PID: %s)' % str(BOT_PID)))
 
 def handler_admin_message(type, source, body):
 	if body:
