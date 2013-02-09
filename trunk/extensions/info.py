@@ -16,13 +16,13 @@ def handler_true_jid(type, source, nick):
 				jid = handler_jid(source[1]+'/'+nick)
 				if type == 'public':
 					reply(type, source, u'ушёл')
-				reply('private', source, u'Реальный жид "'+nick+'" -> '+jid)
+				reply('private', source, u'Реальный Jabbed ID «%s» — %s.' % (nick, jid))
 			else:
-				reply(type, source, u'Ты уверен, "%s" что был тут?' % (nick))
+				reply(type, source, u'Ты уверен, «%s» что был тут?' % (nick))
 		else:
-			reply(type, source, u'мы не в чате мундос!')
+			reply(type, source, u'Только для чатов')
 	else:
-		reply(type, source, u'и чего ты хочеш?')
+		reply(type, source, u'Команда требует наличия параметров.')
 
 def handler_online_here(type, source, body):
 	if source[1] in GROUPCHATS:
@@ -39,7 +39,7 @@ def handler_online_here(type, source, body):
 			reply(type, source, u'Отправил в приват, на всякий...')
 		reply('private', source, (u'Я здесь вижу %s юзеров:' % str(col))+list)
 	else:
-		reply(type, source, u'аблом какой-то...')
+		reply(type, source, u'Только для чатов.')
 
 command_handler(handler_true_jid, 20, "info")
 command_handler(handler_online_here, 10, "info")

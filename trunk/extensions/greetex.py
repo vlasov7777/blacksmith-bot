@@ -54,7 +54,7 @@ def handler_greetex(type, source, body):
 		else:
 			reply(type, source, u'Ты ничего не забыл?')
 	else:
-		reply(type, source, u'Пшел вон мудак!')
+		reply(type, source, u'Так нельзя!')
 
 def atjoin_greetex(conf, nick, afl, role, status, text):
 	if (GROUPCHATS[conf][nick].get('joined', 0) - INFO['start']) >= 20:

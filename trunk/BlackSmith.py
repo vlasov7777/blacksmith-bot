@@ -14,7 +14,7 @@
 #  This program distributed under Apache 2.0 license.
 #  See license.txt for more details.
 #  © WitcherGeralt, based on Talisman by Als (Neutron by Gh0st)
-#  The new bot life © simpleApps.
+#  The new bot life © simpleApps 2011 — 2013.
 
 ## Imports.
 from __future__ import with_statement

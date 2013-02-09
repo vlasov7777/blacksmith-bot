@@ -31,9 +31,9 @@ def command_help(type, source, body):
 						inst = COMMAND_HANDLERS[command].func_name
 						fr = eval(read_file("help/%s" % plug).decode("utf-8"))[inst]
 					mess = fr['desc']
-					mess += u'\nИспользование: '+fr['syntax']+u'\nПримеры:'
+					mess += u'\nИспользование:\n»»» '+fr['syntax']+u'\nПримеры:'
 					for example in fr['examples']:
-						mess += '\n    • '+example
+						mess += '\n    »»» '+example
 					mess += u'\nМинимальный уровень доступа: '+str(COMMANDS[command]['access'])
 				except:
 					mess = u'нет хелпа'

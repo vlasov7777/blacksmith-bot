@@ -23,7 +23,7 @@ def mucAccHandler(mType, source, body, func):
 					jid = handler_jid(u"%s/%s" % (source[1], nick))
 				else:
 					jid = nick
-				if (jid in ADLIST and func.func_name in ("outcast", "kick")) and (jid not in (handler_jid(u"%s/%s" % (source[1], source[2]), source[2]))):
+				if (func.func_name in ("outcast", "kick")) and jid in ADLIST:
 					return reply(mType, source, u"Не стоит этого делать.")
 				else:
 					if len(args) > 1:
@@ -93,7 +93,7 @@ def command_fullban(mType, source, body):
 			answer = u"«%s» успешно забанен в %d конференциях." % (jid, number)
 		else:
 			answer = u"Это не ник или юзеров с таким ником здесь не было."
-	elif BanBase:
+	elif BanBase and mType == "groupchat" or source[2] in GROUPCHATS.get(source[1], []):
 		answer = "\n[#] [JID] [Причина] [Кол-во чатов]\n"
 		num = 0
 		for jid in BanBase.keys():
