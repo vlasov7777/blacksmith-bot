@@ -145,10 +145,9 @@ Handlers = {
 # 07eh = role change
 # 08eh = status change
 
-COMMAND_HANDLERS = {}
 ## Dictionaries, lists.
 MORE = {}
-Flood = {}
+Flood = []
 ADLIST = []
 ANSWER = {}
 PREFIX = {}
@@ -165,6 +164,7 @@ CONFACCESS = {}
 GLOBACCESS = {}
 GROUPCHATS = {}
 UNAVAILABLE = []
+COMMAND_HANDLERS = {}
 cPrefs = ("!", "@", "#", ".", "*", "?", "`")
 
 MACROS = macros.Macros()
@@ -798,7 +798,7 @@ def CheckFlood():
 	Flood.append(time.time())
 	if len(Flood) >= 4:
 		if (Flood[-1] - Flood[0]) <= 8:
-			Flood = [Flood.pop()]
+			globals()["Flood"] = [Flood.pop()]
 			raise xmpp.NodeProcessed()
 		else:
 			Flood.pop(0)

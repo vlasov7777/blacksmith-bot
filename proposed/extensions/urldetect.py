@@ -4,8 +4,8 @@
 # © simpleApps, 21.05.2012 (12:38:47)
 # Web site header detector
 
-# BETA!
-#-extmanager-extVer:2.4-#
+# RC-1!
+#-extmanager-extVer:2.5-#
 import re
 import urllib2
 
@@ -58,7 +58,7 @@ def urlWatcher(raw, mType, source, body):
 							domain, page = raw[0], ""
 						if not chkUnicode(domain):
 							domain = IDNA(domain)
-						if not chkUnicode(page, "~#?%&=,:;"):
+						if not chkUnicode(page, "~#?%&=,:;*|-"):
 							page = urllib.quote(str(page))
 						url = u"%s://%s%s" % (protocol, domain, page)
 					reQ = urllib2.Request(url)

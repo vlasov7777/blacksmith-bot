@@ -8,18 +8,6 @@
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 
 from urllib import urlencode
-compile_st = re.compile("<[^<>]+?>")
-
-def uHTML(text):
-	from HTMLParser import HTMLParser
-	text = text.replace("<br>", "\n ").replace("</br>", "\n").replace("<br />", "\n")
-	text = HTMLParser().unescape(text)
-	del HTMLParser
-	return text
-
-def decodeHTML(data):
-	data = compile_st.sub("", data)
-	return uHTML(data.strip())
 
 def command_jc_search(typ, source, body):
 	if body:
@@ -40,6 +28,7 @@ def command_jc_search(typ, source, body):
 		else:
 			answer = u'Ничего не найдено...'
 	except:
+		import traceback;traceback.print_exc()
 		answer = u'Сервис недоступен.'
 	reply(typ, source, answer)
 

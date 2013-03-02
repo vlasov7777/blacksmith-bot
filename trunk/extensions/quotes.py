@@ -68,15 +68,16 @@ def JQuotes(mType, source, body):
 	reply(mType, source, "\nЦитата: #%s | Автор: %s.\n%s" % (iD, Author, uHTML(Quote)))
 
 def pyOrg(type, source, body):
-	try:
-		data = re_search(read_link('http://python.org/'), '<h2 class="news">', '</div>')
-		data, repl = stripTags(uHTML(data)), "\n"
-		for line in data.splitlines():
-			if line.strip():
-				repl += '%s\n' % (line)
-		reply(type, source, repl.decode('koi8-r'))
-	except Exception:
-		reply(type, source, returnExc())
+	if not body:
+		try:
+			data = re_search(read_link('http://python.org/'), '<h2 class="news">', '</div>')
+			data, repl = stripTags(uHTML(data)), "\n"
+			for line in data.splitlines():
+				if line.strip():
+					repl += '%s\n' % (line)
+			reply(type, source, repl.decode('koi8-r'))
+		except Exception:
+			reply(type, source, returnExc())
 
 def afor(type, source, body):
 	try:

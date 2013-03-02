@@ -21,27 +21,27 @@ def handler_send_save(ltype, source, body):
 				if nick == 'BOSS':
 					jid = handler_jid(source[0])
 					if jid in AMSGBL:
-						reply(ltype, source, u'тебе запрещено отсылать мессаги админу')
+						reply(ltype, source, u'Тебе запрещено отсылать мессаги админу.')
 					else:
 						delivery(u'Сообщение от '+source[2]+' ('+jid+'): '+body)
 						reply(type, source, u'сделано')
 				elif handler_botnick(source[1]) != nick:
 					if nick in GROUPCHATS[source[1]] and GROUPCHATS[source[1]][nick]['ishere']:
-						reply(ltype, source, u'Эээй очнись он прямо сейчас здесь!')
+						reply(ltype, source, u'Он уже в чате.')
 					else:
 						if not nick in SEND_CACHE[source[1]]:
 							SEND_CACHE[source[1]][nick] = []
 						SEND_CACHE[source[1]][nick].append(fromnick+body)
 						write_file('dynamic/'+source[1]+'/send.txt', str(SEND_CACHE[source[1]]))
-						reply(ltype, source, u'как зайдёт передам')
+						reply(ltype, source, u'Как зайдёт, передам.')
 				else:
-					reply(ltype, source, u'себе передать?')
+					reply(ltype, source, u'Себе передать?')
 			else:
 				reply(type, source, u'Слишком длинная мессага!')
 		else:
 			reply(ltype, source, u'ты определённо что-то забыл')
 	else:
-		reply(ltype, source, u'Эй чувак! Очнись! Ты не в чате!')
+		reply(ltype, source, u'Мы не в чате.')
 
 def handler_send_join(conf, nick, afl, role, status, text):
 	if nick in SEND_CACHE[conf]:
