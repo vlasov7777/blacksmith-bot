@@ -96,7 +96,7 @@ def handler_test(type, source, body):
 				  3: u"Что-то сломалось дважды и ещё раз сломалось... (3 ошибки) (!)",
 				  4: u"Плоховато мне, перезапуститься бы... (4 ошибки) (!!)",
 				  "more": u"Сегодня явно не мой день (%d ошибок) (!!!)"}
-		answer = testfr.get(INFO["errs"], testfr["more"])
+		answer = testfr.get(len(ERRORS.keys()), testfr["more"])
 		
 	reply(type, source, answer + (' (PID: %s)' % str(BOT_PID)))
 

@@ -41,13 +41,12 @@ logSynchronize = {}
 
 logger_compile_link = re.compile("((http[s]?|ftp)://[^\s'\"<>]+)")
 
-DefaultLogHeader = u'''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dt">
-
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
+DefaultLogHeader = u'''<!doctype html>
+<html>
 <head>
-<title>%(date)s — %(chat)s</title>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-<link type="text/css" rel="StyleSheet" href="../../.theme/logger.css" />
+<title>%(date)s &#8212; %(chat)s</title>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="../../.theme/logger.css"/>
 </head>
 
 <body>
@@ -112,7 +111,8 @@ def getLogFile(chat, Time):
 			Time = time.time()
 			if (Time - Subjs[chat]['time']) > 20:
 				Subjs[chat]['time'] = Time
-				logFile.write('<span class="topic">%s</span><br>' % Subjs[chat]['body'].replace("\n", "<br>"))
+				#logFile.write('<span class="topic">%s</span><br>' % Subjs[chat]['body'].replace("\n", "<br>"))
+				logWrite(chat, Subjs[chat]['body'].replace("\n", "<br>"), "subject")
 	return logFile
 
 def logWrite(chat, state, body, nick = None):
@@ -131,20 +131,20 @@ def logWrite(chat, state, body, nick = None):
 			body = body.replace(chr(9), "&#9;")
 			logFile.write(chr(10))
 			if state == "subject":
-				logFile.write('<span class="topic">%s</span><br />' % body)
+				logFile.write('<a id="t{0}" href="#t{0}">[{0}]</a> <span class="topic">{1}</span><br>'.format(timestamp, body))
 			elif state == "msg":
 				if nick:
 					nickColor = "nick%d" % coloredNick(chat, nick)
 					if body.startswith("/me"):
-						logFile.write('<span class="{0}"><a id="t{1}" href="#t{1}">[{1}]</a>&nbsp;*{2}&nbsp;{3}</span><br />'.format(nickColor, timestamp, nick, body[3:]))
+						logFile.write('<span class="{0}"><a id="t{1}" href="#t{1}">[{1}]</a>&nbsp;*{2}&nbsp;{3}</span><br>'.format(nickColor, timestamp, nick, body[3:]))
 					else:
-						logFile.write('<span class="{0}"><a id="t{1}" href="#t{1}">[{1}]</a>&nbsp;&lt;{2}&gt;</span>&nbsp;<span class="text">{3}</span><br />'.format(nickColor, timestamp, nick, body))
+						logFile.write('<span class="{0}"><a id="t{1}" href="#t{1}">[{1}]</a>&nbsp;&lt;{2}&gt;</span>&nbsp;<span class="text">{3}</span><br>'.format(nickColor, timestamp, nick, body))
 				else:
 					logFile.write('<span class="status"><a id="t{0}" href="#t{0}">[{0}]</a></span>&nbsp;'.format(timestamp))
-					logFile.write('<span class="status">*** %s</span><br />' % (body))
+					logFile.write('<span class="status">*** %s</span><br>' % (body))
 			else:
 				logFile.write('<span class="{0}"><a id="t{1}" href="#t{1}">[{1}]</a></span>&nbsp;'.format(state, timestamp))
-				logFile.write('<span class="%s">%s</span><br />' % (state, body))
+				logFile.write('<span class="%s">%s</span><br>' % (state, body))
 			logFile.close()
 
 def coloredNick(chat, nick):

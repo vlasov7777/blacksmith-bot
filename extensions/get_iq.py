@@ -197,7 +197,7 @@ def command_disco(mType, source, body):
 		server = (ls.pop(0)).lower()
 		if ls:
 			limit = ls.pop(0)
-			if isNumber(limit):
+			if check_number(limit):
 				limit = int(limit)
 				if limit > 2:
 					if stype == Types[0]:

@@ -11,7 +11,9 @@ GoodServers =  ["jabber.ru", "xmpp.ru", # add 2ch.so maybe
 				"jabbers.ru", "xmpps.ru",
 				"gajim.org", "jabbim.com",
 				"jabberon.ru", "jabbrik.ru",
-				"talkonaut.com", "jabber.org"]
+				"talkonaut.com", "jabber.org",
+				"virtualtalk.org", "xroft.ru",
+				"worldskynet.net", "xmppserv.ru"]
 
 AWIPE = {}
 

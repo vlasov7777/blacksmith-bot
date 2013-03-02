@@ -2,8 +2,8 @@
 
 Caps = "http://simpleapps.ru/caps#blacksmith-m.1"
 BOT_VER = 1
-CORE_MODE = 58
-BOT_REV = 152
+CORE_MODE = 60
+BOT_REV = 160
 
 if os.access(".svn/entries", os.R_OK):
 	try:
