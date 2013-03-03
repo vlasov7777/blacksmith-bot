@@ -111,8 +111,8 @@ def getLogFile(chat, Time):
 			Time = time.time()
 			if (Time - Subjs[chat]['time']) > 20:
 				Subjs[chat]['time'] = Time
-				#logFile.write('<span class="topic">%s</span><br>' % Subjs[chat]['body'].replace("\n", "<br>"))
-				logWrite(chat, Subjs[chat]['body'].replace("\n", "<br>"), "subject")
+				logFile.write('<span class="topic">%s</span><br>' % Subjs[chat]['body'].replace("\n", "<br>"))
+				#logWrite(chat, Subjs[chat]['body'].replace("\n", "<br>"), "subject")
 	return logFile
 
 def logWrite(chat, state, body, nick = None):
