@@ -116,7 +116,7 @@ def command_fullunban(mType, source, jid):
 				write_file(BanBaseFile, str(BanBase))
 			for conf in GROUPCHATS.keys():
 				none(conf, jid)
-			reply(mType, source, u'Сделано.')
+			reply(mType, source, u'Задача выполнена в %d конференциях.' % len(GROUPCHATS.keys()))
 		else:
 			reply(mType, source, u'Не вижу JID.')
 	else:

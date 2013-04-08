@@ -200,7 +200,7 @@ def command_disco(mType, source, body):
 			if check_number(limit):
 				limit = int(limit)
 				if limit > 2:
-					if stype == Types[0]:
+					if mType == "private":
 						if limit > 256:
 							limit = 256
 					elif limit > 24:

@@ -128,12 +128,21 @@ def command_Chuck(mType, source, body):
 			answer = u"Проблемы с разметкой..."
 	reply(mType, source, answer)
 
+def getLinuxLink(mType, source, body):
+	if not body:
+		data = urllib.urlopen("https://kernel.org").read()
+		link = re.search('<td id="latest_link">(.*?)</td>',data,16).group(1).strip()
+		ver = getTagData("a", link)
+		link = "https://kernel.org/%s" % getTagArg("a", "href", link).lstrip("./")
+		reply(mType, source, u"Последняя стабильная версия ядра Linux: %(ver)s | %(link)s" % vars())
+
 command_handler(command_Chuck, 10, "quotes")
 command_handler(Fomenko, 10, "quotes")
 command_handler(JQuotes, 10, "quotes")
 command_handler(pyOrg, 10, "quotes")
-command_handler(bashOrg, 0, "quotes")
+command_handler(bashOrg, 10, "quotes")
 command_handler(itHappens, 10, "quotes")
 command_handler(AnecDote, 10, "quotes")
 command_handler(bashAbyss, 0, "quotes")
 command_handler(afor, 10, "quotes")
+command_handler(getLinuxLink, 10, "quotes")

@@ -29,11 +29,11 @@ def handler_everywhere(type, source, body):
 						for conf in GROUPCHATS.keys():
 							call_command_handlers(command, msgtype, [source[0], conf, source[2]], Parameters, command)
 					else:
-						reply(type, source, u'нет такой команды')
+						reply(type, source, u'Нет такой команды.')
 				else:
-					reply(type, source, u'слишком длинные параметры')
+					reply(type, source, u'Слишком длинные параметры.')
 			else:
-				reply(type, source, u'тип указан не корректно')
+				reply(type, source, u'Тип указан некорректно.')
 		else:
 			reply(type, source, u'инвалид синтакс')
 	else:

@@ -4,8 +4,8 @@
 # © simpleApps, 21.05.2012 (12:38:47)
 # Web site header detector
 
-# RC-1!
-#-extmanager-extVer:2.5-#
+# RC-2!
+#-extmanager-extVer:2.6-#
 import re
 import urllib2
 
@@ -49,7 +49,7 @@ def urlWatcher(raw, mType, source, body):
 				if url:
 					url = url.group(1).strip("'.,\\)\"")
 					if not chkUnicode(url):
-						protocol, _ = url.split("://")
+						protocol, _ = url.split("://")[:2]
 						raw = _.split("/", 1)
 						if len(raw) > 1:
 							domain, page = raw
@@ -58,7 +58,7 @@ def urlWatcher(raw, mType, source, body):
 							domain, page = raw[0], ""
 						if not chkUnicode(domain):
 							domain = IDNA(domain)
-						if not chkUnicode(page, "~#?%&=,:;*|-"):
+						if not chkUnicode(page, "~#?%&=,:;*|"):
 							page = urllib.quote(str(page))
 						url = u"%s://%s%s" % (protocol, domain, page)
 					reQ = urllib2.Request(url)
@@ -68,19 +68,24 @@ def urlWatcher(raw, mType, source, body):
 					if "text/html" in headers.get("Content-Type") or url.endswith((".html", ".htm")):
 						data = opener.read(4500)
 						Type, Charset = contentTypeParser(opener, data)
-						title = getTag("title", data)
+						title = getTagData("title", data)
 						title = title.decode(Charset)
 						answer = u"Заголовок: %s" % uHTML(title).replace("\n", "").encode("utf-8")
 					else:
+						answer = ""
 						Type = headers.get("Content-Type") or ""
-						Size = byteFormat(int(headers.get("Content-Length") or 0))
+						Size = int(headers.get("Content-Length") or 0)
 						Date = headers.get("Last-Modified") or ""
+						if Type:
+							answer += u"Тип: %s" % Type
+						if Size:
+							answer += u", размер: %s" % byteFormat(Size)
 						if Date: 
-							Date = "; последнее изменение файла: %s." % Date
-						answer = u"Тип: %(Type)s, размер: %(Size)s%(Date)s" % vars()
+							answer += "; последнее изменение файла: %s." % Date
+						answer = answer % vars()
 					msg(source[1], ChrReplacer(answer))
-			except (urllib2.HTTPError, urllib2.URLError) as e:
-				msg(source[1], str(e))
+			except (urllib2.HTTPError, urllib2.URLError, urllib2.socket.error) as e:
+				msg(source[1], u"Error: [Errno %s] %s" % (e.errno, e.strerror))
 			except: 
 				lytic_crashlog(urlWatcher, "", u"While parsing \"%s\"." % locals().get("url"))
 
