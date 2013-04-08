@@ -78,7 +78,7 @@ def handler_most_create(type, source, body):
 		else:
 			reply(type, source, u'чего?')
 	else:
-		reply(type, source, u'эта команда выполняеться только в чате!')
+		reply(type, source, u'эта команда выполняется только в чате!')
 
 def handler_most_delete(type, source, body):
 	if type != 'private' or handler_jid(source[0]) in ADLIST:
@@ -90,7 +90,7 @@ def handler_most_delete(type, source, body):
 		else:
 			reply(type, source, u'тут мост и не используется!')
 	else:
-		reply(type, source, u'эта команда выполняеться только в чате!')
+		reply(type, source, u'эта команда выполняется только в чате!')
 
 handler_register("01eh", most_message_handler)
 handler_register("05eh", most_leave_handler)

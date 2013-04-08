@@ -7,7 +7,7 @@
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 # http://witcher-team.ucoz.ru/
 
-BOTS = 'Jaskier/BlackSmith/AnGeL/ταλιςμαη/talisman/Talisman/Neutron/Юта/fatal/Åmulet/lesman/VIKA/iBot'.decode('utf-8')
+BOTS = 'Jaskier/BlackSmith/ταλιςμαη/talisman/Talisman/Neutron/Юта/fatal/Åmulet/lesman/VIKA/iBot/Storm'.decode('utf-8')
 
 EXCEPT_LIST = 'dynamic/exceptions.txt'
 
@@ -42,7 +42,7 @@ def antibot_leave(conf):
 
 def handler_antibot_join(conf, nick, afl, role, status, text):
 	if conf in GROUPCHATS and conf not in EXCEPTIONS:
-		if GROUPCHATS[conf][nick]['ishere']:
+		if GROUPCHATS[conf][nick]['ishere'] and has_access(u"%s/%s" % (conf, nick), 20, nick):
 			conf_nick = conf+'/'+nick
 			iq = xmpp.Iq(to = conf_nick, typ = 'get')
 			INFO['outiq'] += 1

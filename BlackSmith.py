@@ -173,19 +173,23 @@ Sequence = threading.Semaphore()
 
 from sTools import *
 ## os info.
+os_simple = ""
 if os.name == "nt":
-	isOS = ntDetect()
 	from platform import win32_ver
-	os_name = " ".join([isOS, win32_ver()[0], win32_ver()[2]])
+	os_name = " ".join([ntDetect(), win32_ver()[0], win32_ver()[2]])
+	os_simple = os_name
 	del win32_ver
 
 elif os.name == "posix":
 	from platform import dist
-	if dist()[0]:
-		os_name = "POSIX (%s with %s, %s)" % (dist()[0],
+	dist = dist()
+	if dist[0]:
+		os_name = "POSIX (%s with %s, %s)" % (dist[0],
 											  os.uname()[0], os.uname()[2])
+		os_simple = u"%s, %s %s" % (dist[0], os.uname()[0], os.uname()[2])
 	else:
 		os_name = "POSIX (%s, %s)" % (os.uname()[0], os.uname()[2])
+		os_simple = u"%s %s" % (os.uname()[0], os.uname()[2])
 	if os.uname()[0].lower().count("darwin"):
 		print "#! Warning: The Darwin kernel poorly maintained."
 	del dist
@@ -195,7 +199,7 @@ os_name = os_name.strip() + " " + getArchitecture()
 del ntDetect, getArchitecture
 
 from webtools import *
-UserAgents["BlackSmith"] = "BlackSmith XMPP-BOT mark.1 (%s; %d.%d; ru)" % (os_name, BOT_VER, CORE_MODE)
+UserAgents["BlackSmith"] = "Mozilla/5.0 (%s; %d.%d; ru) BlackSmith XMPP-BOT mark.1" % (os_simple, BOT_VER, CORE_MODE)
 
 ## File workers.
 def check_file(conf = None, file = None, data = "{}"):
@@ -291,7 +295,7 @@ def command_handler(instance, access = 0, plug = "default"):
 	if COMMANDS.get(command) or COMMAND_HANDLERS.get(command):
 		if plug != COMMANDS[command].get("plug"):
 			Print("\nCommands in \"%s\" and \"%s\" are repeated." % (plug, COMMANDS[command].get("plug")), color2)
-			command = instance.func_name
+			command = command + "1"
 	COMMAND_HANDLERS[command] = instance
 	COMMANDS[command] = {'plug': plug, 'access': access}
 

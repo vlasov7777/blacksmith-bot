@@ -17,14 +17,14 @@ def handler_set_botnick(type, source, body):
 				send_join_presece(source[1], nick)
 				reply(type, source, u'Переименовался в "%s"' % (nick))
 			else:
-				reply(type, source, u'Нее! в моём нике не более 16 символов')
+				reply(type, source, u'Нее! в моём нике не более 16 символов!')
 		else:
 			reply(type, source, u'инвалид синтакс')
 	else:
-		reply(type, source, u'чё упал чтоли!?')
+		reply(type, source, u'Только для чатов.')
 
 def handler_conflist(type, source, body):
-	repl = u'\n№ [Конфа] [Ник] [Pf] [Юзеров] [статус]'
+	repl = u'\n№ [Конфа] [Ник] [Pfx] [Юзеров] [статус]'
 	col = 0
 	for conf in sorted(GROUPCHATS.keys()):
 		col = col + 1

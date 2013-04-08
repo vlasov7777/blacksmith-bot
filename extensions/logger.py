@@ -107,12 +107,13 @@ def getLogFile(chat, Time):
 		logFile = open(logFileName, "w")
 		INFO["fcr"] += 1
 		logFile.write(pattern % vars())
-		if Subjs[chat]['time'] and Subjs[chat]['body']:
-			Time = time.time()
-			if (Time - Subjs[chat]['time']) > 20:
-				Subjs[chat]['time'] = Time
-				logFile.write('<span class="topic">%s</span><br>' % Subjs[chat]['body'].replace("\n", "<br>"))
-				#logWrite(chat, Subjs[chat]['body'].replace("\n", "<br>"), "subject")
+		if chat in GROUPCHATS:
+			if Subjs[chat]['time'] and Subjs[chat]['body']:
+				Time = time.time()
+				if (Time - Subjs[chat]['time']) > 20:
+					Subjs[chat]['time'] = Time
+					logFile.write('<span class="topic">%s</span><br>' % Subjs[chat]['body'].replace("\n", "<br>"))
+					#logWrite(chat, Subjs[chat]['body'].replace("\n", "<br>"), "subject")
 	return logFile
 
 def logWrite(chat, state, body, nick = None):
