@@ -112,9 +112,16 @@ def getLogFile(chat, Time):
 				Time = time.time()
 				if (Time - Subjs[chat]['time']) > 20:
 					Subjs[chat]['time'] = Time
-					logFile.write('<span class="topic">%s</span><br>' % Subjs[chat]['body'].replace("\n", "<br>"))
+					logFile.write('<span class="topic">%s</span><br>' % logFormat(Subjs[chat]['body']))
 					#logWrite(chat, Subjs[chat]['body'].replace("\n", "<br>"), "subject")
 	return logFile
+
+def logFormat(body):
+	body = xmpp.XMLescape(body)
+	body = logger_compile_link.sub(lambda obj: "<a href=\"{0}\">{0}</a>".format(obj.group(0)), body) #'
+	body = body.replace(chr(10), "<br>")
+	body = body.replace(chr(9), "&#9;")
+	return body
 
 def logWrite(chat, state, body, nick = None):
 	if LoggerCfg["timetype"].lower() == "gmt": 
@@ -126,10 +133,7 @@ def logWrite(chat, state, body, nick = None):
 		if logFile:
 			timestamp = time.strftime("%H:%M:%S", Time)
 			if nick: nick = xmpp.XMLescape(nick)
-			body = xmpp.XMLescape(body)
-			body = logger_compile_link.sub(lambda obj: "<a href=\"{0}\">{0}</a>".format(obj.group(0)), body) #'
-			body = body.replace(chr(10), "<br>")
-			body = body.replace(chr(9), "&#9;")
+			body = logFormat(body)
 			logFile.write(chr(10))
 			if state == "subject":
 				logFile.write('<a id="t{0}" href="#t{0}">[{0}]</a> <span class="topic">{1}</span><br>'.format(timestamp, body))
@@ -174,11 +178,16 @@ def logWriteSubject(chat, nick, subject, body):
 
 def logWriteJoined(chat, nick, afl, role, status, text):
 	if GROUPCHATS.has_key(chat) and logCfg[chat]["enabled"]:
-		log = u"*** %(nick)s заходит как %(role)s"
+		some = ""
+		if logCfg[chat].get("jids"):
+			jid = GROUPCHATS[chat].get(nick, {}).get("full_jid", "?@?/?")
+			if not chat in jid:
+				some = " (%(jid)s)" % vars()
+		log = u"*** %(nick)s%(some)s заходит как %(role)s"
 		if afl != "none":
 			log += u" и %(afl)s"
 		log += u" и теперь %(status)s"
-		afl, role, status = logAfl.get(afl, ""), logRole.get(role, ""), logStatus.get(status, "")
+		afl, role, status = logAfl.get(afl, afl), logRole.get(role, role), logStatus.get(status, status)
 		if text:
 			log += " (%(text)s)"
 		logWrite(chat, "join", log % vars())
@@ -210,24 +219,30 @@ def logWriteStatusChange(chat, nick, status, priority, text):
 
 def logWriteLeave(chat, nick, reason, code):
 	if GROUPCHATS.has_key(chat) and logCfg[chat]["enabled"]:
+		some = ""
+		if logCfg[chat].get("jids"):
+			jid = GROUPCHATS[chat].get(nick, {}).get("full_jid", "")
+			if not chat in jid:
+				some = " (%(jid)s)" % vars()
+			status_code_change(["full_jid"], chat, nick) #?!
 		if code:
 			if code == "307":
 				if reason:
-					logWrite(chat, "kick", u"*** %s выгнали из конференции (%s)" % (nick, reason))
+					logWrite(chat, "kick", u"*** %s%s выгнали из конференции (%s)" % (nick, some, reason))
 				else:
-					logWrite(chat, "kick", u"*** %s выгнали из конференции" % nick)
+					logWrite(chat, "kick", u"*** %s%s выгнали из конференции" % (nick, some))
 			elif code == "301":
 				if reason:
-					logWrite(chat, "ban", u"*** %s запретили входить в данную конференцию (%s)" % (nick, reason))
+					logWrite(chat, "ban", u"*** %s%s запретили входить в данную конференцию (%s)" % (nick, some, reason))
 				else:
-					logWrite(chat, "ban", u"*** %s запретили входить в данную конференцию" % nick)
+					logWrite(chat, "ban", u"*** %s%s запретили входить в данную конференцию" % (nick, some))
 		elif reason:
-			logWrite(chat, "leave", u"*** %s выходит из конференции (%s)" % (nick, reason))
+			logWrite(chat, "leave", u"*** %s%s выходит из конференции (%s)" % (nick, some, reason))
 		else:
-			logWrite(chat, "leave", u"*** %s выходит из конференции" % nick)
+			logWrite(chat, "leave", u"*** %s%s выходит из конференции" % (nick, some))
 
 def logFileInit(chat):
-	cfg = {"theme": LoggerCfg["theme"], "enabled": False, "file": ""}
+	cfg = {"theme": LoggerCfg["theme"], "enabled": False, "file": "", "jids": 0}
 	Subjs[chat] = {'body': '', 'time': 0}
 	if check_file(chat, logCacheFile, str(cfg)):
 		cfg = eval(read_file("dynamic/%s/%s" % (chat, logCacheFile)))
@@ -265,7 +280,7 @@ def init_logger():
 			handler_register("08eh", logWriteStatusChange)
 			command_handler(logSetState, 30, "logger")
 	else:
-		Print("\nCan't init lostate.txt, logger was disabled.", color2)
+		Print("\nCan't init %s, logger wasn't enabled." % logConfigFile, color2)
 
 def logThemeCopier(chat, theme):
 	import shutil
@@ -433,10 +448,32 @@ def logSetState(mType, source, argv):
 					for num, thm in enumerate(logThemes.keys()):
 						repl += "%d. %s.\n" % (num + 1, thm)
 					reply(mType, source, repl)
+			elif a0 in ("жиды", "жид"):
+				if argv:
+					if argv[0] == "1":
+						if not logCfg[chat].get("jids"):
+							logCfg[chat]["jids"] = 1
+							write_file("dynamic/%s/%s" % (chat, logCacheFile), str(logCfg[chat]))
+							reply(mType, source, "Теперь Jabber ID пользователей будут записываться в логи. Обратите внимание: уже записанные Jabber ID никуда не исчезнут даже после отключения данной опции.")
+						else:
+							reply(mType, source, "Эта опция уже включена.")
+					elif argv[0] == "0":
+						if loggerCfg[chat].get("jids"):
+							logCfg[chat]["jids"] = 0
+							write_file("dynamic/%s/%s" % (chat, logCacheFile), str(logCfg[chat]))
+							reply(mType, source, "Больше Jabber ID пользователей записываться не будут. Обратите внимание: уже записанные Jabber ID никуда не исчезнут.")
+						else:
+							reply(mType, source, "Эта опция не включена.")
+					else:
+						reply(mType, source, "Неизвестный параметр.")
 			else:
 				reply(mType, source, u"Нет такого параметра.")
 		elif logCfg[chat]["enabled"]:
-			reply(mType, source, u"Сейчас логгер включён. Тема, используемая плагином в текущей конференции, называется «%s»." % logCfg[chat]["theme"])
+			if logCfg[chat].get("jids"):
+				jid_state = "включена"
+			else:
+				jid_state = "отключена"
+			reply(mType, source, u"Сейчас логгер включён. Запись JabberID: %(jid_state)s. Тема, используемая плагином в текущей конференции, называется «%s»." % logCfg[chat]["theme"])
 		else:
 			reply(mType, source, u"Сейчас комната не логируется.")
 

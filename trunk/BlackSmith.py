@@ -980,8 +980,8 @@ def PRESENCE_PROCESSING(client, stanza):
 					GROUPCHATS[conf][Nick]['idle'] = time.time()
 					call_efunctions("06eh", (stanza, conf, nick, Nick))
 			else:
-				status_code_change(('idle','full_jid','joined'), conf, nick)
-				call_efunctions("05eh", (conf, nick, reason, scode))
+				call_efunctions("05eh", (conf, nick, reason, scode)) #1
+				status_code_change(('idle', 'joined', "caps", "join_date"), conf, nick) #0
 		elif Ptype in ('available', None):
 			full_jid = stanza.getJid()
 			if not full_jid:

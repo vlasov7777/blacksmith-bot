@@ -5,7 +5,7 @@
 # Web site header detector
 
 # RC-2!
-#-extmanager-extVer:2.6-#
+#-extmanager-extVer:2.7-#
 import re
 import urllib2
 
@@ -58,7 +58,7 @@ def urlWatcher(raw, mType, source, body):
 							domain, page = raw[0], ""
 						if not chkUnicode(domain):
 							domain = IDNA(domain)
-						if not chkUnicode(page, "~#?%&=,:;*|"):
+						if not chkUnicode(page, "~#?%&+=,:;*|"):
 							page = urllib.quote(str(page))
 						url = u"%s://%s%s" % (protocol, domain, page)
 					reQ = urllib2.Request(url)
@@ -85,7 +85,7 @@ def urlWatcher(raw, mType, source, body):
 						answer = answer % vars()
 					msg(source[1], ChrReplacer(answer))
 			except (urllib2.HTTPError, urllib2.URLError, urllib2.socket.error) as e:
-				msg(source[1], u"Error: [Errno %s] %s" % (e.errno, e.strerror))
+				msg(source[1], str(e))
 			except: 
 				lytic_crashlog(urlWatcher, "", u"While parsing \"%s\"." % locals().get("url"))
 
