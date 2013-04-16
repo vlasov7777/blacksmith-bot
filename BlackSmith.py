@@ -873,11 +873,14 @@ def MESSAGE_PROCESSING(client, stanza):
 				break
 		if not combody:
 			raise xmpp.NodeProcessed()
+##1[
+		combody = MACROS.expand(combody, [source, instance, nick])
+##1]0[
 		cmb = combody.split(None, 1)
 		cmd = (cmb.pop(0)).lower()
 		if instance in COMMOFF and cmd in COMMOFF[instance]:
 			raise xmpp.NodeProcessed()
-		combody = MACROS.expand(combody, [source, instance, nick])
+##0]
 		if instance in MACROS.macrolist.keys():
 			cmds = MACROS.gmacrolist.keys() + MACROS.macrolist[instance].keys()
 		else:
@@ -898,7 +901,7 @@ def MESSAGE_PROCESSING(client, stanza):
 			if cmb:
 				Parameters = (cmb.pop(0)).rstrip()
 			INFO['cmd'] += 1
-			LAST['cmd'] = u'Помощь по командам: "хелп" (последнее действие - "%s")' % (command)
+			LAST['cmd'] = u"Помощь по командам: «хелп» (последнее действие — «%s»)." % (command)
 			call_command_handlers(command, type, [source, instance, nick], Parameters, cmd)
 			LAST['time'] = time.time()
 		else:

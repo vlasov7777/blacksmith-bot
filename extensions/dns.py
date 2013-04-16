@@ -1,40 +1,18 @@
 # BS mark.1-55 plugin
 # /* coding: utf-8 */
-# (c) simpleApps CodingTeam, 2011
-# This program distributed under Apache 2.0 license.
 
-def chkForDomain(domain, func):
-	iterations = - 1
-	host = domain
-	for x in domain.split("."):
-		if not x.isdigit():
-			iterations += 1
-	if domain.count(".") == iterations:
-		host = func(domain)
-	return host
+import socket
 
-def getHost(argv):
-	if argv:
-		if not chkUnicode(argv): 
-			argv = IDNA(argv)
-		from socket import gethostbyname
-		dns = chkForDomain(argv.strip(), gethostbyname)
-		del gethostbyname
-		if argv.strip() == dns:
-			from socket import gethostbyaddr
-			hostname, aliaslist, ipaddrlist = gethostbyaddr(argv.strip())
-			del gethostbyaddr
-			if not aliaslist: aliaslist = str(None)
-			dns = u"%s, %s, %s" % (hostname, aliaslist, " ".join(ipaddrlist))
-	else:
-		dns = u"что-что?"
-	return dns
-
-def command_dns(mType, source, argv):
-	try:
-		reply(mType, source, getHost(argv))
-	except:
-		reply(mType, source, returnExc())
+def command_dns(mType, source, address):
+	if address:
+		try:
+			name, alias, addrs = socket.gethostbyaddr(address.encode("idna"))
+		except socket.error:
+			answer = "Нет ответа."
+		else:
+			addrs.insert(0, name)
+			answer = ", ".join(addrs)
+		reply(mType, source, answer)
 
 def command_chkServer(mType, source, argv):
 	answer = u"что?"	
@@ -48,8 +26,7 @@ def command_chkServer(mType, source, argv):
 		else: 
 			reply(mType, source, answer)
 			return
-		from socket import socket, AF_INET, SOCK_STREAM
-		sock = socket(AF_INET, SOCK_STREAM)
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock.settimeout(5)
 		if port.isdigit():
 			port = int(port)
@@ -62,7 +39,6 @@ def command_chkServer(mType, source, argv):
 		except:
 			answer = u"Порт %d на \"%s\" закрыт. Не достучался за 5 секунд." % (port, addr) 
 		sock.close()
-		del socket, AF_INET, SOCK_STREAM
 	reply(mType, source, answer)
 
 command_handler(command_dns, 10, "dns")

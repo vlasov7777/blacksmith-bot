@@ -458,7 +458,7 @@ def logSetState(mType, source, argv):
 						else:
 							reply(mType, source, "Эта опция уже включена.")
 					elif argv[0] == "0":
-						if loggerCfg[chat].get("jids"):
+						if logCfg[chat].get("jids"):
 							logCfg[chat]["jids"] = 0
 							write_file("dynamic/%s/%s" % (chat, logCacheFile), str(logCfg[chat]))
 							reply(mType, source, "Больше Jabber ID пользователей записываться не будут. Обратите внимание: уже записанные Jabber ID никуда не исчезнут.")
@@ -473,7 +473,7 @@ def logSetState(mType, source, argv):
 				jid_state = "включена"
 			else:
 				jid_state = "отключена"
-			reply(mType, source, u"Сейчас логгер включён. Запись JabberID: %(jid_state)s. Тема, используемая плагином в текущей конференции, называется «%s»." % logCfg[chat]["theme"])
+			reply(mType, source, u"Сейчас логгер включён. Запись JabberID: %s. Тема, используемая плагином в текущей конференции, называется «%s»." % (jid_state, logCfg[chat]["theme"]))
 		else:
 			reply(mType, source, u"Сейчас комната не логируется.")
 
