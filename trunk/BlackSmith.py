@@ -1033,7 +1033,7 @@ def IQ_PROCESSING(client, iq):
 		query = result.getTag("query")
 		if nsType == xmpp.NS_VERSION:
 			query.setTagData("name", "BlackSmith mark.1")
-			query.setTagData("version", "%d (r.%d)" % (CORE_MODE, BOT_REV))
+			query.setTagData("version", "%s (r.%s)" % (CORE_MODE, BOT_REV))
 			query.setTagData("os", os_name)
 		elif nsType == xmpp.NS_URN_TIME:
 			tzo = (lambda tup: tup[0]+"%02d:" % tup[1]+"%02d" % tup[2])((lambda t: tuple(['+' if t < 0 else '-', abs(t)/3600, abs(t)/60%60]))(time.altzone if time.daylight else time.timezone))
