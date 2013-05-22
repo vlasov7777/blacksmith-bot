@@ -18,7 +18,6 @@
 
 ## Imports.
 from __future__ import with_statement
-from urllib2 import urlopen
 from traceback import format_exc, print_exc
 import gc, os, re, sys, time, random, threading
 
@@ -48,11 +47,11 @@ RSTR = {'AUTH': [], 'BAN': [], 'VN': 'off'}
 LAST = {'time': 0, 'cmd': 'start'}
 
 ## Colored stdout.
-color0 = chr(27) + "[0m"
-color1 = chr(27) + "[33m"
-color2 = chr(27) + "[31;1m"
-color3 = chr(27) + "[32m"
-color4 = chr(27) + "[34;1m"
+color0 	= xmpp.debug.color_none
+color1 	= xmpp.debug.color_brown
+color2 	= xmpp.debug.color_bright_red
+color3 	= xmpp.debug.color_green
+color4 	= xmpp.debug.color_bright_blue
 colored = xmpp.debug.colors_enabled
 
 def exec_(instance, list = ()):
@@ -112,16 +111,16 @@ def PASS_GENERATOR(codename, Number):
 if os.path.exists(GENERAL_CONFIG_FILE):
 	try:
 		execfile(GENERAL_CONFIG_FILE)
-		BOSS_PASS = (PASS_GENERATOR("", eval(BOSS_PASS[7:])) if BOSS_PASS.startswith("/random") else BOSS_PASS)
-		execfile('static/versions.py')
-		reload(sys).setdefaultencoding('utf-8')
+		BOSS_PASS = (PASS_GENERATOR("", eval(BOSS_PASS[7:])) if "/random" in BOSS_PASS else BOSS_PASS)
+		reload(sys).setdefaultencoding("utf-8")
+		execfile("static/versions.py")
 	except Exception, e:
-		Exit(e.message, 1, 12)
+		Exit(str(e), 1, 12)
 else:
 	Exit("\n#! General config file not found! Exiting.")
 
-if BOT_OS == 'nt':
-	os.system('Title BlackSmith - %s' % (Caps))
+if BOT_OS == "nt":
+	os.system("Title BlackSmith - %s" % (Caps))
 
 ## Lists of handlers.
 Handlers = {
@@ -129,9 +128,9 @@ Handlers = {
 	"03eh": [], "04eh": [],
 	"05eh": [], "06eh": [],
 	"07eh": [], "08eh": [],
-	"09eh": [],
-	"00si": [], "01si": [],
-	"02si": [], "03si": []
+	"09eh": [], "00si": [], 
+	"01si": [], "02si": [], 
+	"03si": [], "04si": []
 				}
 
 ## FOR eXample:
@@ -190,9 +189,6 @@ elif os.name == "posix":
 	else:
 		os_name = "POSIX (%s, %s)" % (os.uname()[0], os.uname()[2])
 		os_simple = u"%s %s" % (os.uname()[0], os.uname()[2])
-	if os.uname()[0].lower().count("darwin"):
-		print "#! Warning: The Darwin kernel poorly maintained."
-	del dist
 else:
 	os_name = os.name.upper()
 os_name = os_name.strip() + " " + getArchitecture()
@@ -389,7 +385,7 @@ def load_plugins():
 			except:
 				data = str()
 			ext_name = ext.split(".")[0]
-			if data.count("# BS mark.1-55"): # mark-api_version
+			if "# BS mark.1-55" in data: # mark-api_version
 				try:
 					execfile(path, globals()); Ok.append(ext_name)
 				except:
@@ -455,25 +451,6 @@ def returnExc():
 	else:
 		error = `None`
 	return error
-
-read_link = lambda link: urlopen(link).read()
-
-def read_url(link, Browser = False):
-	from urllib2 import Request
-	req = Request(link)
-	if Browser:
-		req.add_header('User-agent', Browser)
-	site = urlopen(req)
-	data = site.read()
-	del Request
-	return data
-
-def re_search(body, s0, s2, s1 = "(?:.|\s)+"):
-	comp = re.compile("%s(%s?)%s" % (s0, s1, s2), 16)
-	body = comp.search(body)
-	if body:
-		body = (body.group(1)).strip()
-	return body
 
 def handler_botnick(conf):
 	if conf in BOT_NICKS:
@@ -566,7 +543,7 @@ def timeElapsed(Time):
 		else:
 			Rest = Time
 		if Rest >= 1.0:
-			ext.insert(0, "%d %s%s" % (Rest, lr[0], ("s" if Rest >= 2 else "")))
+			ext.insert(0, "%d %s%s" % (Rest, lr[0], ("s" if Rest > 1 else "")))
 		if not (ls and Time):
 			return str.join(chr(32), ext)
 
@@ -575,7 +552,7 @@ def ClearMemory():
 		sys.exc_clear()
 		gc.collect()
 		time.sleep(60)
-		if MEMORY_LIMIT and memory_usage() >= MEMORY_LIMIT:
+		if MEMORY_LIMIT and memory_usage() > MEMORY_LIMIT:
 			sys_exit('memory leak')
 
 ## Access handlers.
@@ -589,7 +566,7 @@ def form_admins_list():
 	if BOSS not in GLOBACCESS:
 		GLOBACCESS[BOSS] = 100
 	for jid in GLOBACCESS:
-		if GLOBACCESS[jid] >= 80:
+		if GLOBACCESS[jid] > 79:
 			ADLIST.append(jid)
 
 def change_local_access(conf, jid, level = 0):
@@ -617,10 +594,7 @@ def user_level(source, conf):
 		level = ACCBYCONF[conf][jid]
 	return level
 
-def has_access(source, level, conf):
-	if user_level(source, conf) >= int(level):
-		return True
-	return False
+has_access = lambda source, level, chat: user_level(source, chat) >= int(level)
 
 ## MUC & Roster handlers.
 def send_join_presece(conf, nick, code = None):
@@ -646,14 +620,15 @@ def join_groupchat(conf, nick, code = None):
 	send_join_presece(conf, nick, code)
 	Print("joined %s" % (conf), color3)
 
-def leave_groupchat(conf, status = None):
-	Presence = xmpp.Presence(conf, 'unavailable')
+def leave_groupchat(chat, status = None):
+	Presence = xmpp.Presence(chat, 'unavailable')
 	if status:
 		Presence.setStatus(status)
 	jClient.send(Presence)
-	if conf in GROUPCHATS:
-		del GROUPCHATS[conf]
-	save_conflist(conf)
+	if chat in GROUPCHATS:
+		del GROUPCHATS[chat]
+	call_sfunctions("04si", (chat,))
+	save_conflist(chat)
 
 def handler_rebody(target, body, ltype):
 	col, all = 0, str(len(body) / PRIV_MSG_LIMIT + 1)
@@ -784,7 +759,7 @@ def roster_check(instance, body):
 		msg(instance, u'Включи мозг! Неправильно!')
 
 def roster_ban(instance):
-	if not instance.count('@conf'):
+	if not '@conf' in instance:
 		RSTR['BAN'].append(instance)
 		write_file(ROSTER_FILE, str(RSTR))
 		msg(instance, u'Поздравляю, ты в бане!')
@@ -824,7 +799,7 @@ def MESSAGE_PROCESSING(client, stanza):
 	nick = source.getResource()
 	if bot_nick == nick:
 		raise xmpp.NodeProcessed()
-	Subject = stanza.getSubject()
+	Subject = isConf and stanza.getSubject()
 	body = stanza.getBody()
 	if body:
 		body = body.strip()
@@ -833,7 +808,7 @@ def MESSAGE_PROCESSING(client, stanza):
 	if not body:
 		raise xmpp.NodeProcessed()
 	if not isConf and instance not in ADLIST:
-		if not instance.count('@conf'):
+		if not '@conf' in instance:
 			if instance in RSTR['BAN'] or RSTR['VN'] == 'off':
 				raise xmpp.NodeProcessed()
 			elif instance not in RSTR['AUTH'] and RSTR['VN'] == 'iq':
@@ -873,21 +848,18 @@ def MESSAGE_PROCESSING(client, stanza):
 				break
 		if not combody:
 			raise xmpp.NodeProcessed()
-##1[
-		combody = MACROS.expand(combody, [source, instance, nick])
-##1]0[
-		cmb = combody.split(None, 1)
-		cmd = (cmb.pop(0)).lower()
+		cmd = combody.split()[0].lower()
 		if instance in COMMOFF and cmd in COMMOFF[instance]:
 			raise xmpp.NodeProcessed()
-##0]
+		combody = MACROS.expand(combody, [source, instance, nick])
 		if instance in MACROS.macrolist.keys():
 			cmds = MACROS.gmacrolist.keys() + MACROS.macrolist[instance].keys()
 		else:
 			cmds = MACROS.gmacrolist.keys()
 		if not combody:
 			raise xmpp.NodeProcessed()
-		command = combody.split()[0].lower()
+		combody = combody.split(None, 1)
+		command = combody.pop(0).lower()
 		if instance in PREFIX and cmd not in cmds:
 			NotPfx = Prefix_state(body, bot_nick)
 			if NotPfx or stype == 'chat':
@@ -898,8 +870,8 @@ def MESSAGE_PROCESSING(client, stanza):
 		if instance in COMMOFF and command in COMMOFF[instance]:
 			raise xmpp.NodeProcessed()
 		if COMMANDS.has_key(command):
-			if cmb:
-				Parameters = (cmb.pop(0)).rstrip()
+			if combody:
+				Parameters = combody.pop()
 			INFO['cmd'] += 1
 			LAST['cmd'] = u"Помощь по командам: «хелп» (последнее действие — «%s»)." % (command)
 			call_command_handlers(command, type, [source, instance, nick], Parameters, cmd)
@@ -1179,7 +1151,6 @@ def sys_exit(Reason = ""):
 		call_sfunctions("03si")
 	Exit('\n\nRESTARTING...\n\nPress Ctrl+C to exit', 0, 30)
 
-
 ## Main.
 def main():
 	Print('\n\n--> BOT STARTED\n\n\nChecking PID...', color4)
@@ -1213,7 +1184,7 @@ def main():
 	INFO['start'] = time.time()
 	composeThr(ClearMemory, ClearMemory.func_name).start()
 	call_sfunctions("02si")
-	Iters, Timeout = calc_Timeout() #'
+	Iters, Timeout = calc_Timeout()
 	while True:
 		if INFO["errs"] > 6:
 			sys_exit("Fatal exception: %s\n" % str(format_exc()))

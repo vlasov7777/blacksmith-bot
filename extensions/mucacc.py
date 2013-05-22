@@ -2,7 +2,7 @@
 # /* coding: utf-8 */
 
 #	BlackSmith plugin
-#	© simpleApps, 2012.
+#	© simpleApps, 2012 — 2013.
 
 BanBase = {}
 BanBaseFile = "dynamic/banbase.txt"
@@ -14,30 +14,38 @@ def handle_AflRl(coze, stanza, mType, source):
 		reply(mType, source, u"Запрещено. Тип: %s." % stanza.getType())
 
 def mucAccHandler(mType, source, body, func):
-	if source[1] in GROUPCHATS:
+	chat = source[1]
+	answer = ""
+	if chat in GROUPCHATS:
 		if body:
 			args = body.split(None, 1)
-			nick = args[0].strip()
-			if nick.count(".") or nick in GROUPCHATS[source[1]]:
+			nick = args[0]
+			if "." in nick or nick in GROUPCHATS[source[1]]:
 				if nick in GROUPCHATS[source[1]]:
 					jid = handler_jid(u"%s/%s" % (source[1], nick))
 				else:
 					jid = nick
 				if (func.func_name in ("outcast", "kick")) and jid in ADLIST:
-					return reply(mType, source, u"Не стоит этого делать.")
+					answer = u"Не стоит этого делать."
 				else:
 					if len(args) > 1:
 						reason = args[1].strip()
 					else:
 						reason = source[2]
-					if func.func_name in ("outcast", "none", "member", "admin", "owner"):
-						func(source[1], jid, reason, (handle_AflRl, {"mType": mType, "source": source}))
+					whoami = GROUPCHATS[chat].get(handler_botnick(chat), {"role": ""})["role"]
+					isOwner = has_access(source[0], 30, source[1])
+					if "owner" in whoami and not isOwner:
+						answer = "Пока бот владелец, а ты нет, никто ничего не получит."
 					else:
-						func(source[1], nick, reason, (handle_AflRl, {"mType": mType, "source": source}))
+						if func.func_name in ("outcast", "none", "member", "admin", "owner"):
+							func(source[1], jid, reason, (handle_AflRl, {"mType": mType, "source": source}))
+						else:
+							func(source[1], nick, reason, (handle_AflRl, {"mType": mType, "source": source}))
 		else:
-			reply(mType, source, u"Некого.")
+			answer = u"Некого."
 	else:
-		reply(mType, source, u"Неподходящее место, не правда ли?")
+		answer = u"Неподходящее место, не правда ли?"
+	if answer: reply(mType, source, answer)
 
 def command_kick(mType, source, body):
 	mucAccHandler(mType, source, body, kick)
@@ -70,7 +78,7 @@ def command_fullban(mType, source, body):
 	if body:
 		args = body.split(None, 1)
 		nick = args[0].strip()
-		if nick.count('.') or nick in GROUPCHATS[source[1]]:
+		if "." in nick or nick in GROUPCHATS[source[1]]:
 			if nick in GROUPCHATS[source[1]]:
 				jid = handler_jid('%s/%s' % (source[1], nick))
 			else:
@@ -110,7 +118,7 @@ def command_fullban(mType, source, body):
 
 def command_fullunban(mType, source, jid):
 	if jid:
-		if jid.count('.') and not jid.count(' '):
+		if "." in jid and not chr(32) in jid:
 			if jid in BanBase:
 				del BanBase[jid]
 				write_file(BanBaseFile, str(BanBase))

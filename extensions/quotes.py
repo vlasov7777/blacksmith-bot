@@ -1,10 +1,10 @@
 # BS mark.1-55
 # /* coding: utf-8 */
-# © simpleApps, 2011 - 2012.
+# © simpleApps, 2011 - 2013.
 
 
 def AnecDote(mType, source, body):
-	target = urlopen("http://anekdot.odessa.ua/rand-anekdot.php").read()
+	target = read_link("http://anekdot.odessa.ua/rand-anekdot.php")
 	data = re.search(">(.*)<a href=", target, 16)
 	if data:
 		data = uHTML(data.group(1).decode("cp1251")).strip()
@@ -44,11 +44,11 @@ def itHappens(mType, source, body):
 ## by Snapi-Snup autor
 def bashAbyss(mType, source, args):
 	try:
-		rawhtml = read_url('http://bash.org.ru/abysstop', UserAgents["BlackSmith"])
+		rawhtml = read_url('http://bash.im/abysstop', UserAgents["BlackSmith"])
 		elements = re.findall("<div class=\"text\">(.+?)</div>", rawhtml, re.DOTALL)
 		if elements:
 			rawquote = random.choice(elements)
-			message = "\n" + uHTML(stripTags(rawquote.decode("cp1251")))
+			message = "\n" + stripTags(uHTML(rawquote.decode("cp1251")))
 		else:
 			message = u"Что-то пусто..."
 	except Exception:
@@ -88,24 +88,6 @@ def afor(type, source, body):
 	except Exception:
 		reply(type, source, returnExc())
 
-# Coded by: Evgеn [email: meb81@mail.ru]
-# http://witcher-team.ucoz.ru/
-# TODO: Rewrite it to re (mrDoctorWho)
-
-def Fomenko(mType, source, body):
-	try:
-		radky = read_link("http://www.fomenko.ru/foma/lenta/text.html").splitlines()
-		if len(radky) >= 16:
-			radky = radky[15].decode('windows-1251')
-			if radky.find("<b>"):
-				radky = radky.split('<b>')[1]
-			else:
-				radky = u'что-то левое с разметкой'
-		else:
-			radky = u'что-то левое с разметкой'
-	except:
-		radky = u'не могу пропарсить сайт'
-	reply(mType, source, radky)
 
 def command_Chuck(mType, source, body):
 	if body and check_number(body):
@@ -130,14 +112,16 @@ def command_Chuck(mType, source, body):
 
 def getLinuxLink(mType, source, body):
 	if not body:
-		data = urllib.urlopen("https://kernel.org").read()
-		link = re.search('<td id="latest_link">(.*?)</td>',data,16).group(1).strip()
+		link = ""
+		data = read_link("https://kernel.org")
+		expression = re.search('<td id="latest_link">(.*?)</td>', data, 16)
+		if expression:
+			link = expression.group(1)
 		ver = getTagData("a", link)
 		link = "https://kernel.org/%s" % getTagArg("a", "href", link).lstrip("./")
 		reply(mType, source, u"Последняя стабильная версия ядра Linux: %(ver)s | %(link)s" % vars())
 
 command_handler(command_Chuck, 10, "quotes")
-command_handler(Fomenko, 10, "quotes")
 command_handler(JQuotes, 10, "quotes")
 command_handler(pyOrg, 10, "quotes")
 command_handler(bashOrg, 10, "quotes")
