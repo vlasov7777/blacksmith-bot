@@ -107,7 +107,7 @@ def handler_admin_leave(type, source, body):
 	if not body or jid in ADLIST or conf == source[1]:
 		if conf in GROUPCHATS:
 			if jid not in [BOSS, BOSS.lower()]:
-				admin_info = u'АХТУНГ! %s (%s) выгнал меня из -> "%s"' % (source[2], jid, conf)
+				admin_info = u'Внимание! %s (%s) выгнал меня из -> "%s"' % (source[2], jid, conf)
 				if reason:
 					admin_info += u'\nПричина: %s' % (reason)
 				delivery(admin_info)

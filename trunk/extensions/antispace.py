@@ -15,7 +15,7 @@ def handler_antispace(Prs):
 			nick = Prs.getNick()
 		else:
 			nick = Prs.getFrom().getResource()
-		if nick.count(' '):
+		if chr(32) in nick:
 			kick(chat, nick, u'Пробелы в нике запрещены!')
 
 def handler_antispace_control(type, source, body):
@@ -27,7 +27,7 @@ def handler_antispace_control(type, source, body):
 				Antispace.append(source[1])
 				write_file(filename, str(Antispace))
 				reply(type, source, u'Теперь включено.')
-			elif body in [u'выкл', '0'] and source[1] in Antispace:
+			elif body in (u'выкл', '0') and source[1] in Antispace:
 				Antispace.remove(source[1])
 				write_file(filename, str(Antispace))
 				reply(type, source, u'Выключил.')

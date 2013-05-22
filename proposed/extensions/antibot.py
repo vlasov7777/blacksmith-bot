@@ -6,6 +6,7 @@
 
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 # http://witcher-team.ucoz.ru/
+#-extmanager-extVer:1.4-# 
 
 BOTS = 'Jaskier/BlackSmith/ταλιςμαη/talisman/Talisman/Neutron/Юта/fatal/Åmulet/lesman/VIKA/iBot/Storm'.decode('utf-8')
 

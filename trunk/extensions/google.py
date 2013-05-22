@@ -32,7 +32,7 @@ def command_google(mType, source, body):
 					except LookupError:
 						answer = u"Ничего не найдено..."
 					else:
-						desc = list.pop(0)
+						#desc = list.pop(0)
 						ls = []
 						ls.append(desc.get("title", "").replace("<b>", u"«").replace("</b>", u"»"))
 						ls.append(desc.get("content", ""))

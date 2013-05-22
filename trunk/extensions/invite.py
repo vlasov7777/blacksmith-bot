@@ -2,60 +2,47 @@
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
-#  invite_plugin.py
+#  invite.py
 
-# Idea: Als [Als@exploit.in]
-# Coded by: WitcherGeralt [WitcherGeralt@rocketmail.com]
-# http://witcher-team.ucoz.ru/
+# © simpleApps, 2013.
 
-INV_TIMES = {}
+inviteChatrooms = []
 
-def invite_timer(conf):
-	if conf not in INV_TIMES:
-		INV_TIMES[conf] = 0
-	return INV_TIMES[conf]
-
-def handler_send_invite(type, source, body):
-	if source[1] in GROUPCHATS:
-		if body:
-			timer = (time.time() - invite_timer(source[1]))
-			if timer >= 300:
-				args = body.split()
-				nick = args[0].strip()
-				if nick.count('@') and nick.count('.'):
+def command_sendInvite(mType, source, body):
+	chat = source[1]
+	if chat in GROUPCHATS:
+		if chat not in inviteChatrooms:	
+			if body:
+				args = body.split(None, 1)
+				nick = args.pop(0).strip()
+				reason = jid = None
+				if "@" in nick or "." in nick:
 					jid = nick
-				elif nick in GROUPCHATS[source[1]]:
-					jid = handler_jid(source[1]+'/'+nick)
-				else:
-					jid = False
+				elif nick in GROUPCHATS[chat]:
+					jid = handler_jid("%s/%s" % (chat, nick))
 				if jid:
-					if len(args) >= 2:
-						reason = body[(body.find(' ') + 1):].strip()
-					else:
-						reason = False
-					INV_TIMES[source[1]] = time.time()
-					invite = xmpp.Message(to = source[1])
-					INFO['outmsg'] += 1
-					id = 'inv_'+str(INFO['outmsg'])
-					invite.setID(id)
-					x = xmpp.Node('x')
+					if args:
+						reason = args.pop(0)
+					inviteChatrooms.append(chat)
+					invite = xmpp.Message(to = chat)
+					INFO["outmsg"] += 1
+					x = xmpp.Node("x")
 					x.setNamespace(xmpp.NS_MUC_USER)
-					inv = x.addChild('invite', {'to': jid})
+					inv = x.addChild("invite", {"to": jid})
 					if reason:
-						inv.setTagData('reason', reason)
+						inv.setTagData("reason", reason)
 					else:
-						inv.setTagData('reason', u'Вас приглашает '+source[2])
+						inv.setTagData("reason", u"Вас приглашает %s" % source[2])
 					invite.addChild(node = x)
 					jClient.send(invite)
-					reply(type, source, u'Приглашение выслано!')
+					reply(mType, source, u"Приглашение выслано!")
+					composeTimer(180, lambda room: inviteChatrooms.remove(room), "inviteTimer-%s" % chat, (chat,)).start()
 				else:
-					reply(type, source, u'Я его незнаю!')
-			else:
-				strtimer = timeElapsed(300 - timer)
-				reply(type, source, u'Приглашения можно отсылать 1 раз в 5 мин. (Осталось: %s)' % (strtimer))
+					reply(mType, source, u"Это не JabberID и пользователей с таким ником в базе нет.")
 		else:
-			reply(type, source, u'Чего нада!?')
+			reply(mType, source, u"Отсылать инвайты из одной конференции можно только один раз в течение 3-х минут.")
 	else:
-		reply(type, source, u'Только для чатов!')
+		reply(mType, source, u"Только для чатов!")
 
-command_handler(handler_send_invite, 20, "invite")
+
+command_handler(command_sendInvite, 15, "invite")

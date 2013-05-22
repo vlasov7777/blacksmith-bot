@@ -69,13 +69,18 @@ def logGetDate(Time):
 	year, month, day = Time[:3]
 	try:
 		date = time.mktime(time.struct_time((year, month, day, 6, 0, 0, 0, 0, 0)))
-	except:
+	except Exception:
 		year_p = month_p = day_p = year_n = month_n = day_n = 0
 	else:
-		year_p, month_p, day_p = get_date(date - 86400)
-		year_n, month_n, day_n = get_date(date + 86400)
-	return {"prev": "{0}/{1:02}/{2:02}".format(year_p, month_p, day_p),
-			"next": "{0}/{1:02}/{2:02}".format(year_n, month_n, day_n)}
+		try:
+			year_p, month_p, day_p = get_date(date - 86400)
+			year_n, month_n, day_n = get_date(date + 86400)
+		except ValueError:										## Meet 2038 year!
+			year_p, month_p, day_p = year_n, month_n, day_n =\
+				[time.strftime(x) for x in ("%Y", "%m", "%d")]	## Just for fun. 
+			if year_p == "2038":
+				Print("#-# Impossible! Bot works in 2038 year! Hello from 2013!", xmpp.debug.color_cyan) ## fuuuuuuuuuuuun!
+	return "{0}/{1:02}/{2:02}||{3}/{4:02}/{5:02}".format(year_p, month_p, day_p, year_n, month_n, day_n)
 		
 
 def getLogFile(chat, Time):
@@ -86,7 +91,7 @@ def getLogFile(chat, Time):
 			os.makedirs(logDir)
 		except:
 			return False
-	prev, next = logGetDate(Time).values()
+	prev, next = logGetDate(Time).split("||")
 	day = "{0:02}".format(Time.tm_mday)
 	logFileName = "%s/%s.html" % (logDir, day)
 	if os.path.isfile(logFileName):
@@ -169,12 +174,13 @@ def logWriteMessage(stanza, mType, source, body):
 		logWrite(source[1], "msg", body, source[2])
 
 def logWriteSubject(chat, nick, subject, body):
-	Time = time.time()
-	if (Time - Subjs[chat]['time']) > 20:
-		Subjs[chat] = {'body': body, 'time': Time}
-		if nick:
-			body = "%s set subject:\n%s" % (nick.strip(), subject.strip())
-		logWrite(chat, "subject", body)
+	if chat in logCfg and logCfg[chat]["enabled"]:
+		Time = time.time()
+		if (Time - Subjs[chat]['time']) > 20:
+			Subjs[chat] = {'body': body, 'time': Time}
+			if nick:
+				body = "%s set subject:\n%s" % (nick.strip(), subject.strip())
+			logWrite(chat, "subject", body)
 
 def logWriteJoined(chat, nick, afl, role, status, text):
 	if GROUPCHATS.has_key(chat) and logCfg[chat]["enabled"]:

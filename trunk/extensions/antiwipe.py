@@ -45,17 +45,18 @@ def wipeCleaner():
 	raise SystemExit("exit")
 
 def findServer(jid):
-	if jid.count('@'):
-		jid = jid.split('@')[1]
-	if jid.count('/'):
-		jid = jid.split('/')[0]
+	dog = chr(64)
+	if dog in jid:
+		jid = jid.split(dog[1])
+	if chr(47) in jid:
+		jid = jid.split(chr(47))[0]
 	return jid
 
 def handle_wipers(chat, nick, afl, role, status, text):
 	if chat not in UNAVAILABLE:
 		Time = time.time()
 		jid = handler_jid("%s/%s" % (chat, nick))
-		if (time.time() - INFO['start']) > 59 and jid not in ADLIST and AWIPE.get(chat) and afl == 'none':
+		if (afl == "none") and ((time.time() - INFO['start']) > 59) and (jid not in ADLIST) and (chat in AWIPE):
 			if (Time - AWIPE[chat]['ltime']) < 19:
 				AWIPE[chat]["jids"].append(jid)
 				joined = AWIPE[chat]["jids"]

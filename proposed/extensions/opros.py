@@ -6,6 +6,7 @@
 
 # Coded by: WitcherGeralt (WitcherGeralt@jabber.ru)
 # http://witcher-team.ucoz.ru/
+#-extmanager-extVer:0.5-#
 
 OPROS_USERS = {}
 OPROS_CHAT = []

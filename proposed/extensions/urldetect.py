@@ -4,8 +4,8 @@
 # © simpleApps, 21.05.2012 (12:38:47)
 # Web site header detector
 
-# RC-2!
-#-extmanager-extVer:2.7-#
+# RC-3!
+#-extmanager-extVer:2.7.3-#
 import re
 import urllib2
 
@@ -47,7 +47,7 @@ def urlWatcher(raw, mType, source, body):
 			try:
 				url = comp_link.search(body)
 				if url:
-					url = url.group(1).strip("'.,\\)\"")
+					url = url.group(1).strip("'.,)\\]\"")
 					if not chkUnicode(url):
 						protocol, _ = url.split("://")[:2]
 						raw = _.split("/", 1)
@@ -65,17 +65,18 @@ def urlWatcher(raw, mType, source, body):
 					reQ.add_header("User-agent", UserAgents["BlackSmith"])
 					opener = urllib2.urlopen(reQ)
 					headers  = opener.headers
-					if "text/html" in headers.get("Content-Type") or url.endswith((".html", ".htm")):
+					if "text/html" in headers.get("Content-Type", "") or url.endswith((".html", ".htm")):
 						data = opener.read(4500)
 						Type, Charset = contentTypeParser(opener, data)
 						title = getTagData("title", data)
 						title = title.decode(Charset)
-						answer = u"Заголовок: %s" % uHTML(title).replace("\n", "").encode("utf-8")
+						if title:
+							answer = u"Заголовок: %s" % uHTML(title).replace("\n", "").encode("utf-8")
 					else:
 						answer = ""
-						Type = headers.get("Content-Type") or ""
-						Size = int(headers.get("Content-Length") or 0)
-						Date = headers.get("Last-Modified") or ""
+						Type = headers.get("Content-Type", "")
+						Size = int(headers.get("Content-Length", 0))
+						Date = headers.get("Last-Modified") or headers.get("Date") or ""
 						if Type:
 							answer += u"Тип: %s" % Type
 						if Size:
@@ -83,9 +84,10 @@ def urlWatcher(raw, mType, source, body):
 						if Date: 
 							answer += "; последнее изменение файла: %s." % Date
 						answer = answer % vars()
-					msg(source[1], ChrReplacer(answer))
+					if answer:
+						msg(source[1], ChrReplacer(answer))
 			except (urllib2.HTTPError, urllib2.URLError, urllib2.socket.error) as e:
-				msg(source[1], str(e))
+				msg(source[1], "%s: %s" % (e.__class__.__name__, e.message or str(e)))
 			except: 
 				lytic_crashlog(urlWatcher, "", u"While parsing \"%s\"." % locals().get("url"))
 

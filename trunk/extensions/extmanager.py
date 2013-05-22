@@ -3,12 +3,13 @@
 
 # BlackSmith Extension Manager
 # This plugin distributed under Apache 2.0 license.
-# (c) simpleApps, 2012.
+# (c) simpleApps, 2012 — 2013.
 
 ## NOTICE: 
 ##			All plugins that depend from another plugins or files (not help files that placed in help dir)
 ##			Must be contain this code: #-extmanager-depends:depend1;depend2;depend3-#
 ##			Where depend1, depend2 and depend3 are depends of this plugin.
+##			Read plugins comments (from /proposed) for know more.
 import urllib
 
 svnUrl = "http://blacksmith-bot.googlecode.com/svn/proposed/%s/"
@@ -78,9 +79,9 @@ def findConflicts(data):
 def extManager(mType, source, args):
 	if args:
 		answer = str()
-		a = args.split()
+		a = args.split(None, 1)
 		name, fullName = a[0], a[0] + ".py"
-		afterA0 = args[(args.find(" ") + 1):].strip()
+		afterA0 = args[-1]	## args[(args.find(" ") + 1):].strip()
 		extList = re.findall("\">(.*\.py)</a></li>", read_url(svnUrl % "extensions")) #"
 		extList = [x[:-3] for x in extList]
 
@@ -104,8 +105,9 @@ def extManager(mType, source, args):
 					if conflicts:
 						conflictList = str.join(", ", conflicts)
 					commandList = str.join(", ", commandList)
+					version = findExtVer(data)
 					answer =\
-						"\nПлагин: %(name)s.\nСодержит команды: %(commandList)s."
+						"\nПлагин: %(name)s (версия %(version)s).\nСодержит команды: %(commandList)s."
 					if depList:
 						answer +=\
 							"\nДля плагина требуется: %(jDepList)s, после установки будет занятно примерно %(sizeOf)s."

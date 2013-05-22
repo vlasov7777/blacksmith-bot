@@ -1,11 +1,11 @@
 {
-u"handler_send_invite": {
-u"syntax": u'''призвать [Jabber ID/ник] [причина]''',
+u"command_sendInvite": {
+u"syntax": u'''призвать (Jabber ID/ник) [причина]''',
 
 u"cmd": u'''призвать''',
 
-u"examples": [u'''призвать Маша так надо''', u'''призвать cuvak@jabber.ru'''],
+u"examples": [u'''призвать mrdoctorwho@jabber.ru''', u'''призвать mrDoctorWho опять косяк!'''],
 
-u"desc": u'''Отсылает приглашение указанному пользователю.'''
+u"desc": u'''Отсылает приглашение в текущую конференцию указанному пользователю.'''
 }
 }
