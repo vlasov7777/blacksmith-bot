@@ -47,7 +47,7 @@ def wipeCleaner():
 def findServer(jid):
 	dog = chr(64)
 	if dog in jid:
-		jid = jid.split(dog[1])
+		jid = jid.split(dog)[1]
 	if chr(47) in jid:
 		jid = jid.split(chr(47))[0]
 	return jid

@@ -123,26 +123,25 @@ if BOT_OS == "nt":
 	os.system("Title BlackSmith - %s" % (Caps))
 
 ## Lists of handlers.
-Handlers = {
-	"01eh": [], "02eh": [],
-	"03eh": [], "04eh": [],
-	"05eh": [], "06eh": [],
-	"07eh": [], "08eh": [],
-	"09eh": [], "00si": [], 
-	"01si": [], "02si": [], 
-	"03si": [], "04si": []
-				}
+Handlers = { "01eh": [], "02eh": [],
+			 "03eh": [], "04eh": [],
+			 "05eh": [], "06eh": [],
+			 "07eh": [], "08eh": [],
+			 "09eh": [], "00si": [], 
+			 "01si": [], "02si": [], 
+			 "03si": [], "04si": [] }
 
 ## FOR eXample:
 # *si = *stage-init
 # 01eh = message
 # 02eh = presence
 # 03eh = IQ
-# 04eh = join
-# 05eh = leave
-# 06eh = nick change
-# 07eh = role change
-# 08eh = status change
+# 04eh = user join
+# 05eh = user leave
+# 06eh = user nick change
+# 07eh = user role change
+# 08eh = user status change
+# 09eh = topic recieved
 
 ## Dictionaries, lists.
 MORE = {}
@@ -182,20 +181,19 @@ if os.name == "nt":
 elif os.name == "posix":
 	from platform import dist
 	dist = dist()
+	uname = os.uname()
 	if dist[0]:
-		os_name = "POSIX (%s with %s, %s)" % (dist[0],
-											  os.uname()[0], os.uname()[2])
-		os_simple = u"%s, %s %s" % (dist[0], os.uname()[0], os.uname()[2])
+		os_simple = u"%s, %s" % (dist[0], uname[0])
+		os_name = "POSIX (%s %s)" % (os_simple, uname[2])
 	else:
-		os_name = "POSIX (%s, %s)" % (os.uname()[0], os.uname()[2])
-		os_simple = u"%s %s" % (os.uname()[0], os.uname()[2])
-else:
+		os_simple = uname[0]
+		os_name = "POSIX (%s, %s)" % (os_simple, uname[2])
 	os_name = os.name.upper()
 os_name = os_name.strip() + " " + getArchitecture()
-del ntDetect, getArchitecture
 
 from webtools import *
 UserAgents["BlackSmith"] = "Mozilla/5.0 (%s; %d.%d; ru) BlackSmith XMPP-BOT mark.1" % (os_simple, BOT_VER, CORE_MODE)
+del ntDetect, getArchitecture, dist, uname, os_simple
 
 ## File workers.
 def check_file(conf = None, file = None, data = "{}"):
@@ -956,7 +954,7 @@ def PRESENCE_PROCESSING(client, stanza):
 					call_efunctions("06eh", (stanza, conf, nick, Nick))
 			else:
 				call_efunctions("05eh", (conf, nick, reason, scode)) #1
-				status_code_change(('idle', 'joined', "caps", "join_date"), conf, nick) #0
+				status_code_change(('idle', 'joined', "caps"), conf, nick) #0
 		elif Ptype in ('available', None):
 			full_jid = stanza.getJid()
 			if not full_jid:

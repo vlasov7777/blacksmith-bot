@@ -379,8 +379,8 @@ def logSetStateMain(mType, source, argv):
 					reply(mType, source, u"Нет такой темы :(")
 			else:
 				ls = []
-				for Numb, Theme in enumerate(logThemes.keys()):
-					ls.append("%d. %s." % ((Numb + 1), Theme))
+				for Numb, Theme in enumerate(logThemes.keys(), 1):
+					ls.append("%d. %s." % (Numb , Theme))
 				reply(mType, source, str.join(chr(10), ls))
 		elif a0 == u"папка":
 			if argv:

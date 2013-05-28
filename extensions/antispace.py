@@ -15,7 +15,7 @@ def handler_antispace(Prs):
 			nick = Prs.getNick()
 		else:
 			nick = Prs.getFrom().getResource()
-		if chr(32) in nick:
+		if nick.endswith(chr(32)):
 			kick(chat, nick, u'Пробелы в нике запрещены!')
 
 def handler_antispace_control(type, source, body):
