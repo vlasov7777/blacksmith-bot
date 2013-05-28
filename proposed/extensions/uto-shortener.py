@@ -5,24 +5,24 @@
 # This program published under Apache 2.0 license
 # See LICENSE.txt for more details
 
-#-extmanager-extVer:2.0-#
+#-extmanager-extVer:2.1-#
 
 def uto_parse(code):
-  data = re.search("#shurlout'\)\.val\('(.*)'\)\.show\(\)\.focus\(\)", code)
-  if data:
-	data = data.group(1)
-  return data
+	data = re.search("#shurlout'\)\.val\('(.*)'\)\.show\(\)\.focus\(\)", code)
+	if data:
+		data = data.group(1)
+	return data
 
-def url_shortener(mType, source, args):
-	if args:
-		if not chkUnicode(args):
-			args = IDNA(args)
+def url_shortener(mType, source, body):
+	if body:
+		if not chkUnicode(body, "~#?%&+=,:;*|"):
+			body = IDNA(body)
 		headers = {"Accept": "application/xml, text/xml */*",
 				   "Accept-Language": "ru-ru,ru; q=0.5",
 				   "Accept-Encoding": "deflate",
 				   "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
 				   "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:21.0) Gecko/20130309 Firefox/21.0"}
-		data = urllib.urlencode(dict(a = "add", url = args))
+		data = urllib.urlencode(dict(a = "add", url = body))
 		request = urllib2.Request("http://u.to/", data, headers)
 		resp = urllib2.urlopen(request)
 		answer = uto_parse(resp.read()) or u"Какая-то проблема с получением результата." 

@@ -2,10 +2,9 @@
 # coding: utf-8
 
 #  BlackSmith plugin
-#  help_plugin.py
+#  help.py
 
-# ReCoded: by WitcherGeralt (WitcherGeralt@jabber.ru)
-# http://witcher-team.ucoz.ru/
+#  © mrDoctorWho & WitcherGeralt, 2011 — 2013.
 
 def command_comaccess(type, source, body):
 	if body:
@@ -44,6 +43,7 @@ def command_help(type, source, body):
 	else:
 		mess = u'Для просмотра списка команд, напишите «комлист».'
 	reply(type, source, mess)
+
 def command_comlist(mType, source, body):
 	answer = ""
 	commandByAccess = {}
@@ -61,22 +61,22 @@ def command_comlist(mType, source, body):
 			commandByAccess[access] = []
 		commandByAccess[access].append(command)
 	for access in sorted(commandByAccess.keys()):
-		answer += "\n## Команды для пользователей с доступом %d (%s):\n" % (access, Access[access])
-#		answer += "\n
-		answer += str.join(", ", sorted(commandByAccess[access]))
+		answer += "\n## Команды для пользователей с доступом %d (%s):\n" % (access, Access.get(access, "Unknown"))
+		answer += str.join(", ", sorted(commandByAccess[access])) + "\n"
 	if mType == "public":
 		reply(mType, source, "В привате.")
 	msg(source[0], answer)
 
-def command_commands(type, source, body):
-	answer = u"\nСписок команд в категории \"все\" (всего %d штук):\n\n%s." % (len(COMMANDS.keys()), ", ".join(sorted(COMMANDS.keys())))
+def command_commands(mType, source, body):
+	commands = COMMANDS.keys()
+	answer = u"\nСписок команд в категории \"все\" (всего %d штук):\n\n%s." % (len(commands), ", ".join(sorted(commands)))
 	if len(COMMOFF.get(source[1], [])):
 		answer += u"\n\nСледующие команды здесь отключены: \n%s." % ", ".join(sorted(COMMOFF.get(source[1], [])))
 	answer += u"\n\n*** Чтобы узнать доступ к определённой команде, напишите \"комдоступ [команда]\"."
 	if PREFIX.get(source[1]):
 		answer += u"\n*** Префикс команд: \"%s\"." % PREFIX.get(source[1])
-	if type != "private":
-		reply(type, source, u"В привате.")	
+	if mType != "private":
+		reply(mType, source, u"В привате.")	
 	msg(source[0], answer)
 
 
