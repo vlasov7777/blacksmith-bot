@@ -1,8 +1,7 @@
-Чтобы скачать бота вам необходима система контроля версий - Subversion.
+#labels Featured,Phase-Deploy
+Чтобы скачать бота *последней версии* вам необходима система контроля версий - Subversion.
 
 Командуйте в консоли:
-
 svn checkout http://blacksmith-bot.googlecode.com/svn/trunk BlackSmith
 
-Полная вики -> http://witcher-team.ucoz.ru/wiki.html
-Копия -> http://blacksmith-bot.googlecode.com/svn/wiki/wiki.html
+Описание команд можно посмотреть тут: http://blacksmith-bot.googlecode.com/svn/wiki/bs-commands-reference.html
