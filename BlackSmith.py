@@ -37,7 +37,8 @@ except OSError:
 sys.path.insert(0, "library.zip")
 
 from enconf import *
-import xmpp, macros, simplejson
+import xmpp, macros
+import json as simplejson
 
 ## Stats.
 INFO = {'start': 0, 'msg': 0, 'prs': 0, 'iq': 0, 'outmsg': 0, 'outiq': 0,
