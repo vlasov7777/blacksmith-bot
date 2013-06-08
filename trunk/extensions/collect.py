@@ -91,12 +91,13 @@ def handler_test(type, source, body):
 		answer = random.choice(testfr)
 	else:
 		testfr = {0: u"Всё в порядке! (Ошибок нет)",
-				  1: u"Что-то сломалось... (1 ошибка)",
+				  1: u"Что-то сломалось… (1 ошибка)",
 				  2: u"Что-то сломалось дважды... (2 ошибки)",
-				  3: u"Что-то сломалось дважды и ещё раз сломалось... (3 ошибки) (!)",
-				  4: u"Плоховато мне, перезапуститься бы... (4 ошибки) (!!)",
+				  3: u"Что-то сломалось дважды и ещё раз сломалось… (3 ошибки) (!)",
+				  4: u"Что-то пошло не так… (4 ошибки) (!!)",
 				  "more": u"Сегодня явно не мой день (%d ошибок) (!!!)"}
-		answer = testfr.get(len(ERRORS.keys()), testfr["more"])
+		Error = len(ERRORS.keys()) # meet you here!
+		answer = testfr.get(Error, testfr["more"] % Error)
 		
 	reply(type, source, answer + (' (PID: %s)' % str(BOT_PID)))
 
@@ -105,23 +106,21 @@ def handler_admin_message(type, source, body):
 		args = body.split()
 		if len(args) >= 2:
 			jid = args[0].strip()
-			if jid.count('@') and jid.count('.'):
+			if "@" in jid and "." in jid:
 				inst = jid.split('/')[0].lower()
-				if jid.count('@conf') and inst not in GROUPCHATS:
-					reply(type, source, u'меня нет в этой конфе')
+				if "@conf" in jid and inst not in GROUPCHATS:
+					reply(type, source, u'Меня нет в этой конференции.')
 				else:
 					mess = body[(body.find(' ') + 1):].strip()
 					if len(mess) <= 1024:
 						msg(jid, u'Сообщение от '+source[2]+': '+mess)
 						reply(type, source, u'сделано')
 					else:
-						reply(type, source, u'Слишком длинная мессага!')
+						reply(type, source, u'Слишком длинное сообщение!')
 			else:
-				reply(type, source, u'Ээ нет, это вообще не жид!')
+				reply(type, source, u'Это вообще не JabberID!')
 		else:
 			reply(type, source, u'А что слать-то?')
-	else:
-		reply(type, source, u'ты чё-то тупишь')
 
 def handler_admin_say(type, source, body):
 	if body:
@@ -136,20 +135,20 @@ def handler_global_message(type, source, body):
 	if body:
 		for conf in GROUPCHATS.keys():
 			msg(conf, u'### Сообщение от '+source[2]+':\n'+body)
-		reply(type, source, u'Мессага успешно разослана')
+		reply(type, source, u'Сообщение успешно разослано.')
 	else:
-		reply(type, source, u'А что слать то?')
+		reply(type, source, u'А что слать-то?')
 
 def handler_auto_message(type, source, body):
 	if body:
 		jid = handler_jid(source[0])
 		if jid in AMSGBL:
-			reply(type, source, u'тебе запрещено отсылать мессаги админу')
+			reply(type, source, u'Тебе запрещено отсылать сообщения админу.')
 		elif len(body) <= 1024:
 			delivery(u'Сообщение от '+source[2]+' ('+jid+'): '+body)
 			reply(type, source, u'сделано')
 		else:
-			reply(type, source, u'Слишком длинная мессага!')
+			reply(type, source, u'Слишком длинное сообщение!')
 	else:
 		reply(type, source, u'Ну а дальше?')
 
@@ -158,7 +157,7 @@ def handler_amsg_blacklist(type, source, body):
 		args = body.split()
 		if len(args) == 2:
 			jid = args[1].strip()
-			if jid.count('@') and jid.count('.'):
+			if "@" in jid and "." in jid:
 				check = args[0].strip()
 				if check == '+':
 					if jid not in AMSGBL:

@@ -16,7 +16,7 @@ def handler_true_jid(type, source, nick):
 				jid = handler_jid(source[1]+'/'+nick)
 				if type == 'public':
 					reply(type, source, u'ушёл')
-				reply('private', source, u'Реальный Jabbed ID «%s» — %s.' % (nick, jid))
+				reply('private', source, u'Реальный JabberID «%s» — %s.' % (nick, jid))
 			else:
 				reply(type, source, u'Ты уверен, «%s» что был тут?' % (nick))
 		else:

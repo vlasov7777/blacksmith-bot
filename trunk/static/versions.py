@@ -2,8 +2,8 @@
 
 Caps = "http://simpleapps.ru/caps#blacksmith-m.1"
 BOT_VER = 1
-CORE_MODE = 61
-BOT_REV = 166
+CORE_MODE = 62
+BOT_REV = 169
 
 try:
 	svnversion = os.popen("svnversion").read()

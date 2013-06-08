@@ -17,7 +17,6 @@
 #  The new bot life © simpleApps 2011 — 2013.
 
 ## Imports.
-from __future__ import with_statement
 from traceback import format_exc, print_exc
 import gc, os, re, sys, time, random, threading
 
@@ -189,11 +188,12 @@ elif os.name == "posix":
 		os_simple = uname[0]
 		os_name = "POSIX (%s, %s)" % (os_simple, uname[2])
 	os_name = os.name.upper()
+	del dist, uname
 os_name = os_name.strip() + " " + getArchitecture()
 
 from webtools import *
 UserAgents["BlackSmith"] = "Mozilla/5.0 (%s; %d.%d; ru) BlackSmith XMPP-BOT mark.1" % (os_simple, BOT_VER, CORE_MODE)
-del ntDetect, getArchitecture, dist, uname, os_simple
+del ntDetect, getArchitecture, os_simple
 
 ## File workers.
 def check_file(conf = None, file = None, data = "{}"):
@@ -289,7 +289,7 @@ def command_handler(instance, access = 0, plug = "default"):
 	if COMMANDS.get(command) or COMMAND_HANDLERS.get(command):
 		if plug != COMMANDS[command].get("plug"):
 			Print("\nCommands in \"%s\" and \"%s\" are repeated." % (plug, COMMANDS[command].get("plug")), color2)
-			command = command + "1"
+			command += "1"
 	COMMAND_HANDLERS[command] = instance
 	COMMANDS[command] = {'plug': plug, 'access': access}
 
