@@ -8,31 +8,24 @@
 
 inviteChatrooms = []
 
-def command_sendInvite(mType, source, body):
+def command_sendInvite(mType, source, nick):
 	chat = source[1]
 	if chat in GROUPCHATS:
 		if chat not in inviteChatrooms:	
-			if body:
-				args = body.split(None, 1)
-				nick = args.pop(0).strip()
-				reason = jid = None
+			if nick:
+				jid = None
 				if "@" in nick or "." in nick:
 					jid = nick
 				elif nick in GROUPCHATS[chat]:
 					jid = handler_jid("%s/%s" % (chat, nick))
 				if jid:
-					if args:
-						reason = args.pop(0)
 					inviteChatrooms.append(chat)
 					invite = xmpp.Message(to = chat)
 					INFO["outmsg"] += 1
 					x = xmpp.Node("x")
 					x.setNamespace(xmpp.NS_MUC_USER)
 					inv = x.addChild("invite", {"to": jid})
-					if reason:
-						inv.setTagData("reason", reason)
-					else:
-						inv.setTagData("reason", u"Вас приглашает %s" % source[2])
+					inv.setTagData("reason", u"Вас приглашает %s" % source[2])
 					invite.addChild(node = x)
 					jClient.send(invite)
 					reply(mType, source, u"Приглашение выслано!")
