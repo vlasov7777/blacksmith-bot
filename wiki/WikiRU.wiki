@@ -4,4 +4,4 @@
 Командуйте в консоли:
 svn checkout http://blacksmith-bot.googlecode.com/svn/trunk BlackSmith
 
-Описание команд можно посмотреть тут: http://blacksmith-bot.googlecode.com/svn/wiki/bs-commands-reference.html
+Описание команд можно посмотреть тут: http://simpleapps.ru/bs-commands-reference.html
