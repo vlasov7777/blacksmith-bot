@@ -6,7 +6,7 @@
 # See LICENSE.txt for more details
 
 #-extmanager-extVer:1.0-#
-#-extmanager-conflicts:uto-shortener.py-#
+#-extmanager-conflict:extensions/uto-shortener.py-#
 
 def isGd_shortener(mType, source, body):
 	if body:

@@ -6,7 +6,7 @@
 # See LICENSE.txt for more details
 
 #-extmanager-extVer:2.2-#
-#-extmanager-conflicts:isgd-shortener.py-#
+#-extmanager-conflict:extensions/isgd-shortener.py-#
 
 def url_shortener(mType, source, body):
 	if body:
