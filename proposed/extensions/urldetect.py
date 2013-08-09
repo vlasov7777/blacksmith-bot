@@ -4,21 +4,22 @@
 # © simpleApps, 21.05.2012 (12:38:47)
 # Web site header detector
 
-# RC-3!
-#-extmanager-extVer:2.7.4-#
+# RC-4!
+#-extmanager-extVer:2.8-#
 import re
 import urllib2
 
-comp_link = re.compile("(http[s]?://[^\s'\"<>]+)")
+comp_link = re.compile("(https?)://([^\s'\"<>/]+)([^\s'\"<>]+)")
 comp_charset = re.compile("(.+);[ ]?charset=(.+)")
 comp_charset_alt = re.compile("charset=['\"]?(.+?)[\s'\"/>]+?")
 
-urlDetect = []
-unAllowedChars = (unichr(x) for x in xrange(32) if x not in (9, 10, 13))
+urlDetect = {"list": [], "last": None, 
+			 "urlAllowedChars": "(~#?!%&+=,:;*|)",
+			 "unAllowedChars": (unichr(x) for x in xrange(32) if x not in (9, 10, 13))}
 
 def contentTypeParser(opener, data):
 	Charset, Type = None, opener.headers.get("Content-Type")
- 	try:
+	try:
 		if Type and Type.count(";"):
 			Type, Charset = comp_charset.search(Type).groups()
 			Charset = Charset.strip("'\"").lower()
@@ -37,24 +38,19 @@ def contentTypeParser(opener, data):
 	return (Type, Charset) 
 
 def urlParser(body, TitleMSG = "%s"):
-	url = comp_link.search(body)
+	data = comp_link.search(body)
 	answer = ""
-	if url:
+	if data:
 		try:
-			url = url.group(1).strip("'.,\\]\"")
-			if not chkUnicode(url):
-				protocol, _ = url.split("://")[:2]
-				raw = _.split("/", 1)
-				if len(raw) > 1:
-					domain, page = raw
-					page = "/" + page
-				else:
-					domain, page = raw[0], ""
-				if not chkUnicode(domain):
-					domain = IDNA(domain)
-				if not chkUnicode(page, "(~#?%&+=,:;*|)"):
-					page = urllib.quote(str(page))
-				url = u"%s://%s%s" % (protocol, domain, page)
+			protocol, domain, page = data.groups()
+			domain = IDNA(domain)
+			page = page.strip("'.,\\]\"")
+			if not chkUnicode(page, urlDetect["urlAllowedChars"]):
+				page = urllib.quote(str(page))
+			url = u"%s://%s%s" % (protocol, domain, page)
+			if url == urlDetect["last"]:
+				return None
+			urlDetect["last"] = url
 			reQ = urllib2.Request(url)
 			reQ.add_header("User-agent", UserAgents["BlackSmith"])
 			opener = urllib2.urlopen(reQ)
@@ -68,27 +64,35 @@ def urlParser(body, TitleMSG = "%s"):
 				if title:
 					answer = TitleMSG % uHTML(title).replace("\n", "").encode("utf-8")
 			else:
+				fullUrl = opener.url
+				name = fullUrl.split("/")[-1]
 				Type = headers.get("Content-Type", "")
 				Size = int(headers.get("Content-Length", 0))
 				Date = headers.get("Last-Modified") or headers.get("Date") or ""
-				if Type:
-					answer += u"Тип: %s" % Type
+				try:
+					Date = time.strptime(Date, "%a, %d %b %Y %H:%M:%S GMT")
+					Date = time.strftime("%d.%m.%Y %H:%M:%S GMT", Date)
+				except ValueError: 
+					pass
+				if name:
+					answer += "Файл: %s" % name
 				if Size:
-					answer += u", размер: %s" % byteFormat(Size)
+					answer += " — %s" % byteFormat(Size)
+				if Type:
+					answer += " • %s" % Type.split()[0].strip(",;.")
 				if Date: 
-					answer += "; последнее изменение файла: %s." % Date
+					answer += "\nПоследнее изменение: %s." % Date
 				if answer:
-					answer = answer % vars()
-				answer = replace_all(answer, unAllowedChars, "")
+					answer = replace_all(answer % vars(), urlDetect["unAllowedChars"], "")
 		except (urllib2.HTTPError, urllib2.URLError, urllib2.socket.error) as e:
 			answer = "%s: %s" % (e.__class__.__name__, e.message or str(e))
 		except: 
-			lytic_crashlog(urlWatcher, "", u"While parsing \"%s\"." % locals().get("url"))
+			lytic_crashlog(urlWatcher, "", "While parsing \"%s\"." % locals().get("url", body))
 	return answer
 
 
 def urlWatcher(raw, mType, source, body):
-	if mType == "public" and (source[1] in urlDetect) and has_access(source[0], 11, source[1]):
+	if mType == "public" and (source[1] in urlDetect["list"]) and has_access(source[0], 11, source[1]):
 		if len(body) < 500:
 			answer = urlParser(body, u"Заголовок: %s")
 			if answer:
@@ -103,16 +107,16 @@ def urlWatcherConfig(mType, source, args):
 		if args in ("1", "0"):
 			if has_access(source[0], 20, source[1]):
 				if args == "1":
-					if source[1] in urlDetect:
+					if source[1] in urlDetect["list"]:
 						answer = u"Уже включено."
 					else:
-						urlDetect.append(source[1])
-						write_file("dynamic/urlWatcher.txt", str(urlDetect))
+						urlDetect["list"].append(source[1])
+						write_file("dynamic/urlWatcher.txt", str(urlDetect["list"]))
 						answer = u"Включил автодетект ссылок."
 				elif args == "0":
-					if source[1] in urlDetect:
-						urlDetect.remove(source[1])
-						write_file("dynamic/urlWatcher.txt", str(urlDetect))
+					if source[1] in urlDetect["list"]:
+						urlDetect["list"].remove(source[1])
+						write_file("dynamic/urlWatcher.txt", str(urlDetect["list"]))
 						answer = u"Выключил автодетек ссылок."
 					else:
 						 answer = u"Не включено."
@@ -128,12 +132,12 @@ def urlWatcherConfig(mType, source, args):
 
 def urlWatcherConfig_load():
 	if initialize_file("dynamic/urlWatcher.txt", "[]"):
-		globals()["urlDetect"] = eval(read_file("dynamic/urlWatcher.txt"))
+		urlDetect["list"] = eval(read_file("dynamic/urlWatcher.txt"))
 
 def urlWatcher_04si(chat):
 	if chat in urlDetect:
-		urlDetect.remove(chat)
-		write_file("dynamic/urlWatcher.txt", str(urlDetect))
+		urlDetect["list"].remove(chat)
+		write_file("dynamic/urlWatcher.txt", str(urlDetect["list"]))
 
 handler_register("01eh", urlWatcher)
 

@@ -5,29 +5,39 @@
 # This program published under Apache 2.0 license
 # See LICENSE.txt for more details
 
-#-extmanager-extVer:2.1-#
-
-def uto_parse(code):
-	data = re.search("#shurlout'\)\.val\('(.*)'\)\.show\(\)\.focus\(\)", code)
-	if data:
-		data = data.group(1)
-	return data
+#-extmanager-extVer:2.2-#
+#-extmanager-conflicts:isgd-shortener.py-#
 
 def url_shortener(mType, source, body):
 	if body:
-		if not chkUnicode(body, "~#?%&+=,:;*|"):
-			body = IDNA(body)
+		protocol, _ = body.split("://")[:2]
+		raw = _.split("/", 1)
+		if len(raw) > 1:
+			domain, page = raw
+			page = "/" + page
+		else:
+			domain, page = raw[0], ""
+		domain = IDNA(domain)
+		if not chkUnicode(page, "(~#?!%&+=,:;*|)"):
+			page = urllib.quote(str(page))
+		_url = u"%s://%s%s" % (protocol, domain, page)
 		headers = {"Accept": "application/xml, text/xml */*",
 				   "Accept-Language": "ru-ru,ru; q=0.5",
 				   "Accept-Encoding": "deflate",
 				   "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-				   "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:21.0) Gecko/20130309 Firefox/21.0"}
-		data = urllib.urlencode(dict(a = "add", url = body))
+				   "User-Agent": UserAgents["BlackSmith"]}
+		data = urllib.urlencode(dict(a = "add", url = _url))
 		request = urllib2.Request("http://u.to/", data, headers)
 		resp = urllib2.urlopen(request)
-		answer = uto_parse(resp.read()) or u"Какая-то проблема с получением результата." 
+		html = resp.read()
+		regExp = re.search("#shurlout'\)\.val\('(.*)'\)\.show\(\)\.focus\(\)", html)
+		if regExp:
+			answer = regExp.group(1)
+		else:
+			regErrExp = re.search("<div class=\"myWinLoadSF\">(.*)</div>", html)
+			answer = regErrExp.group(1)
 	else:
-		answer = u"Не нашёл URL."
+		answer = u"Ошибка."
 	reply(mType, source, answer)
 
 command_handler(url_shortener, 11, "uto-shortener")
