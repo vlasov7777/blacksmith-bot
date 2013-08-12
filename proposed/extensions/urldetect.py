@@ -5,7 +5,7 @@
 # Web site header detector
 
 # RC-4!
-#-extmanager-extVer:2.8-#
+#-extmanager-extVer:2.9-#
 import re
 import urllib2
 
@@ -75,6 +75,8 @@ def urlParser(body, TitleMSG = "%s"):
 				except ValueError: 
 					pass
 				if name:
+					if name.count("%") > 2:
+						name = urllib.unquote(str(name))
 					answer += "Файл: %s" % name
 				if Size:
 					answer += " — %s" % byteFormat(Size)
@@ -100,6 +102,7 @@ def urlWatcher(raw, mType, source, body):
 
 			
 def urlWatcherConfig(mType, source, args):
+	answer = "Что?"
 	if args:	
 		args = args.strip()[:500]
 		argv = args.split()
