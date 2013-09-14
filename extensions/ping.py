@@ -27,46 +27,16 @@ def handler_ping(type, source, nick):
 
 def handler_ping_answer(coze, stanza, t0, mtype, source, nick, jid, user):
 	if stanza:
-		if stanza.getType() == 'result':
-			repl, difference = u"Понг", (time.time() - t0)
-			Ping = round(difference, 3)
-			if jid not in PINGSTAT:
-				PINGSTAT[jid] = []
-			PINGSTAT[jid].append(Ping)
-			if nick:
-				repl += u' от %s — %s секунд.' % (nick, str(Ping))
-			else:
-				repl += u' — %s секунд.' % str(Ping)
-			reply(mtype, source, repl)
+		repl, difference = u"Понг", (time.time() - t0)
+		Ping = round(difference, 3)
+		if jid not in PINGSTAT:
+			PINGSTAT[jid] = []
+		PINGSTAT[jid].append(Ping)
+		if nick:
+			repl += u' от %s — %s секунд.' % (nick, str(Ping))
 		else:
-			reping_by_version(mtype, source, user, jid, nick)
-
-def reping_by_version(type, source, user, jid, nick):
-	iq = xmpp.Iq(to = user, typ = 'get')
-	iq.addChild('query', {}, [], xmpp.NS_VERSION)
-	jClient.SendAndCallForResponse(iq, handler_ping_ver_answer, {'t1': time.time(), 'type': type, 'source': source, 'nick': nick, 'jid': jid, 'user': user})
-
-def handler_ping_ver_answer(coze, stanza, t1, type, source, nick, jid, user):
-	if stanza:
-		if stanza.getType() == 'result':
-			name, answer, difference = '[no name]', '', (time.time() - t1)
-			Props = stanza.getQueryChildren()
-			for Prop in Props:
-				Pname = Prop.getName()
-				if Pname == 'name':
-					name = Prop.getData()
-			Ping = round(difference, 3)
-			if jid not in PINGSTAT:
-				PINGSTAT[jid] = []
-			PINGSTAT[jid].append(Ping)
-			if nick:
-				answer += u' от %s — %s секунд.' % (nick, str(Ping))
-			else:
-				answer += u' — %s секунд.' % str(Ping)
-			repl = u'Понга нет. Ответ на версию ('+name+')'+answer
-		else:
-			repl = u'Ни пинга, ни версии...'
-		reply(type, source, repl)
+			repl += u' — %s секунд.' % str(Ping)
+		reply(mtype, source, repl)
 
 def form_ping_stat(jid):
 	mass, col, max, min = 0, 0, 0, 999999.999

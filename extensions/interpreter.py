@@ -9,6 +9,8 @@
 def pyEval(mType, source, code):
 	try: result = unicode(eval(code))
 	except Exception: result = returnExc()
+	if not result:
+		result = `result`
 	reply(mType, source, result)
 
 def pyExec(mType, source, code):
@@ -29,10 +31,10 @@ def pyShell(mType, source, cmd):
 	if not result: result = "Done."
 	reply(mType, source, result)
 
+calcExp = re.compile("([0-9]|[\+\-\(\/\*\)\%\^\.\ ])")
 def pyCalc(mType, source, expression):
-	if expression and len(expression) <= 24 and not expression.count("**"):
-		reg = re.sub("([0-9]|[\+\-\(\/\*\)\%\^\.])", "", expression)
-		if reg:
+	if expression and len(expression) < 40 and not expression.count("**"):
+		if calcExp.sub("", expression):
 			result = "Недопустимо."
 		else:
 			try:

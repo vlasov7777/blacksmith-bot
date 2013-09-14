@@ -132,7 +132,7 @@ def command_getVersion(mType, source, args):
 def answer_version(coze, stanza, mType, source):
 	if xmpp.isResultNode(stanza):
 		Name, Ver, OS = "[None]", "[None]", "[None]"
-		data =  stanza.getQueryChildren()
+		data = stanza.getQueryChildren()
 		if data:
 			for x in data:
 				xname = x.getName()
@@ -142,7 +142,7 @@ def answer_version(coze, stanza, mType, source):
 					Ver = x.getData()
 				elif xname == "os":
 					OS = x.getData()
-			answer = "\nName: %s\nVer.: %s\nOS: %s" % (Name, Ver, OS)
+			answer = "\Клиент: %s\nВерсия: %s\nОС: %s" % (Name, Ver, OS)
 		else:
 			answer = u"Error: null."
 	else:

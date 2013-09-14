@@ -81,7 +81,6 @@ def logGetDate(Time):
 			if year_p == "2038":
 				Print("#-# Impossible! Bot works in 2038 year! Hello from 2013!", xmpp.debug.color_cyan) ## fuuuuuuuuuuuun!
 	return "{0}/{1:02}/{2:02}||{3}/{4:02}/{5:02}".format(year_p, month_p, day_p, year_n, month_n, day_n)
-		
 
 def getLogFile(chat, Time):
 	mon = "{0:02}".format(Time.tm_mon)
@@ -125,7 +124,7 @@ def logFormat(body):
 	body = xmpp.XMLescape(body)
 	body = logger_compile_link.sub(lambda obj: "<a href=\"{0}\">{0}</a>".format(obj.group(0)), body) #'
 	body = body.replace(chr(10), "<br>")
-	body = body.replace(chr(9), "&#9;")
+	body = body.replace(chr(9), "&emsp;" * 4) # "&#9;" requires tag <pre>, but "&emsp;" just eats your brain
 	return body
 
 def logWrite(chat, state, body, nick = None):
@@ -230,7 +229,7 @@ def logWriteLeave(chat, nick, reason, code):
 			jid = GROUPCHATS[chat].get(nick, {}).get("full_jid", "")
 			if not chat in jid:
 				some = " (%(jid)s)" % vars()
-			status_code_change(["full_jid"], chat, nick) #?!
+#			status_code_change(["full_jid"], chat, nick) #?!
 		if code:
 			if code == "307":
 				if reason:
@@ -268,7 +267,7 @@ def init_logger():
 			if not os.path.isdir(LoggerCfg["dir"]):
 				try:
 					os.makedirs(LoggerCfg["dir"])
-				except:
+				except :
 					pass
 			Dir = "static/logger/themes"
 			for Theme in os.listdir(Dir):
@@ -285,6 +284,7 @@ def init_logger():
 			handler_register("06eh", logWriteNickChange)
 			handler_register("08eh", logWriteStatusChange)
 			command_handler(logSetState, 30, "logger")
+			return True
 	else:
 		Print("\nCan't init %s, logger wasn't enabled." % logConfigFile, color2)
 
@@ -303,19 +303,20 @@ def logSetStateMain(mType, source, argv):
 		if a0 in ("1", u"вкл"):
 			if not LoggerCfg["enabled"]:
 				LoggerCfg["enabled"] = True
-				write_file(logConfigFile, str(LoggerCfg))
-				handler_register("01si", logFileInit)
+#				write_file(logConfigFile, str(LoggerCfg))
+#				handler_register("01si", logFileInit)
 				for chat in GROUPCHATS.keys():
 					execute_handler(logFileInit, (chat,))
-				handler_register("04eh", logWriteJoined)
-				handler_register("05eh", logWriteLeave)
-				handler_register("01eh", logWriteMessage)
-				handler_register("09eh", logWriteSubject)
-				handler_register("07eh", logWriteARole)
-				handler_register("06eh", logWriteNickChange)
-				handler_register("08eh", logWriteStatusChange)
-				command_handler(logSetState, 30, "logger")
-				reply(mType, source, u"Включил логгер.")
+#				handler_register("04eh", logWriteJoined)
+#				handler_register("05eh", logWriteLeave)
+#				handler_register("01eh", logWriteMessage)
+#				handler_register("09eh", logWriteSubject)
+#				handler_register("07eh", logWriteARole)
+#				handler_register("06eh", logWriteNickChange)
+#				handler_register("08eh", logWriteStatusChange)
+#				command_handler(logSetState, 30, "logger")
+				if init_logger():
+					reply(mType, source, u"Включил логгер.")
 			else:
 				reply(mType, source, u"Уже включено.")
 		elif a0 in ("0", u"выкл"):

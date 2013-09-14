@@ -28,7 +28,6 @@ def user_stats_spike(conf, db):
 				if info["joins"] > 2:
 					db("insert into stat values (?,?,?,?,?,?,?)", (user, "%s/%s" % (info["afl"], info["role"]), info["joined"], info["joins"], info["seen"], info["leave"], "-/-".join(info["nicks"])))
 			db.commit()
-			del stats
 		os.remove(filename)
 
 # end
