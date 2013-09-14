@@ -3,7 +3,7 @@
 
 # regexp.py
 # © simpleApps, 2013. (02.07.13 15:54)
-#-extmanager-extVer:0.99-# 
+#-extmanager-extVer:0.99.1-# 
 
 from pattern import *
 
@@ -100,7 +100,7 @@ def pattern_command(mType, source, body):
 		else:
 			answer = "Need more body!"
 	else:
-		if Patterns[room]:
+		if Patterns.get(room):
 			List = {"jid": [], "nick": []}
 			nickPatterns = Patterns[room]["nick"]
 			jidPatterns = Patterns[room]["jid"]

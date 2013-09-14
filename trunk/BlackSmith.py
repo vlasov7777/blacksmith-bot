@@ -61,11 +61,6 @@ def exec_(instance, args = ()):
 		code = None
 	return code
 
-def retry_body(body, color):
-	try: body = unicode(body)
-	except: color = False
-	return (body, color)
-
 def text_color(text, color):
 	if colored and color:
 		text = color+text+color0
