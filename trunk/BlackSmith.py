@@ -41,10 +41,10 @@ import xmpp, macros
 import json as simplejson
 
 ## Stats.
-INFO = {'start': 0, 'msg': 0, 'prs': 0, 'iq': 0, 'outmsg': 0, 'outiq': 0,
-		'cmd': 0, 'thr': 0, 'fr': 0, 'fw': 0, 'fcr': 0, 'cfw': 0, 'errs': 0, "zc": 0}
-RSTR = {'AUTH': [], 'BAN': [], 'VN': 'off'}
-LAST = {'time': 0, 'cmd': 'start'}
+INFO = {"start": 0, "msg": 0, "prs": 0, "iq": 0, "outmsg": 0, "outiq": 0,
+		"cmd": 0, "thr": 0, "fr": 0, "fw": 0, "fcr": 0, "cfw": 0, "errs": 0, "zc": 0}
+RSTR = {"AUTH": [], "BAN": [], "VN": "off"}
+LAST = {"time": 0, "cmd": "start", "error": None}
 
 ## Colored stdout.
 color0 	= xmpp.debug.color_none
@@ -54,15 +54,15 @@ color3 	= xmpp.debug.color_green
 color4 	= xmpp.debug.color_bright_blue
 colored = xmpp.debug.colors_enabled
 
-def exec_(instance, list = ()):
+def exec_(instance, args = ()):
 	try:
-		code = instance(*list)
-	except:
+		code = instance(*args)
+	except Exception:
 		code = None
 	return code
 
-def retry_body(x, y):
-	try: body = unicode(x)
+def retry_body(body, color):
+	try: body = unicode(body)
 	except: color = False
 	return (body, color)
 
@@ -165,6 +165,20 @@ UNAVAILABLE = []
 COMMAND_HANDLERS = {}
 cPrefs = ("!", "@", "#", ".", "*", "?", "`")
 
+
+XEPs = set((xmpp.NS_VERSION, 
+			xmpp.NS_PING, 
+			xmpp.NS_TIME, 
+			xmpp.NS_URN_TIME,
+			xmpp.NS_LAST, 
+			xmpp.NS_DISCO_INFO,
+			xmpp.NS_CAPS,
+			xmpp.NS_SASL,
+			xmpp.NS_TLS,
+			xmpp.NS_MUC,
+			xmpp.NS_ROSTER,
+			xmpp.NS_RECEIPTS))
+
 MACROS = macros.Macros()
 
 Sequence = threading.Semaphore()
@@ -180,16 +194,17 @@ if os.name == "nt":
 
 elif os.name == "posix":
 	from platform import dist
-	dist = dist()
-	uname = os.uname()
+	dist, uname = dist(), os.uname()
 	if dist[0]:
 		os_simple = u"%s, %s" % (dist[0], uname[0])
 		os_name = "POSIX (%s %s)" % (os_simple, uname[2])
 	else:
 		os_simple = uname[0]
 		os_name = "POSIX (%s, %s)" % (os_simple, uname[2])
-	os_name = os.name.upper()
 	del dist, uname
+else:
+	os_name = os.name.upper()
+
 os_name = os_name.strip() + " " + getArchitecture()
 
 from webtools import *
@@ -197,9 +212,9 @@ UserAgents["BlackSmith"] = "Mozilla/5.0 (%s; %d.%d; ru) BlackSmith XMPP-BOT mark
 del ntDetect, getArchitecture, os_simple
 
 ## File workers.
-def check_file(conf = None, file = None, data = "{}"):
-	if conf:
-		filename = chkFile('dynamic/%s/%s' % (conf, file))
+def check_file(chat = None, file = None, data = "{}"):
+	if chat:
+		filename = chkFile('dynamic/%s/%s' % (chat, file))
 	else:
 		filename = 'dynamic/%s' % (file)
 	return initialize_file(filename, data)
@@ -233,41 +248,38 @@ def write_file(name, data, mode = "w"):
 			INFO['fw'] += 1
 			fp.write(data)
 
+iAmConnected = lambda: "jClient" in globals() and jClient.isConnected()
+
 ## Crashfile writer.
 def lytic_crashlog(handler, command = None, comment = None):
-	DIR, handler, Number, error_body = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), format_exc()
+	dir, handler, number, trace = "feillog", handler.func_name, (len(ERRORS.keys()) + 1), format_exc()
 	text = str()
-	if globals().get("jClient") and jClient.isConnected():
-		if command:
-			error = u'команды "%s" (%s)' % (command, handler)
-		else:
-			error = u'процесса "%s"' % (handler)
-		text += u'При выполнении %s произошла ошибка!' % (error)
-	else:
-		Print('\n\nError: can\'t execute "%s"!' % (handler), color2) #'
-	filename = (DIR+'/error[%s]%s.crash') % (str(INFO['cfw'] + 1), time.strftime('[%H.%M.%S][%d.%m.%Y]'))
-	ERRORS[Number] = filename
-	try:
-		INFO['cfw'] += 1
-		if not os.path.exists(DIR):
-			os.mkdir(DIR, 0755)
-		write_file(filename, error_body)
-		if comment:
-			write_file(filename, "\nDeveloper Comment: %s" % comment, "a")
-		if globals().get("jClient") and jClient.isConnected():
-			if BOT_OS == "nt":
-				delivery(text + u' Ошибку смотри по команде: "ошибка %s" (Крэшфайл - %s)' % (str(Number), filename))
+	if trace != LAST["error"]:
+		LAST["error"] = trace
+		if iAmConnected():
+			if command:
+				error = u"команды «%s» (%s)" % (command, handler)
 			else:
-				delivery(text + u' Ошибку смотри по командам: "ошибка %s", "sh cat %s"' % (str(Number), filename))
+				error = u"процесса «%s»" % handler
+			text += u"При выполнении %s произошла ошибка!" % error
 		else:
-			Print('\n\nCrash file: %s\nError number: %s' % (filename, str(Number)), color2)
-	except:
-		Print(error_body)
-		if globals().get("jClient") and jClient.isConnected():
-			delivery(error_body)
+			Print("\n\nError: can't execute \"%s\"!" % handler, color2)
+		INFO['cfw'] += 1
+		filename = "%s/error[%d]%s.crash" % (dir, INFO["cfw"], time.strftime("[%H.%M.%S][%d.%m.%Y]"))
+		ERRORS[number] = filename
+		if not os.path.exists(dir):
+			os.mkdir(dir, 0755)
+		if comment:
+			trace += u"\nDeveloper's Comment: %s" % comment
+		write_file(filename, trace)
+		if iAmConnected():
+			if BOT_OS == "posix":
+				Text = u"%(text)s Ошибку смотри по командам: \"ошибка %(number)d\" или \"sh cat %(filename)s\""
+			else:
+				Text = u"%(text)s Ошибку смотри по команде: \"ошибка %(number)d\" (крэшфайл — %(filename)s)" 
+			delivery(Text % vars())
 		else:
-			(body, color) = retry_body(error_body, color2)
-			Print(body, color)
+			Print("\n\n#-# Error #%d, name: %s" % (number, filename), color2)
 
 ## Handlers register.
 def handler_register(ls, handler):
@@ -285,12 +297,12 @@ def command_handler(instance, access = 0, plug = "default"):
 		print_exc()
 		command = instance.func_name.lower()
 		Print("\nPlugin \"%s\" has no help and command name. New command name: %s." % (plug, command), color2)
-	if not COMMSTAT.get(command):
-		COMMSTAT[command] = {'col': 0, 'users': []}
 	if COMMANDS.get(command) or COMMAND_HANDLERS.get(command):
 		if plug != COMMANDS[command].get("plug"):
 			Print("\nCommands in \"%s\" and \"%s\" are repeated." % (plug, COMMANDS[command].get("plug")), color2)
 			command += "1"
+	if command not in COMMSTAT:
+		COMMSTAT[command] = {'col': 0, 'users': []}
 	COMMAND_HANDLERS[command] = instance
 	COMMANDS[command] = {'plug': plug, 'access': access}
 
@@ -320,13 +332,13 @@ def composeThr(handler, Name, list = (), command = None):
 	Name = "%s-%d" % (Name, INFO['thr'])
 	return threading.Thread(None, execute_handler, Name, (handler, list, command,))
 
-def Try_Thr(Thr, Number = 0):
-	if Number >= 4:
+def StartThr(Thr, Number = 0):
+	if Number > 2:
 		raise RuntimeError("exit")
 	try:
 		Thr.start()
 	except threading.ThreadError:
-		Try_Thr(Thr, (Number + 1))
+		StartThr(Thr, (Number + 1))
 	except:
 		lytic_crashlog(Thr.start)
 
@@ -334,18 +346,15 @@ def sThread_Run(Thr, handler, command = None):
 	try:
 		Thr.start()
 	except threading.ThreadError:
-		if (str(sys.exc_info()[1]) == "can't start new thread"):
+		try:
+			StartThr(Thr)
+		except RuntimeError:
 			try:
-				Try_Thr(Thr)
-			except RuntimeError:
-				try:
-					Thr.run()
-				except KeyboardInterrupt:
-					raise KeyboardInterrupt("Interrupt (Ctrl+C)")
-				except:
-					lytic_crashlog(handler, command)
-		else:
-			lytic_crashlog(sThread_Run, command)
+				Thr.run()
+			except KeyboardInterrupt:
+				raise KeyboardInterrupt("Interrupt (Ctrl+C)")
+			except:
+				lytic_crashlog(handler, command)
 	except:
 		lytic_crashlog(sThread_Run, command)
 
@@ -359,13 +368,13 @@ def call_efunctions(ls, list = ()):
 ThrNames = lambda: [Thr._Thread__name for Thr in threading.enumerate()]
 
 def call_command_handlers(command, typ, source, body, callee):
-	real_access = MACROS.get_access(callee, source[1])
-	if real_access <= 0:
-		real_access = COMMANDS[command]['access']
+	rAccess = MACROS.get_access(callee, source[1])
+	if rAccess < 1:
+		rAccess = COMMANDS[command]['access']
 	if COMMAND_HANDLERS.has_key(command):
-		if has_access(source[0], real_access, source[1]):
+		if has_access(source[0], rAccess, source[1]):
 			sThread("command", COMMAND_HANDLERS[command], (typ, source, body), command)
-			COMMSTAT[command]['col'] += 1
+			COMMSTAT[command]["col"] += 1
 			jid = handler_jid(source[0])
 			if jid not in COMMSTAT[command]['users']:
 				COMMSTAT[command]['users'].append(jid)
@@ -451,18 +460,18 @@ def returnExc():
 		error = `None`
 	return error
 
-def handler_botnick(conf):
-	if conf in BOT_NICKS:
-		return BOT_NICKS[conf]
+def handler_botnick(chat):
+	if chat in BOT_NICKS:
+		return BOT_NICKS[chat]
 	return DEFAULT_NICK
 
-def handler_jid(instance):
+def handler_jid(instance, Type = "jid"):
 	instance = unicode(instance)
 	List = instance.split('/', 1)
 	chat = List[0].lower()
 	if (len(List) == 2) and GROUPCHATS.has_key(chat):
 		if GROUPCHATS[chat].has_key(List[1]):
-			return GROUPCHATS[chat][List[1]]['jid']
+			return GROUPCHATS[chat][List[1]][Type]
 	return chat
 
 def save_conflist(conf, nick = None, code = None):
@@ -486,18 +495,17 @@ def save_conflist(conf, nick = None, code = None):
 		Print("\n\nError: can't append conference into chatrooms list file!", color2)
 
 def memory_usage():
-	PID, memory = `BOT_PID`, '0'
+	memory = '0'
 	if BOT_OS == 'posix':
-		lines = read_pipe('ps -o rss -p %s' % (PID)).splitlines()
+		lines = read_pipe('ps -o rss -p %d' % BOT_PID).splitlines()
 		if len(lines) >= 2:
 			memory = lines[1].strip()
 	elif BOT_OS == 'nt':
-		lines = read_pipe('TASKLIST /FI "IMAGENAME eq python.exe').splitlines()
-		for line in lines:
-			slist = line.split()
-			if len(slist) >= 6 and PID == slist[1].strip():
-				memory = '%s%s' % (slist[4].strip(), slist[5].strip())
-				break
+		lines = read_pipe('TASKLIST /FI "PID eq %d"' % BOT_PID).splitlines()
+		if len(lines) >= 3:
+			list = lines[3].split()
+			if len(list) >= 6:
+				memory = (list[4] + list[5])
 	return (0 if not check_number(memory) else int(memory))
 
 def command_Prefix(conf, command):
@@ -515,7 +523,8 @@ def Prefix_state(combody, bot_nick):
 		return False
 	return True
 
-check_number = lambda objt: (None if exec_(int, (objt,)) is None else True)
+enumerated_list = lambda ls: str.join(chr(10), ["%d. %s;" % (numb, line) for numb, line in enumerate(ls, 1)])
+check_number = lambda obj: (not exec_(int, (obj,)) is None)
 
 def replace_all(retxt, list, data = False):
 	for x in list:
@@ -534,7 +543,9 @@ def formatWord(Numb, ls):
 	return edge
 
 def timeElapsed(Time):
-	ext, ls = [], [("Year", None), ("Month", 12), ("Day", 30.4375), ("Hour", 24), ("Minute", 60), ("Second", 60)]
+	ext, ls = [], [("Year", None), 
+				   ("Month", 12),  ("Day", 30.4375), 
+				   ("Hour", 24), ("Minute", 60), ("Second", 60)]
 	while ls:
 		lr = ls.pop()
 		if lr[1]:
@@ -603,10 +614,10 @@ def send_join_presece(conf, nick, code = None):
 	Presence.setStatus(STATUS[conf]['message'])
 	Presence.setShow(STATUS[conf]['status'])
 	Presence.setTag('c', namespace = xmpp.NS_CAPS, attrs = {'node': Caps, 'ver': CapsVer})
-	Pres = Presence.setTag('x', namespace = xmpp.NS_MUC)
-	Pres.addChild('history', {'maxchars': '0'})
+	xTag = Presence.setTag('x', namespace = xmpp.NS_MUC)
+	xTag.addChild('history', {'maxchars': '0'})
 	if code:
-		Pres.setTagData('password', code)
+		xTag.setTagData('password', code)
 	jClient.send(Presence)
 
 def join_groupchat(conf, nick, code = None):
@@ -668,13 +679,11 @@ def msg(target, body):
 	INFO['outmsg'] += 1
 	jClient.send(xmpp.Message(target, body.strip(), ltype))
 
-def reply(ltype, source, body):
-	if not isinstance(body, unicode):
-		body = body.decode('utf-8', 'replace')
-	if ltype == 'public':
-		body = '%s: %s' % (source[2], body)
+def reply(mType, source, body):
+	if mType in ("public", "groupchat"):
+		body = "%s: %s" % (source[2], body)
 		msg(source[1], body)
-	elif ltype == 'private':
+	elif mType in ("private", "chat"):
 		msg(source[0], body)
 
 def send_unavailable(status):
@@ -774,8 +783,8 @@ def roster_timer(roster_user):
 
 def CheckFlood():
 	Flood.append(time.time())
-	if len(Flood) >= 4:
-		if (Flood[-1] - Flood[0]) <= 8:
+	if len(Flood) > 4:
+		if (Flood[-1] - Flood[0]) < 9:
 			globals()["Flood"] = [Flood.pop()]
 			raise xmpp.NodeProcessed()
 		else:
@@ -785,14 +794,14 @@ def MESSAGE_PROCESSING(client, stanza):
 	source = stanza.getFrom()
 	INFO['msg'] += 1
 	instance = source.getStripped().lower()
-	if user_level(source, instance) <= -100:
+	if user_level(source, instance) < -99:
 		raise xmpp.NodeProcessed()
 	isConf = (instance in GROUPCHATS)
 	if not isConf and not has_access(source, 80, instance):
 		if RSTR['VN'] == 'off':
 			raise xmpp.NodeProcessed()
 		CheckFlood()
-	if (instance in UNAVAILABLE and not MSERVE) or stanza.getTimestamp():
+	if (instance in UNAVAILABLE and not MSERVE) or stanza.getTimestamp(): #"""Warning: i think these terms may cause problems"""
 		raise xmpp.NodeProcessed()
 	bot_nick = handler_botnick(instance)
 	nick = source.getResource()
@@ -804,7 +813,7 @@ def MESSAGE_PROCESSING(client, stanza):
 		body = body.strip()
 	elif Subject:
 		body = Subject.strip()
-	if not body:
+	else: ##if not body:
 		raise xmpp.NodeProcessed()
 	if not isConf and instance not in ADLIST:
 		if not '@conf' in instance:
@@ -832,7 +841,7 @@ def MESSAGE_PROCESSING(client, stanza):
 		if stype != 'groupchat':
 			if (stanza.getTag('request')):
 				answer = xmpp.Message(source)
-				answer.setTag('received', namespace = xmpp.NS_RECEIPTS)
+				answer.setTag("received", namespace = xmpp.NS_RECEIPTS).setAttr("id", stanza.getID())
 				answer.setID(stanza.getID())
 				jClient.send(answer)
 			type = 'private'
@@ -878,22 +887,22 @@ def MESSAGE_PROCESSING(client, stanza):
 		else:
 			call_efunctions("01eh", (stanza, type, [source, instance, nick], body))
 
-def status_code_change(items, conf, nick):
+def status_code_change(items, chat, nick):
 	for item in items:
 		try:
-			del GROUPCHATS[conf][nick][item]
-		except:
+			del GROUPCHATS[chat][nick][item]
+		except KeyError:
 			pass
 
-def error_join_timer(conf):
-	if conf in GROUPCHATS:
-		send_join_presece(conf, handler_botnick(conf))
+def error_join_timer(chat):
+	if chat in GROUPCHATS:
+		send_join_presece(chat, handler_botnick(chat))
 
 def roster_subscribe(jid):
 	if jid in ADLIST:
 		jClient.Roster.Authorize(jid)
 		jClient.Roster.Subscribe(jid)
-		jClient.Roster.setItem(jid, jid, ['ADMINS'])
+		jClient.Roster.setItem(jid, jid, ['Admins'])
 	elif RSTR['VN'] == 'off':
 		jClient.Roster.Unauthorize(jid)
 		if jid in jClient.Roster.getItems():
@@ -901,7 +910,7 @@ def roster_subscribe(jid):
 	elif not jid in RSTR['BAN'] and RSTR['VN'] in ('iq', 'on'):
 		jClient.Roster.Authorize(jid)
 		jClient.Roster.Subscribe(jid)
-		jClient.Roster.setItem(jid, jid, ['USERS'])
+		jClient.Roster.setItem(jid, jid, ['Users'])
 
 Roles = {'owner': 15, 'moderator': 15, 'participant': 10, 'admin': 5, 'member': 1}
 
@@ -945,7 +954,8 @@ def PRESENCE_PROCESSING(client, stanza):
 					GROUPCHATS[conf][Nick] = GROUPCHATS[conf].pop(nick)
 				except KeyError:
 					role = (stanza.getRole(), stanza.getAffiliation())
-					GROUPCHATS[conf][nick] = {"role": role, "caps": stanza.getTagAttr("c", "node"), 'full_jid': full_jid, 'jid': jid, 'join_date': (that_day(), time.gmtime()), 'idle': time.time(), 'joined': time.time(), 'ishere': True}
+					Time = time.time()
+					GROUPCHATS[conf][nick] = {"role": role, "caps": stanza.getTagAttr("c", "node"), 'full_jid': full_jid, 'jid': jid, 'join_date': (that_day(), time.gmtime()), 'idle': Time, 'joined': Time, 'ishere': True}
 					calc_acc(conf, jid, role)
 					status = stanza.getShow()
 					text = stanza.getStatus()
@@ -1010,7 +1020,7 @@ def PRESENCE_PROCESSING(client, stanza):
 					send_join_presece(conf, handler_botnick(conf))
 				elif ecode in ('401', '403', '405'):
 					leave_groupchat(conf, u'Got %s error code!' % str(ecode))
-					delivery(u'Ошибка %s, пришлось выйти из -> "%s"' % (ecode, conf))
+					delivery(u'Ошибка %s, пришлось выйти из «%s»' % (ecode, conf))
 				elif ecode in ('404', '503'):
 					try:
 						ThrName = "rejoin-%s" % (conf.decode("utf-8"))
@@ -1024,7 +1034,7 @@ def PRESENCE_PROCESSING(client, stanza):
 def IQ_PROCESSING(client, iq):
 	INFO["iq"] += 1
 	fromjid = iq.getFrom()
-	if not fromjid or user_level(fromjid, fromjid.getStripped().lower()) <= -100:
+	if not fromjid or user_level(fromjid, fromjid.getStripped().lower()) < -99:
 		raise xmpp.NodeProcessed()
 	if iq.getType() == "get":
 		nsType = iq.getQueryNS()
@@ -1034,23 +1044,20 @@ def IQ_PROCESSING(client, iq):
 			query.setTagData("name", "BlackSmith mark.1")
 			query.setTagData("version", "%s (r.%s)" % (CORE_MODE, BOT_REV))
 			query.setTagData("os", os_name)
-		elif nsType == xmpp.NS_URN_TIME:
-			tzo = (lambda tup: tup[0]+"%02d:" % tup[1]+"%02d" % tup[2])((lambda t: tuple(['+' if t < 0 else '-', abs(t)/3600, abs(t)/60%60]))(time.altzone if time.daylight else time.timezone))
-			utc = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
-			repl = result.addChild('time', {}, [], 'urn:xmpp:time')
-			repl.setTagData('tzo', tzo)
-			repl.setTagData('utc', utc)
+		
 		elif nsType == xmpp.NS_DISCO_INFO:
-			ids = [{'category': 'client', 'type': 'bot', 'name': 'BlackSmith'}]
-			features = [xmpp.NS_DISCO_INFO, xmpp.NS_DISCO_ITEMS, xmpp.NS_MUC, xmpp.NS_URN_TIME, xmpp.NS_PING, xmpp.NS_VERSION, xmpp.NS_ROSTER, xmpp.NS_VCARD, xmpp.NS_DATA, xmpp.NS_LAST, xmpp.NS_TIME]
-			info = {'ids': ids, 'features': features}
-			pybr = xmpp.browser.Browser()
-			pybr.PlugIn(jClient)
-			pybr.setDiscoHandler({'items': [], 'info': info})
+			anode = result.getTag("query")
+			anode.addChild("identity", {"category": "client",
+										"type": "bot",
+										"name": "BlackSmith"})
+			for feature in XEPs:
+				anode.addChild("feature", {"var": feature})
+
 		elif nsType == xmpp.NS_LAST:
 			last = time.time() - LAST['time']
 			query.setAttr('seconds', int(last))
 			query.setData(LAST['cmd'])
+
 		elif nsType == xmpp.NS_TIME:
 			LocTime = time.strftime("%a, %d %b %Y %H:%M:%S")
 			GMTime = time.strftime("%Y%m%dT%H:%M:%S (GMT)", time.gmtime())
@@ -1060,6 +1067,15 @@ def IQ_PROCESSING(client, iq):
 			query.setTagData("utc", GMTime)
 			query.setTagData("tz", tz)
 			query.setTagData("display", LocTime)
+
+		elif nsType == xmpp.NS_URN_TIME: #! TEST IT
+			anode = result.addChild("time", namespace = xmpp.NS_URN_TIME)
+			anode.setTagData("utc", strfTime("%Y-%m-%dT%H:%M:%SZ", False))
+			TimeZone = (time.altzone if time.daylight else time.timezone)
+			anode.setTagData("tzo", "%s%02d:%02d" % (((TimeZone < 0) and "+" or "-"),
+												   abs(TimeZone) / 3600,
+												   abs(TimeZone) / 60 % 60))
+
 		client.send(result)
 		raise xmpp.NodeProcessed()
 	call_efunctions("03eh", (iq,))
@@ -1104,9 +1120,9 @@ def Connect():
 
 def calc_Timeout():
 	Chats = len(GROUPCHATS.keys())
-	if Chats <= 16:
+	if Chats < 16:
 		Timeout = 8
-	elif Chats >= 48:
+	elif Chats > 48:
 		Timeout = 0.2
 	else:
 		Timeout = round(7.8 - (Chats - 16)*0.2438, 4)
@@ -1186,8 +1202,8 @@ def main():
 	Iters, Timeout = calc_Timeout()
 	while True:
 		if INFO["errs"] > 6:
-			sys_exit("Fatal exception: %s\n" % str(format_exc()))
-		if Iters >= 9000:
+			sys_exit("Fatal exception: %s\n" % (format_exc()))
+		if Iters > 9000:
 			Iters, Timeout = calc_Timeout()
 		try:
 			Dispatch_handler(Timeout)

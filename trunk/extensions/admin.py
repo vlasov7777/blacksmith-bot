@@ -33,13 +33,13 @@ def handler_admin_join(type, source, body):
 	if body:
 		list = body.split()
 		conf = list[0].strip().lower()
-		if conf.count('.') >= 2:
+		if "." in conf:
 			if conf not in GROUPCHATS:
 				if len(list) == 2:
 					code = list[1].strip()
 					if code.count('{') and code.count('}'):
 						codename = replace_all(code, ['{', '}'], '')
-						reason = body[(body.find(code) + (len(code) + 1)):].strip()
+						reason = body[(body.find(code) + (len(code) + 1)):].strip() # WTF
 					else:
 						codename = None
 						reason = body[(body.find(' ') + 1):].strip()

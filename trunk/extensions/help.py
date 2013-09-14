@@ -57,7 +57,7 @@ def command_comlist(mType, source, body):
 			  100: "Владелец бота"}
 	for command in COMMANDS.keys():
 		access = COMMANDS[command]["access"]
-		if access not in commandByAccess:
+		if access not in commandByAccess.keys():
 			commandByAccess[access] = []
 		commandByAccess[access].append(command)
 	for access in sorted(commandByAccess.keys()):

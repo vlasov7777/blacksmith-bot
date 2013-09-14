@@ -72,7 +72,7 @@ def findConflicts(data):
 	match = re.search("#-extmanager-conflict:(.*)-#", data)
 	if match:
 		rawConflicts = match.group(1)
-		if rawConflicts.count(";"):
+		if ";" in rawConflicts:
 			return rawConflicts.split(";")
 		return [rawConflicts]
 
@@ -81,14 +81,13 @@ def extManager(mType, source, args):
 		answer = str()
 		a = args.split(None, 1)
 		name, fullName = a[0], a[0] + ".py"
-		afterA0 = args[-1]	## args[(args.find(" ") + 1):].strip()
+		afterA0 = args[-1]
 		extList = re.findall("\">(.*\.py)</a></li>", read_url(svnUrl % "extensions")) #"
 		extList = [x[:-3] for x in extList]
 
 		if a[0] == u"лист":
 			answer = u"\nВсего доступно %d плагинов:\n" % len(extList)
-			for x, y in enumerate(extList):
-				answer +=  u"%i. %s;\n" % (x + 1, y)
+			answer = enumerated_list(extList)
 			answer = answer.rstrip("\n;") + "."
 
 		elif a[0] in extList and len(a) > 1:
@@ -124,12 +123,12 @@ def extManager(mType, source, args):
 					
 					if conflicts:
 						for x in conflicts:
-								if os.path.exists(x):
+								if os.path.isfile(x):
 									try:
 										os.remove(x)
 										conflicts.remove(x)
 										del extensions[x] #!
-									except:
+									except (KeyError, OSError):
 										pass
 								else:
 									conflicts.remove(x)
