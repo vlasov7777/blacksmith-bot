@@ -5,7 +5,7 @@
 # Web site header detector
 
 # RC-4!
-#-extmanager-extVer:2.9-#
+#-extmanager-extVer:2.9.1-#
 import re
 import urllib2
 
@@ -17,18 +17,20 @@ urlDetect = {"list": [], "last": None,
 			 "urlAllowedChars": "(~#?!%&+=,:;*|)",
 			 "unAllowedChars": [unichr(x) for x in xrange(32) if x not in (9, 10, 13)]}
 
-urlDetect["unAllowedChars"].append(57003)
+urlDetect["unAllowedChars"].append(unichr(57003))
 
 def contentTypeParser(opener, data):
 	Charset, Type = None, opener.headers.get("Content-Type")
 	try:
 		if Type and Type.count(";"):
-			Type, Charset = comp_charset.search(Type).groups()
-			Charset = Charset.strip("'\"").lower()
-			if Charset == "unicode":
-				Charset = "utf-8"
-			if Charset.count("."):
-				Charset = Charset.split(".")[1]
+			found = comp_charset.search(Type)
+			if found:
+				Type, Charset = found.groups()
+				Charset = Charset.strip("'\"").lower()
+				if Charset == "unicode":
+					Charset = "utf-8"
+				if Charset.count("."):
+					Charset = Charset.split(".")[1]
 		elif (not Charset and Type == "text/html") or opener.url.endswith((".html", ".htm")):
 			Charset = comp_charset_alt.search(data)
 			if Charset:
