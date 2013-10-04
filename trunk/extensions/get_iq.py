@@ -142,7 +142,7 @@ def answer_version(coze, stanza, mType, source):
 					Ver = x.getData()
 				elif xname == "os":
 					OS = x.getData()
-			answer = "\Клиент: %s\nВерсия: %s\nОС: %s" % (Name, Ver, OS)
+			answer = "\nКлиент: %s\nВерсия: %s\nОС: %s" % (Name, Ver, OS)
 		else:
 			answer = u"Error: null."
 	else:

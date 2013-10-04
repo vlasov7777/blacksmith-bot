@@ -15,7 +15,9 @@ comp_charset_alt = re.compile("charset=['\"]?(.+?)[\s'\"/>]+?")
 
 urlDetect = {"list": [], "last": None, 
 			 "urlAllowedChars": "(~#?!%&+=,:;*|)",
-			 "unAllowedChars": (unichr(x) for x in xrange(32) if x not in (9, 10, 13))}
+			 "unAllowedChars": [unichr(x) for x in xrange(32) if x not in (9, 10, 13)]}
+
+urlDetect["unAllowedChars"].append(57003)
 
 def contentTypeParser(opener, data):
 	Charset, Type = None, opener.headers.get("Content-Type")
@@ -37,7 +39,7 @@ def contentTypeParser(opener, data):
 		Charset = "utf-8"
 	return (Type, Charset) 
 
-def urlParser(body, TitleMSG = "%s"):
+def urlParser(body, TitleMSG = "%s", callType = "auto"):
 	data = comp_link.search(body)
 	answer = ""
 	if data:
@@ -48,7 +50,7 @@ def urlParser(body, TitleMSG = "%s"):
 			if not chkUnicode(page, urlDetect["urlAllowedChars"]):
 				page = urllib.quote(str(page))
 			url = u"%s://%s%s" % (protocol, domain, page)
-			if url == urlDetect["last"]:
+			if url == urlDetect["last"] and callType == "auto":
 				return None
 			urlDetect["last"] = url
 			reQ = urllib2.Request(url)
@@ -130,7 +132,7 @@ def urlWatcherConfig(mType, source, args):
 		else:
 			argv = argv[:10]
 			for link in argv:
-				answer += "\n%s ­— %s" % (link, urlParser(link))
+				answer += "\n%s ­— %s" % (link, urlParser(link, callType = "manual"))
 	reply(mType, source, answer)
 
 def urlWatcherConfig_load():

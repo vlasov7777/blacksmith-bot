@@ -789,6 +789,8 @@ def MESSAGE_PROCESSING(client, stanza):
 	source = stanza.getFrom()
 	INFO['msg'] += 1
 	instance = source.getStripped().lower()
+	#if stanza.getTimestamp():
+	print stanza.getTimestamp()
 	if user_level(source, instance) < -99:
 		raise xmpp.NodeProcessed()
 	isConf = (instance in GROUPCHATS)
