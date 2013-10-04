@@ -267,7 +267,7 @@ def init_logger():
 			if not os.path.isdir(LoggerCfg["dir"]):
 				try:
 					os.makedirs(LoggerCfg["dir"])
-				except :
+				except:
 					pass
 			Dir = "static/logger/themes"
 			for Theme in os.listdir(Dir):
@@ -303,7 +303,7 @@ def logSetStateMain(mType, source, argv):
 		if a0 in ("1", u"вкл"):
 			if not LoggerCfg["enabled"]:
 				LoggerCfg["enabled"] = True
-#				write_file(logConfigFile, str(LoggerCfg))
+				write_file(logConfigFile, str(LoggerCfg))
 #				handler_register("01si", logFileInit)
 				for chat in GROUPCHATS.keys():
 					execute_handler(logFileInit, (chat,))
@@ -317,6 +317,8 @@ def logSetStateMain(mType, source, argv):
 #				command_handler(logSetState, 30, "logger")
 				if init_logger():
 					reply(mType, source, u"Включил логгер.")
+				else:
+					reply(mType, source, "Something wrong")
 			else:
 				reply(mType, source, u"Уже включено.")
 		elif a0 in ("0", u"выкл"):
