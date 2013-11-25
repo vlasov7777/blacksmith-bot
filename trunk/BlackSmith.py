@@ -646,33 +646,27 @@ def handler_rebody(target, body, ltype):
 	return u'[%d/%s] %s' % ((col + 1), all, body)
 
 def delivery(body):
-	if not isinstance(body, unicode):
-		body = body.decode('utf-8', 'replace')
-	INFO['outmsg'] += 1
-	if not INFO.get("creporter"):
-		return
-	try:
-		jClient.send(xmpp.Message(BOSS, body, 'chat'))
-	except:
-		print_exc()
-		write_file('delivery.txt', body, 'a')
+	INFO["outmsg"] += 1
+	if INFO.get("creporter"):
+		try:
+			jClient.send(xmpp.Message(BOSS, body, 'chat'))
+		except:
+			print_exc()
+			write_file("delivery.txt", body, "a")
 
 def msg(target, body):
-	if not isinstance(body, unicode):
-		body = body.decode('utf-8', 'replace')
-	obody = body
 	jid = str(target).split("/")[0]
 	if GROUPCHATS.has_key(target):
-		ltype = 'groupchat'
+		mType = "groupchat"
 		if len(body) > CHAT_MSG_LIMIT:
 			MORE[target] = body[CHAT_MSG_LIMIT:].strip()
 			body = (u'%s[...]\n\n*** Лимит %d знаков! Продолжение по команде «далее».' % (body[:CHAT_MSG_LIMIT].strip(), CHAT_MSG_LIMIT))
 	else:
-		ltype = 'chat'
+		mType = "chat"
 		if len(body) > PRIV_MSG_LIMIT:
-			body = handler_rebody(target, body, ltype)
-	INFO['outmsg'] += 1
-	jClient.send(xmpp.Message(target, body.strip(), ltype))
+			body = handler_rebody(target, body, mType)
+	INFO["outmsg"] += 1
+	jClient.send(xmpp.Message(target, body.strip(), mType))
 
 def reply(mType, source, body):
 	if mType in ("public", "groupchat"):
@@ -789,8 +783,6 @@ def MESSAGE_PROCESSING(client, stanza):
 	source = stanza.getFrom()
 	INFO['msg'] += 1
 	instance = source.getStripped().lower()
-	#if stanza.getTimestamp():
-	print stanza.getTimestamp()
 	if user_level(source, instance) < -99:
 		raise xmpp.NodeProcessed()
 	isConf = (instance in GROUPCHATS)

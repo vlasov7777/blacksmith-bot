@@ -14,7 +14,7 @@ comp_charset = re.compile("(.+);[ ]?charset=(.+)")
 comp_charset_alt = re.compile("charset=['\"]?(.+?)[\s'\"/>]+?")
 
 urlDetect = {"list": [], "last": None, 
-			 "urlAllowedChars": "(~#?!%&+=,:;*|)",
+			 "urlAllowedChars": "([~#?!%&+=,:;*]|)",
 			 "unAllowedChars": [unichr(x) for x in xrange(32) if x not in (9, 10, 13)]}
 
 urlDetect["unAllowedChars"].append(unichr(57003))

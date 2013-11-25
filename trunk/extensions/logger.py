@@ -304,17 +304,8 @@ def logSetStateMain(mType, source, argv):
 			if not LoggerCfg["enabled"]:
 				LoggerCfg["enabled"] = True
 				write_file(logConfigFile, str(LoggerCfg))
-#				handler_register("01si", logFileInit)
 				for chat in GROUPCHATS.keys():
 					execute_handler(logFileInit, (chat,))
-#				handler_register("04eh", logWriteJoined)
-#				handler_register("05eh", logWriteLeave)
-#				handler_register("01eh", logWriteMessage)
-#				handler_register("09eh", logWriteSubject)
-#				handler_register("07eh", logWriteARole)
-#				handler_register("06eh", logWriteNickChange)
-#				handler_register("08eh", logWriteStatusChange)
-#				command_handler(logSetState, 30, "logger")
 				if init_logger():
 					reply(mType, source, u"Включил логгер.")
 				else:
