@@ -29,8 +29,9 @@ def answer_server_stats_get(some, stanza, mType, source):
 		for node in stanza.getQueryChildren():
 			name = node.getAttr("name")
 			value = node.getAttr("value")
+			units = node.getAttr("units")
 			if name and value:
-				ls.append("%s: %s" % (name, value))
+				ls.append("%s: %s %s" % (name, value, units))
 		if ls:
 			ls.insert(0, "\n*** Статистика %s:" % stanza.getFrom())
 			answer = str.join(chr(10), ls)

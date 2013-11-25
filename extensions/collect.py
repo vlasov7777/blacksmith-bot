@@ -2,12 +2,14 @@
 # /* coding: utf-8 */
 
 #  BlackSmith plugin
+#  This should be rewritten!
 	
 BLACK_LIST = 'dynamic/blacklist.txt'
 
 CHAT_CACHE = {}
 AMSGBL = []
-CHAT_DIRTY = {}
+
+DirtyChats = []
 
 def handler_chat_cache(stanza, ltype, source, body):
 	try:
@@ -22,37 +24,38 @@ def handler_chat_cache(stanza, ltype, source, body):
 		body = body[:256]+'[...]'
 	CHAT_CACHE[source[1]]['2'] = header+body
 
-def handler_clean(type, source, body):
-	if GROUPCHATS.has_key(source[1]):
-		if CHAT_DIRTY[source[1]]:
-			CHAT_DIRTY[source[1]] = False
-			if type != 'private':
+def handler_clean(mType, source, body):
+	if source[1] in GROUPCHATS:
+		if source[1] in DirtyChats:
+			DirtyChats.remove(source[1])
+			if mType != "private":
 				change_bot_status(source[1], u"Чистка...", "dnd")
-			zero = xmpp.Message(to = source[1], typ = "groupchat")
-			for Numb in xrange(24):
-				if not GROUPCHATS.has_key(source[1]):
-					return
-				try:
-					jClient.send(zero)
-				except IOError:
-					return
+			zero = xmpp.Message(source[1], "", typ = "groupchat")
+			zero.setTag("body")
+			count = 24
+			if check_number(body):
+				number = int(body)
+				if number < 51:
+					count = number
+			for msg in xrange(count):
+				try: jClient.send(zero)
+				except IOError: return
 				INFO['outmsg'] += 1
-				if (Numb != 23):
+				if (msg != count):
 					time.sleep(1.4)
-			if type != 'private':
-				message = STATUS[source[1]]['message']
-				status = STATUS[source[1]]['status']
+			if mType != "private":
+				message = STATUS[source[1]]["message"]
+				status = STATUS[source[1]]["status"]
 				change_bot_status(source[1], message, status)
-			CHAT_CACHE[source[1]] = {'1': '', '2': ''}
-			CHAT_DIRTY[source[1]] = True
+			CHAT_CACHE[source[1]] = {"1": "0", "2": "0"}
+			DirtyChats.append(source[1])
 		else:
-			reply(type, source, u'и так чищу!')
+			reply(mType, source, "В процессе.")
 	else:
-		reply(type, source, u'сам свой ростер чисть!')
+		reply(mType, source, "Только для чатов!")
 
 def last_chat_cache(type, source, body):
-	confs = GROUPCHATS.keys()
-	confs.sort()
+	confs = sorted(GROUPCHATS.keys())
 	if body:
 		body = body.lower()
 		if body in confs:
@@ -194,9 +197,9 @@ def amsg_blacklist_init():
 	else:
 		Print('\n\nError: can`t create black list file!', color2)
 
-def chat_cache_init(conf):
-	CHAT_CACHE[conf] = {'1': '', '2': ''}
-	CHAT_DIRTY[conf] = True
+def chat_cache_init(chat):
+	CHAT_CACHE[chat] = {'1': '', '2': ''}
+	DirtyChats.append(chat)
 
 handler_register("01eh", handler_chat_cache)
 command_handler(handler_clean, 15, "collect")
