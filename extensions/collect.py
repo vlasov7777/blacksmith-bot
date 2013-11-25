@@ -47,7 +47,7 @@ def handler_clean(mType, source, body):
 				message = STATUS[source[1]]["message"]
 				status = STATUS[source[1]]["status"]
 				change_bot_status(source[1], message, status)
-			CHAT_CACHE[source[1]] = {"1": "0", "2": "0"}
+			CHAT_CACHE[source[1]] = {"1": "", "2": ""}
 			DirtyChats.append(source[1])
 		else:
 			reply(mType, source, "В процессе.")
