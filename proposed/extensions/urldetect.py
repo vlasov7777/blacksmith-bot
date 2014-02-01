@@ -5,7 +5,7 @@
 # Web site header detector
 
 # RC-4!
-#-extmanager-extVer:2.9.1-#
+#-extmanager-extVer:2.9.2-#
 import re
 import urllib2
 
