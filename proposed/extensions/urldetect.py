@@ -18,6 +18,7 @@ urlDetect = {"list": [], "last": None,
 			 "unAllowedChars": [unichr(x) for x in xrange(32) if x not in (9, 10, 13)]}
 
 urlDetect["unAllowedChars"].append(unichr(57003))
+urlDetect["unAllowedChars"].append(unichr(65535))
 
 def contentTypeParser(opener, data):
 	Charset, Type = None, opener.headers.get("Content-Type")
@@ -78,18 +79,15 @@ def urlParser(body, TitleMSG = "%s", callType = "auto"):
 					Date = time.strftime("%d.%m.%Y %H:%M:%S GMT", Date)
 				except ValueError: 
 					pass
-				if name:
-					if name.count("%") > 2:
-						name = urllib.unquote(str(name))
-					answer += "Файл: %s" % name
-				if Size:
-					answer += " — %s" % byteFormat(Size)
-				if Type:
-					answer += " • %s" % Type.split()[0].strip(",;.")
-				if Date: 
-					answer += "\nПоследнее изменение: %s." % Date
-				if answer:
-					answer = replace_all(answer % vars(), urlDetect["unAllowedChars"], "")
+				answer += "Файл: " + name
+ 				if Size:
+ 					answer += " — " + byteFormat(Size)
+ 				if Type:
+ 					answer += " • " + Type.split()[0].strip(",;.")
+ 				if Date: 
+ 					answer += "\nПоследнее изменение: %s." % Date
+			if answer:
+				answer = replace_all(answer % vars(), urlDetect["unAllowedChars"], "")
 		except (urllib2.HTTPError, urllib2.URLError, urllib2.socket.error) as e:
 			answer = "%s: %s" % (e.__class__.__name__, e.message or str(e))
 		except: 
