@@ -15,7 +15,7 @@ def len_cron():
 	col = 0
 	for timer in CRON['tmrs']:
 		if CRON['tmrs'][timer].isAlive():
-			col = col + 1
+			col += 1
 	return col
 
 def cron_bust_handler(timer, cycles):
@@ -23,13 +23,13 @@ def cron_bust_handler(timer, cycles):
 	if over_time > 86400:
 		return u'Общее время cron`a не должно составлять больше 24х часов!'
 	elif cycles < 2:
-		return u'Меньше 2х циклов безсмысленно! Юзай таймер!'
+		return u'Меньше 2х циклов бессмысленно! Юзай таймер!'
 	elif timer < 60:
-		return u'Меньше минуты безсмысленно!'
+		return u'Меньше минуты бессмысленно!'
 	return False
 
 def execute_cron_handler(commnad_handler, timer, cycles, command, type, source, body):	
-	cycles = cycles - 1	
+	cycles -= 1
 	if cycles:
 		try:
 			commnad_handler(type, source, body)
@@ -45,6 +45,7 @@ def execute_cron_handler(commnad_handler, timer, cycles, command, type, source, 
 			except:
 				pass
 
+
 def handler_cron_command(type, source, body):
 	if body:
 		args = body.split()
@@ -54,7 +55,6 @@ def handler_cron_command(type, source, body):
 				jid = handler_jid(source[0])
 				timer = int(timer)
 				cycles = args[1].strip()
-				error = False
 				if cycles.lower() in [u'стоп', 'stop']:
 					if jid in ADLIST:
 						if timer in CRON['tmrs']:
@@ -62,8 +62,6 @@ def handler_cron_command(type, source, body):
 								try:
 									CRON['tmrs'][timer].cancel()
 								except:
-									error = True
-								if error:
 									reply(type, source, u'Ошибка! Не удалось остановить cron!')
 								else:
 									reply(type, source, u'Cron остановлен!')
@@ -76,7 +74,7 @@ def handler_cron_command(type, source, body):
 				elif len_cron() <= 15:
 					if len(args) >= 3:
 						if check_number(cycles):
-							cycles = int(cycles)
+							cycles = int(cycles) + 1
 							bust = cron_bust_handler(timer, cycles)
 							if bust:
 								reply(type, source, bust)
@@ -85,6 +83,8 @@ def handler_cron_command(type, source, body):
 								if command in CRCMDS or jid in ADLIST: # BOSS?
 									if len(args) >= 4:
 										Params = body[((body.lower()).find(command) + (len(command) + 1)):].strip()
+										print Params
+										print body
 									else:
 										Params = ''
 									if len(Params) <= 96:
@@ -96,8 +96,6 @@ def handler_cron_command(type, source, body):
 												try:
 													CRON['tmrs'][NUM].start()
 												except:
-													error = True
-												if error:
 													try:
 														del CRON['tmrs'][NUM]
 													except:
