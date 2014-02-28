@@ -7,7 +7,7 @@
 #  Copyleft
 
 #-extmanager-depends:static/boltun/ident_base.txt;static/boltun/random_base.txt-#
-#-extmanager-extVer:1.4-#
+#-extmanager-extVer:1.5-#
 
 IDENT_BASE = 'static/boltun/ident_base.txt'
 RAND_BASE = 'static/boltun/random_base.txt'
