@@ -20,19 +20,13 @@
 from traceback import format_exc, print_exc
 import gc, os, re, sys, time, random, threading
 
-## Enable G.C.
-gc.enable()
-
-## Set "sys.path".
-if not hasattr(sys, "argv") or not sys.argv[0]:
-	sys.argv = ["."]
-
-try:
-	__file__ = os.path.abspath(sys.argv[0])
-	os.chdir(os.path.dirname(__file__))
-except OSError:
-	print "#! Incorrect launch!"
-	time.sleep(6)
+## Local dir.
+core = getattr(sys.modules["__main__"], "__file__", None)
+if core:
+	core = os.path.abspath(core)
+	root = os.path.dirname(core)
+	if root:
+		os.chdir(root)
 
 sys.path.insert(0, "library.zip")
 

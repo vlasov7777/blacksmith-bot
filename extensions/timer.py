@@ -22,7 +22,7 @@ def timer_bust_handler(timer):
 	if timer > 86400:
 		return u'Больше 24х часов нельзя!'
 	elif timer < 60:
-		return u'Меньше минуты безсмысленно!'
+		return u'Меньше минуты бессмысленно!'
 	return False
 
 def handler_command_timer(type, source, body):
@@ -57,7 +57,7 @@ def handler_command_timer(type, source, body):
 					bust = timer_bust_handler(timer)
 					if bust:
 						reply(type, source, bust)
-					elif command in TCMDS or jid == (BOSS or BOSS.lower()):
+					elif command in TCMDS or jid in ADLIST:
 						if len(args) >= 3:
 							Params = body[((body.lower()).find(command) + (len(command) + 1)):].strip()
 						else:
@@ -67,7 +67,11 @@ def handler_command_timer(type, source, body):
 								if COMMAND_HANDLERS.has_key(command):
 									NUM = len(TIMERS['tmrs']) + 1
 									handler = COMMAND_HANDLERS[command]
-									TIMERS['tmrs'][NUM] = composeThr(timer, execute_handler, None, (handler, (type, source, Params), command,))
+									print "command", command
+									print "handler", handler
+									print "num", NUM
+
+									TIMERS['tmrs'][NUM] = composeThr(timer, handler, None, (type, source, Params), command,)
 									try:
 										TIMERS['tmrs'][NUM].start()
 									except:
