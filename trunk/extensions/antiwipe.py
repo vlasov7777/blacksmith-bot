@@ -7,6 +7,7 @@
 #  Copyleft
 
 GoodServers =  ["jabber.ru", "xmpp.ru", # add 2ch.so maybe
+				"jabber.cz", "jabbim.cz",
 				"gtalk.com", "gmail.com",
 				"jabbers.ru", "xmpps.ru",
 				"gajim.org", "jabbim.com",

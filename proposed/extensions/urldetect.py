@@ -4,9 +4,11 @@
 # © simpleApps, 21.05.2012 (12:38:47)
 # Web site header detector
 
-# RC-4!
-#-extmanager-extVer:2.9.2-#
+# RC-5!
+#-extmanager-extVer:2.9.3-#
+
 import re
+import zlib
 import urllib2
 
 comp_link = re.compile("(https?)://([^\s'\"<>/]+)([^\s'\"<>]+)")
@@ -56,13 +58,17 @@ def urlParser(body, TitleMSG = "%s", callType = "auto"):
 			if url == urlDetect["last"] and callType == "auto":
 				return None
 			urlDetect["last"] = url
-			reQ = urllib2.Request(url)
-			reQ.add_header("User-agent", UserAgents["BlackSmith"])
-			opener = urllib2.urlopen(reQ)
+			req = urllib2.Request(url)
+			req.add_header("User-agent", UserAgents["BlackSmith"])
+			opener = urllib2.urlopen(req)
 			headers  = opener.headers
 			cType = headers.get("Content-Type", "")
 			if ("text/html" in cType) or ("application/xhtml+xml" in cType) or url.endswith((".html", ".htm")):
-				data = opener.read(4500)
+				if headers.get("Content-Encoding") == "gzip":
+					data = opener.read()
+					data = zlib.decompress(data, 16 + zlib.MAX_WBITS)
+				else:
+					data = opener.read(4500)
 				Type, Charset = contentTypeParser(opener, data)
 				title = getTagData("title", data)
 				title = title.decode(Charset)
