@@ -5,7 +5,7 @@
 # Web site header detector
 
 # RC-5!
-#-extmanager-extVer:2.9.3-#
+#-extmanager-extVer:2.9.4-#
 
 import re
 import zlib
@@ -38,13 +38,13 @@ def contentTypeParser(opener, data):
 			Charset = comp_charset_alt.search(data)
 			if Charset:
 				Charset = Charset.group(1)
-	except:
+	except Exception:
 		lytic_crashlog(contentTypeParser, "", u"During the search encoding on %s." % opener.url)
 	if not Charset:
 		Charset = "utf-8"
 	return (Type, Charset) 
 
-def urlParser(body, TitleMSG = "%s", callType = "auto"):
+def urlParser(body, TitleMSG = u"%s", callType = "auto"):
 	data = comp_link.search(body)
 	answer = ""
 	if data:
@@ -68,12 +68,12 @@ def urlParser(body, TitleMSG = "%s", callType = "auto"):
 					data = opener.read()
 					data = zlib.decompress(data, 16 + zlib.MAX_WBITS)
 				else:
-					data = opener.read(4500)
+					data = opener.read(7000)
 				Type, Charset = contentTypeParser(opener, data)
 				title = getTagData("title", data)
 				title = title.decode(Charset)
 				if title:
-					answer = TitleMSG % uHTML(title).replace("\n", "").encode("utf-8")
+					answer = TitleMSG % uHTML(title).replace("\n", "").replace("\r","").strip()
 			else:
 				fullUrl = opener.url
 				name = fullUrl.split("/")[-1]
@@ -87,19 +87,18 @@ def urlParser(body, TitleMSG = "%s", callType = "auto"):
 					pass
 				answer += "Файл: " + name
  				if Size:
- 					answer += " — " + byteFormat(Size)
+ 					answer += u" — " + byteFormat(Size)
  				if Type:
- 					answer += " • " + Type.split()[0].strip(",;.")
+ 					answer += u" • " + Type.split()[0].strip(",;.")
  				if Date: 
- 					answer += "\nПоследнее изменение: %s." % Date
+ 					answer += u"\nПоследнее изменение: %s." % Date
 			if answer:
-				answer = replace_all(answer % vars(), urlDetect["unAllowedChars"], "")
+				answer = replace_all(answer, urlDetect["unAllowedChars"], "")
 		except (urllib2.HTTPError, urllib2.URLError, urllib2.socket.error) as e:
 			answer = "%s: %s" % (e.__class__.__name__, e.message or str(e))
 		except: 
 			lytic_crashlog(urlWatcher, "", "While parsing \"%s\"." % locals().get("url", body))
-	return answer
-
+	return answer.decode("utf-8")
 
 def urlWatcher(raw, mType, source, body):
 	if mType == "public" and (source[1] in urlDetect["list"]) and has_access(source[0], 11, source[1]):

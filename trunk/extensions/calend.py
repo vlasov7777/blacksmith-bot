@@ -14,7 +14,7 @@ def command_calendar(mType, source, body):
 		x = body.pop(0)
 		if check_nubmer(x):
 			z = int(x)
-			if body and check_nubmer(body[0]):
+			if body and check_number(body[0]):
 				y = int(body.pop(0))
 	if z not in xrange(1, 13):
 		y = (date.tm_year)
