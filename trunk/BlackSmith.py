@@ -106,7 +106,7 @@ if os.path.exists(GENERAL_CONFIG_FILE):
 	except Exception, e:
 		Exit(str(e), 1, 12)
 else:
-	Exit("\n#! General config file not found! Exiting.")
+	Exit("\n#! General config file not found! Exiting.", 1, 5)
 
 if BOT_OS == "nt":
 	os.system("Title BlackSmith - %s" % (Caps))
@@ -1017,9 +1017,12 @@ def PRESENCE_PROCESSING(client, stanza):
 def IQ_PROCESSING(client, iq):
 	INFO["iq"] += 1
 	fromjid = iq.getFrom()
+
 	if not fromjid or user_level(fromjid, fromjid.getStripped().lower()) < -99:
 		raise xmpp.NodeProcessed()
+
 	if iq.getType() == "get":
+			
 		nsType = iq.getQueryNS()
 		result = iq.buildReply("result")
 		query = result.getTag("query")
@@ -1072,7 +1075,7 @@ def starting_actions():
 	load_plugins()
 
 def Connect():
-	globals()['jClient'] = globals()['JCON'] = xmpp.Client(HOST, PORT, None)
+	globals()['jClient'] = globals()['JCON'] = xmpp.Client(HOST, PORT)
 	Print('\n\nConnecting...', color4)
 	if SECURE:
 		CONNECT = jClient.connect((SERVER, PORT), None, None, False)
