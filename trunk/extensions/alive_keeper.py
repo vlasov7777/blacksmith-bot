@@ -6,10 +6,11 @@
 
 get_disp = lambda disp: "%s@%s" % (disp._owner.User, disp._owner.Server) if isinstance(disp, (xmpp.Client, xmpp.dispatcher.Dispatcher)) else disp
 
+ALIVE_KEEPER = {}
+
 def alive_keeper():
 
 		def alive_keeper_answer(disp, stanza):
-			print "aKeeper"
 			if stanza:
 				jClient.aKeeper = 0
 
@@ -46,23 +47,23 @@ def alive_keeper():
 def conf_alive_keeper():
 
 	def conf_alive_keeper_answer(disp, stanza, conf):
-		if GROUPCHATS.has_key(conf):
+		if GROUPCHATS.has_key(conf) and ALIVE_KEEPER.has_key(conf):
 			if xmpp.isErrorNode(stanza):
 				if "405" == stanza.getErrorCode():
-					GROUPCHATS[conf]["aKeeper"] = 0
+					ALIVE_KEEPER[conf] = 0
 			else:
-				GROUPCHATS[conf]["aKeeper"] = 0
+				ALIVE_KEEPER[conf] = 0
 
 	while True:
 		time.sleep(360)
 		thrIds = [x.name for x in threading.enumerate()]
 		for conf in GROUPCHATS.keys():
 
-			if not GROUPCHATS[conf].has_key("aKeeper"):
-				GROUPCHATS[conf]["aKeeper"] = 0
+			if conf not in ALIVE_KEEPER:
+				ALIVE_KEEPER[conf] = 0
 
-			if GROUPCHATS[conf]["aKeeper"] > 2:
-				GROUPCHATS[conf]["aKeeper"] = 0
+			if ALIVE_KEEPER[conf] > 2:
+				ALIVE_KEEPER[conf] = 0
 				TimerName = "ejoinTimer-%s" % conf
 				if TimerName not in thrIds:
 					try:
@@ -71,7 +72,7 @@ def conf_alive_keeper():
 						lytic_crashlog(conf_alive_keeper)
 
 			else:
-				GROUPCHATS[conf]["aKeeper"] += 1
+				ALIVE_KEEPER[conf] += 1
 				INFO["outiq"] += 1
 				iq = xmpp.Iq("get", to = "%s/%s" % (conf, handler_botnick(conf)))
 				iq.addChild("ping", namespace = xmpp.NS_PING)
